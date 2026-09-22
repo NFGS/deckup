@@ -20,7 +20,7 @@ const QUEUE = {
       front: 'What is mitosis?',
       back: 'Cell division',
       hint: 'Think about the nucleus',
-      imageUrl: null,
+      imageUrl: 'https://cdn.test/mitosis.png',
       state: 'NEW',
       dueAt: '2026-09-22T10:00:00.000Z',
       isNew: true,
@@ -134,6 +134,16 @@ describe('StudySessionPage', () => {
     expect(screen.getByText(/1m 35s/)).toBeInTheDocument();
   });
 
+  it('renders the card image when the card has one', async () => {
+    renderStudyPage();
+
+    expect(await screen.findByText('What is mitosis?')).toBeInTheDocument();
+
+    const image = screen.getByRole('img', { name: /image of the card what is mitosis/i });
+
+    expect(image).toHaveAttribute('src', 'https://cdn.test/mitosis.png');
+  });
+
   it('supports the keyboard shortcuts for flipping and rating', async () => {
     renderStudyPage();
 
@@ -227,5 +237,6 @@ describe('StudySessionPage', () => {
     expect(await screen.findByText(/saved on this device/i)).toBeInTheDocument();
     expect(await screen.findByText('What is osmosis?')).toBeInTheDocument();
     expect(readQueue()).toHaveLength(1);
+    expect(readQueue()[0]?.clientReviewId).toBeTruthy();
   });
 });
