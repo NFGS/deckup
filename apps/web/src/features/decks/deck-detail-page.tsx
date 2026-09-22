@@ -16,6 +16,8 @@ import {
 } from '../../components/ui/surfaces';
 import { ApiError } from '../../lib/api-client';
 import { downloadBlob } from '../../lib/download';
+import { GenerateCardsModal } from '../ai/generate-cards-modal';
+import type { GeneratedCardInput } from '../ai/generate-cards-modal';
 import { CardForm } from './card-form';
 import type { CardFormPayload } from './card-form';
 import { DeckForm } from './deck-form';
@@ -45,6 +47,7 @@ export function DeckDetailPage() {
   const [isEditOpen, setEditOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [isImportOpen, setImportOpen] = useState(false);
+  const [isGenerateOpen, setGenerateOpen] = useState(false);
   const [cardModal, setCardModal] = useState<CardModalState>(null);
   const [cardToDelete, setCardToDelete] = useState<Card | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -114,6 +117,12 @@ export function DeckDetailPage() {
       downloadBlob(blob, filename ?? `${deck.title}.csv`);
     } catch (error) {
       setFormError(error instanceof ApiError ? error.message : 'Unable to export the deck');
+    }
+  };
+
+  const handleAddGenerated = async (cards: GeneratedCardInput[]) => {
+    for (const card of cards) {
+      await createCard.mutateAsync({ ...card, tags: [] });
     }
   };
 
@@ -204,6 +213,9 @@ export function DeckDetailPage() {
             >
               {exportDeck.isPending ? 'Exporting…' : 'Export'}
             </Button>
+            <Button variant="secondary" onClick={() => setGenerateOpen(true)}>
+              Generate with AI
+            </Button>
             <Button
               onClick={() => {
                 setFormError(null);
@@ -274,6 +286,12 @@ export function DeckDetailPage() {
       </section>
 
       <ImportCardsModal deckId={deckId} open={isImportOpen} onClose={() => setImportOpen(false)} />
+
+      <GenerateCardsModal
+        open={isGenerateOpen}
+        onClose={() => setGenerateOpen(false)}
+        onAddCards={handleAddGenerated}
+      />
 
       <Modal open={isEditOpen} title="Edit deck" onClose={() => setEditOpen(false)}>
         <DeckForm

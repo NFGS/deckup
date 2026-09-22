@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { jsonResponse, requestUrl } from '../../test/http';
 import { renderWithProviders } from '../../test/render';
+import { clearQueue, readQueue } from '../../lib/offline-queue';
 import { StudySessionPage } from './study-session-page';
 
 const DECK_ID = '22222222-2222-4222-8222-222222222222';
@@ -39,6 +40,7 @@ const QUEUE = {
 };
 
 beforeEach(() => {
+  clearQueue();
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
 
@@ -98,6 +100,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  clearQueue();
   vi.unstubAllGlobals();
 });
 
@@ -178,5 +181,51 @@ describe('StudySessionPage', () => {
     expect(await screen.findByText('Nothing is due right now')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /review ahead/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /review all cards/i })).toBeInTheDocument();
+  });
+
+  it('queues the review on this device when the network fails', async () => {
+    fetchMock.mockImplementation((input) => {
+      const url = requestUrl(input);
+
+      if (url.includes('/auth/refresh')) {
+        return Promise.resolve(jsonResponse({ title: 'Unauthorized', status: 401 }, 401));
+      }
+
+      if (url.includes('/reviews')) {
+        return Promise.reject(new TypeError('Failed to fetch'));
+      }
+
+      if (url.endsWith('/study-sessions') || url.includes('/study-sessions?')) {
+        return Promise.resolve(
+          jsonResponse({
+            id: SESSION_ID,
+            deckId: DECK_ID,
+            mode: 'DUE',
+            status: 'ACTIVE',
+            startedAt: '2026-09-22T10:00:00.000Z',
+            endedAt: null,
+            cardsReviewed: 0,
+            correctCount: 0,
+          }),
+        );
+      }
+
+      if (url.includes('/queue')) {
+        return Promise.resolve(jsonResponse(QUEUE));
+      }
+
+      return Promise.resolve(jsonResponse({ title: 'Not found', status: 404 }, 404));
+    });
+
+    renderStudyPage();
+
+    expect(await screen.findByText('What is mitosis?')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /show answer/i }));
+    await userEvent.click(screen.getByRole('button', { name: /good/i }));
+
+    expect(await screen.findByText(/saved on this device/i)).toBeInTheDocument();
+    expect(await screen.findByText('What is osmosis?')).toBeInTheDocument();
+    expect(readQueue()).toHaveLength(1);
   });
 });

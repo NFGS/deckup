@@ -1,4 +1,3 @@
-import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
 
 import { LoginPage } from '../features/auth/login-page';
@@ -6,20 +5,9 @@ import { ProtectedRoute } from '../features/auth/protected-route';
 import { RegisterPage } from '../features/auth/register-page';
 import { DashboardPage } from '../features/decks/dashboard-page';
 import { DeckDetailPage } from '../features/decks/deck-detail-page';
+import { ExplorePage } from '../features/explore/explore-page';
 import { LandingPage } from '../features/landing/landing-page';
 import { AppLayout } from './app-layout';
-
-const AnalyticsPage = lazy(() =>
-  import('../features/analytics/analytics-page').then((module) => ({
-    default: module.AnalyticsPage,
-  })),
-);
-
-const StudySessionPage = lazy(() =>
-  import('../features/study/study-session-page').then((module) => ({
-    default: module.StudySessionPage,
-  })),
-);
 
 export const router = createBrowserRouter([
   {
@@ -33,9 +21,22 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'explore', element: <ExplorePage /> },
           { path: 'decks/:deckId', element: <DeckDetailPage /> },
-          { path: 'decks/:deckId/study', element: <StudySessionPage /> },
-          { path: 'analytics', element: <AnalyticsPage /> },
+          {
+            path: 'decks/:deckId/study',
+            lazy: async () => {
+              const module = await import('../features/study/study-session-page');
+              return { Component: module.StudySessionPage };
+            },
+          },
+          {
+            path: 'analytics',
+            lazy: async () => {
+              const module = await import('../features/analytics/analytics-page');
+              return { Component: module.AnalyticsPage };
+            },
+          },
         ],
       },
     ],

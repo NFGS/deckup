@@ -14,23 +14,28 @@ export interface ModalProps {
 
 export function Modal({ open, title, onClose, children, footer }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) {
       return;
     }
 
-    const onKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
       }
     };
 
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
     panelRef.current?.focus();
 
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onClose]);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   if (!open) {
     return null;

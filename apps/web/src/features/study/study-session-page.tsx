@@ -1,4 +1,5 @@
 import type { ReviewRating, SessionSummary, StudyMode } from '@deckup/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
@@ -6,6 +7,8 @@ import { Button } from '../../components/ui/button';
 import { FormError } from '../../components/ui/field';
 import { EmptyState, Spinner } from '../../components/ui/surfaces';
 import { ApiError } from '../../lib/api-client';
+import { enqueueReview, flushQueue, readQueue } from '../../lib/offline-queue';
+import { submitReview as sendReview } from './api';
 import {
   useCompleteStudySession,
   useStartStudySession,
@@ -31,6 +34,9 @@ export function StudySessionPage() {
   const [revealed, setRevealed] = useState(false);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [queuedReviews, setQueuedReviews] = useState(() => readQueue().length);
+
+  const queryClient = useQueryClient();
 
   const startSession = useStartStudySession();
   const startSessionAsync = startSession.mutateAsync;
@@ -70,6 +76,34 @@ export function StudySessionPage() {
   const current = items[index];
   const isFinished = sessionId !== null && !queue.isPending && current === undefined;
 
+  useEffect(() => {
+    const syncQueuedReviews = async () => {
+      const sent = await flushQueue(async (review) => {
+        await sendReview(review.sessionId, {
+          cardId: review.cardId,
+          rating: review.rating,
+        });
+      });
+
+      setQueuedReviews(readQueue().length);
+
+      if (sent > 0) {
+        void queryClient.invalidateQueries({ queryKey: ['decks'] });
+      }
+    };
+
+    const handleOnline = () => {
+      void syncQueuedReviews();
+    };
+
+    if (navigator.onLine && readQueue().length > 0) {
+      void syncQueuedReviews();
+    }
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [queryClient]);
+
   const handleRate = useCallback(
     async (rating: ReviewRating) => {
       if (!current) {
@@ -83,10 +117,18 @@ export function StudySessionPage() {
         setRevealed(false);
         setIndex((value) => value + 1);
       } catch (caught) {
+        if (!(caught instanceof ApiError) && sessionId) {
+          enqueueReview({ sessionId, cardId: current.cardId, rating });
+          setQueuedReviews(readQueue().length);
+          setRevealed(false);
+          setIndex((value) => value + 1);
+          return;
+        }
+
         setError(caught instanceof ApiError ? caught.message : 'Unable to save your answer');
       }
     },
-    [current, submitReviewAsync],
+    [current, sessionId, submitReviewAsync],
   );
 
   const handleComplete = useCallback(async () => {
@@ -151,6 +193,17 @@ export function StudySessionPage() {
       </Link>
 
       <FormError message={error ?? undefined} />
+
+      {queuedReviews > 0 ? (
+        <p
+          role="status"
+          className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
+        >
+          {queuedReviews === 1
+            ? '1 review is saved on this device and will sync when you are back online.'
+            : `${queuedReviews} reviews are saved on this device and will sync when you are back online.`}
+        </p>
+      ) : null}
 
       {isPreparing ? (
         <div className="flex justify-center py-16">

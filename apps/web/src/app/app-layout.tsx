@@ -1,9 +1,7 @@
-import { Suspense } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router';
 
 import { Button } from '../components/ui/button';
 import { LogOutIcon } from '../components/ui/icons';
-import { Spinner } from '../components/ui/surfaces';
 import { useAuth } from '../features/auth/auth-context';
 
 export function AppLayout() {
@@ -36,6 +34,9 @@ export function AppLayout() {
                 <Link to="/dashboard" className="text-sm text-slate-300 hover:text-white">
                   My decks
                 </Link>
+                <Link to="/explore" className="text-sm text-slate-300 hover:text-white">
+                  Explore
+                </Link>
                 <Link to="/analytics" className="text-sm text-slate-300 hover:text-white">
                   Analytics
                 </Link>
@@ -60,15 +61,7 @@ export function AppLayout() {
       </header>
 
       <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
-        <Suspense
-          fallback={
-            <div className="flex justify-center py-16">
-              <Spinner label="Loading page" />
-            </div>
-          }
-        >
-          <Outlet />
-        </Suspense>
+        <Outlet />
       </main>
 
       <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-400">
