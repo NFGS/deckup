@@ -166,7 +166,7 @@ export function CardForm({
             ) : null}
           </div>
 
-          <p className="text-xs text-slate-500">JPEG or PNG, up to 5 MB.</p>
+          <p className="text-xs text-slate-400">JPEG or PNG, up to 5 MB.</p>
           <FormError message={imageError ?? imageErrorMessage} />
         </fieldset>
       ) : null}
