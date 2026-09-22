@@ -1,7 +1,7 @@
 import type { ReviewRating, SessionSummary, StudyMode } from '@deckup/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 
 import { Button } from '../../components/ui/button';
 import { FormError } from '../../components/ui/field';
@@ -10,6 +10,7 @@ import { ApiError } from '../../lib/api-client';
 import { enqueueReview, flushQueue, readQueue } from '../../lib/offline-queue';
 import { submitReview as sendReview } from './api';
 import {
+  useAbandonStudySession,
   useCompleteStudySession,
   useStartStudySession,
   useStudyQueue,
@@ -27,6 +28,7 @@ const RATING_BY_KEY: Record<string, ReviewRating> = {
 
 export function StudySessionPage() {
   const { deckId = '' } = useParams<{ deckId: string }>();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<StudyMode>('DUE');
   const [runId, setRunId] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -45,6 +47,7 @@ export function StudySessionPage() {
   const submitReviewAsync = submitReview.mutateAsync;
   const completeSession = useCompleteStudySession();
   const completeSessionAsync = completeSession.mutateAsync;
+  const abandonSession = useAbandonStudySession();
 
   useEffect(() => {
     let active = true;
@@ -82,6 +85,7 @@ export function StudySessionPage() {
         await sendReview(review.sessionId, {
           cardId: review.cardId,
           rating: review.rating,
+          clientReviewId: review.clientReviewId,
         });
       });
 
@@ -112,13 +116,15 @@ export function StudySessionPage() {
 
       setError(null);
 
+      const clientReviewId = crypto.randomUUID();
+
       try {
-        await submitReviewAsync({ cardId: current.cardId, rating });
+        await submitReviewAsync({ cardId: current.cardId, rating, clientReviewId });
         setRevealed(false);
         setIndex((value) => value + 1);
       } catch (caught) {
         if (!(caught instanceof ApiError) && sessionId) {
-          enqueueReview({ sessionId, cardId: current.cardId, rating });
+          enqueueReview({ sessionId, cardId: current.cardId, rating, clientReviewId });
           setQueuedReviews(readQueue().length);
           setRevealed(false);
           setIndex((value) => value + 1);
@@ -130,6 +136,21 @@ export function StudySessionPage() {
     },
     [current, sessionId, submitReviewAsync],
   );
+
+  const handleAbandon = useCallback(async () => {
+    if (!sessionId) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      await abandonSession.mutateAsync(sessionId);
+      void navigate(`/decks/${deckId}`);
+    } catch (caught) {
+      setError(caught instanceof ApiError ? caught.message : 'Unable to abandon the session');
+    }
+  }, [abandonSession, deckId, navigate, sessionId]);
 
   const handleComplete = useCallback(async () => {
     if (!sessionId) {
@@ -192,6 +213,19 @@ export function StudySessionPage() {
       <Link to={`/decks/${deckId}`} className="text-sm text-slate-400 hover:text-slate-200">
         ← Back to deck
       </Link>
+
+      {sessionId !== null && summary === null ? (
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={abandonSession.isPending}
+            onClick={() => void handleAbandon()}
+          >
+            {abandonSession.isPending ? 'Abandoning…' : 'Abandon session'}
+          </Button>
+        </div>
+      ) : null}
 
       {sessionId !== null ? <FormError message={error ?? undefined} /> : null}
 

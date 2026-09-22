@@ -1,7 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { StudyMode, SubmitReview } from '@deckup/shared';
 
-import { completeStudySession, fetchStudyQueue, startStudySession, submitReview } from './api';
+import {
+  abandonStudySession,
+  completeStudySession,
+  fetchStudyQueue,
+  startStudySession,
+  submitReview,
+} from './api';
 
 export function useStartStudySession() {
   return useMutation({
@@ -37,6 +43,17 @@ export function useCompleteStudySession() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['decks'] });
       void queryClient.invalidateQueries({ queryKey: ['analytics'] });
+    },
+  });
+}
+
+export function useAbandonStudySession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (sessionId: string) => abandonStudySession(sessionId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['decks'] });
     },
   });
 }

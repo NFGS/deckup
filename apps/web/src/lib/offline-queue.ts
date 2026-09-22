@@ -4,6 +4,8 @@ export interface QueuedReview {
   sessionId: string;
   cardId: string;
   rating: ReviewRating;
+  /** Stable id so replaying the same review twice is a no-op on the server. */
+  clientReviewId: string;
   queuedAt: string;
 }
 
@@ -88,6 +90,7 @@ function isQueuedReview(value: unknown): value is QueuedReview {
     typeof candidate.sessionId === 'string' &&
     typeof candidate.cardId === 'string' &&
     typeof candidate.rating === 'string' &&
+    typeof candidate.clientReviewId === 'string' &&
     typeof candidate.queuedAt === 'string'
   );
 }

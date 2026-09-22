@@ -42,3 +42,10 @@ export async function completeStudySession(sessionId: string): Promise<SessionSu
     schema: sessionSummarySchema,
   });
 }
+
+export async function abandonStudySession(sessionId: string): Promise<StudySession> {
+  return apiRequest(`/study-sessions/${sessionId}/abandon`, {
+    method: 'POST',
+    schema: studySessionSchema,
+  });
+}

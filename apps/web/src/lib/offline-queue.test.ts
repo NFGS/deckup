@@ -6,6 +6,7 @@ const REVIEW = {
   sessionId: '33333333-3333-4333-8333-333333333333',
   cardId: '44444444-4444-4444-8444-444444444444',
   rating: 'GOOD',
+  clientReviewId: '55555555-5555-4555-8555-555555555555',
 } as const;
 
 beforeEach(() => {
@@ -32,6 +33,7 @@ describe('offline review queue', () => {
     expect(queue[0]).toMatchObject({ ...REVIEW, rating: 'GOOD' });
     expect(queue[1]?.rating).toBe('AGAIN');
     expect(queue[0]?.queuedAt).toBeTypeOf('string');
+    expect(queue[0]?.clientReviewId).toBe(REVIEW.clientReviewId);
   });
 
   it('ignores corrupted storage', () => {
