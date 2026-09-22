@@ -56,20 +56,32 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 
 ## 3. Requirement traceability matrix
 
-| Requirement | User story | Use case     | Test cases                 | Status  |
-| ----------- | ---------- | ------------ | -------------------------- | ------- |
-| RF-01       | Epic       | CU#01, CU#02 | TC-A1 … TC-A4              | Planned |
-| RF-02       | US-01      | CU#03        | TC-01, TC-02               | Planned |
-| RF-03       | US-02      | CU#04        | TC-05, TC-06               | Planned |
-| RF-04       | US-02      | CU#05        | TC-03, TC-04               | Planned |
-| RF-05       | US-03      | CU#06 (CU-I) | TC-07 … TC-10              | Planned |
-| RF-06       | US-03      | CU#07 (CU-V) | TC-11 … TC-14              | Planned |
-| RF-07       | Epic       | CU#10        | TC-27, TC-28               | Planned |
-| RF-08       | US-04      | CU#08 (CU-Q) | TC-15, TC-16, TC-24        | Planned |
-| RF-09       | US-04      | CU#08 (CU-S) | TC-17, TC-18, TC-25, TC-26 | Planned |
-| RF-10       | US-04      | CU#09 (CU-E) | TC-19 … TC-23              | Planned |
-| RF-11       | Epic       | CU#11        | TC-29, TC-30               | Phase 8 |
-| RF-12       | Epic       | CU#12        | TC-31, TC-32               | Phase 8 |
+| Requirement | User story | Use case     | Test cases                 | Status                                                                   |
+| ----------- | ---------- | ------------ | -------------------------- | ------------------------------------------------------------------------ |
+| RF-01       | Epic       | CU#01, CU#02 | TC-A1 … TC-A4              | Implemented (Phase 2)                                                    |
+| RF-02       | US-01      | CU#03        | TC-01, TC-02               | Implemented (Phase 2)                                                    |
+| RF-03       | US-02      | CU#04        | TC-05, TC-06               | Implemented (Phase 2)                                                    |
+| RF-04       | US-02      | CU#05        | TC-03, TC-04               | Implemented (Phase 2)                                                    |
+| RF-05       | US-03      | CU#06 (CU-I) | TC-07 … TC-10              | Partial — hint, difficulty and tags done; image upload pending (Phase 3) |
+| RF-06       | US-03      | CU#07 (CU-V) | TC-11 … TC-14              | Planned (Phase 3)                                                        |
+| RF-07       | Epic       | CU#10        | TC-27, TC-28               | Planned (Phase 6)                                                        |
+| RF-08       | US-04      | CU#08 (CU-Q) | TC-15, TC-16, TC-24        | Planned (Phase 3)                                                        |
+| RF-09       | US-04      | CU#08 (CU-S) | TC-17, TC-18, TC-25, TC-26 | Planned (Phase 3)                                                        |
+| RF-10       | US-04      | CU#09 (CU-E) | TC-19 … TC-23              | Planned (Phase 5)                                                        |
+| RF-11       | Epic       | CU#11        | TC-29, TC-30               | Phase 8                                                                  |
+| RF-12       | Epic       | CU#12        | TC-31, TC-32               | Phase 8                                                                  |
+
+### 3.1 Automated coverage status (Phase 2)
+
+| Suite                        | File                                      | Covers                                                    |
+| ---------------------------- | ----------------------------------------- | --------------------------------------------------------- |
+| Domain unit                  | `apps/api/src/domain/**/*.spec.ts`        | Entity and value-object rules                             |
+| Application unit             | `apps/api/src/application/auth/*.spec.ts` | Registration and refresh rotation (incl. reuse detection) |
+| API integration (auth)       | `apps/api/test/auth.e2e-spec.ts`          | TC-A1 … TC-A4, profile, CSRF, logout                      |
+| API integration (decks)      | `apps/api/test/decks.e2e-spec.ts`         | TC-01, TC-05, TC-06, ownership isolation, soft delete     |
+| API integration (cards)      | `apps/api/test/cards.e2e-spec.ts`         | TC-03, TC-04, TC-09, ownership isolation                  |
+| API integration (throttling) | `apps/api/test/throttling.e2e-spec.ts`    | Brute-force protection (429)                              |
+| API integration (health)     | `apps/api/test/app.e2e-spec.ts`           | Operational health endpoint                               |
 
 ## 4. Test case catalog
 

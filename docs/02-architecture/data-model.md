@@ -131,16 +131,16 @@ erDiagram
 
 ### 2.1 `User`
 
-| Column          | Type          | Constraints                     | Notes                                   |
-| --------------- | ------------- | ------------------------------- | --------------------------------------- |
-| `id`            | `uuid`        | PK, default `gen_random_uuid()` |                                         |
-| `email`         | `citext`      | unique, not null                | Case-insensitive login                  |
-| `password_hash` | `text`        | not null                        | Argon2id encoded hash                   |
-| `display_name`  | `text`        | not null, 1–80 chars            |                                         |
-| `timezone`      | `text`        | not null, default `UTC`         | IANA identifier; drives local-day logic |
-| `role`          | `UserRole`    | not null, default `STUDENT`     | `STUDENT`, `ADMIN` (future)             |
-| `created_at`    | `timestamptz` | not null, default `now()`       |                                         |
-| `updated_at`    | `timestamptz` | not null                        |                                         |
+| Column          | Type          | Constraints                     | Notes                                                                     |
+| --------------- | ------------- | ------------------------------- | ------------------------------------------------------------------------- |
+| `id`            | `uuid`        | PK, default `gen_random_uuid()` |                                                                           |
+| `email`         | `text`        | unique, not null                | Lower-cased by the `Email` value object; case-insensitive by construction |
+| `password_hash` | `text`        | not null                        | Argon2id encoded hash                                                     |
+| `display_name`  | `text`        | not null, 1–80 chars            |                                                                           |
+| `timezone`      | `text`        | not null, default `UTC`         | IANA identifier; drives local-day logic                                   |
+| `role`          | `UserRole`    | not null, default `STUDENT`     | `STUDENT`, `ADMIN` (future)                                               |
+| `created_at`    | `timestamptz` | not null, default `now()`       |                                                                           |
+| `updated_at`    | `timestamptz` | not null                        |                                                                           |
 
 ### 2.2 `RefreshToken`
 
@@ -265,16 +265,16 @@ Rows are append-only: no update or delete endpoints exist for review logs.
 
 ## 4. Design decisions
 
-| Decision                            | Rationale                                                                  |
-| ----------------------------------- | -------------------------------------------------------------------------- |
-| **UUID primary keys**               | Safe to expose in URLs; no enumeration of users' data.                     |
-| **`citext` email**                  | Case-insensitive uniqueness without application-level normalization bugs.  |
-| **Soft delete (`deleted_at`)**      | Deleting a deck or card must not destroy review history used by analytics. |
-| **Immutable `ReviewLog`**           | Analytics and audit require append-only history.                           |
-| **Denormalized `user_id` on state** | Enables the single `(user_id, due_at)` queue index without joins.          |
-| **`scheduler_version`**             | Future FSRS parameter changes stay auditable and reproducible.             |
-| **UTC everywhere**                  | Local-day logic is derived from `User.timezone` at query time.             |
-| **`image_public_id`**               | Allows deleting/replacing the Cloudinary asset when a card is updated.     |
+| Decision                               | Rationale                                                                                                                                                                                                        |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UUID primary keys**                  | Safe to expose in URLs; no enumeration of users' data.                                                                                                                                                           |
+| **Plain `text` email + normalization** | The domain `Email` value object trims and lower-cases before persisting, so the unique index behaves case-insensitively without the `citext` extension (fewer database privileges and a simpler migration path). |
+| **Soft delete (`deleted_at`)**         | Deleting a deck or card must not destroy review history used by analytics.                                                                                                                                       |
+| **Immutable `ReviewLog`**              | Analytics and audit require append-only history.                                                                                                                                                                 |
+| **Denormalized `user_id` on state**    | Enables the single `(user_id, due_at)` queue index without joins.                                                                                                                                                |
+| **`scheduler_version`**                | Future FSRS parameter changes stay auditable and reproducible.                                                                                                                                                   |
+| **UTC everywhere**                     | Local-day logic is derived from `User.timezone` at query time.                                                                                                                                                   |
+| **`image_public_id`**                  | Allows deleting/replacing the Cloudinary asset when a card is updated.                                                                                                                                           |
 
 ## 5. Prisma mapping (target schema)
 
@@ -288,7 +288,7 @@ enum UserRole       { STUDENT ADMIN }
 
 model User {
   id            String   @id @default(uuid()) @db.Uuid
-  email         String   @unique @db.Citext
+  email         String   @unique
   passwordHash  String   @map("password_hash")
   displayName   String   @map("display_name")
   timezone      String   @default("UTC")
