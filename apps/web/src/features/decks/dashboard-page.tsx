@@ -59,7 +59,7 @@ export function DashboardPage() {
       </header>
 
       <div className="relative max-w-sm">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <Input
           className="pl-9"
           placeholder="Search decks"
@@ -128,7 +128,7 @@ function DeckCardItem({ deck }: { deck: Deck }) {
         </div>
 
         {deck.subject ? (
-          <p className="mt-1 text-xs tracking-wide text-slate-500 uppercase">{deck.subject}</p>
+          <p className="mt-1 text-xs tracking-wide text-slate-400 uppercase">{deck.subject}</p>
         ) : null}
 
         {deck.description ? (

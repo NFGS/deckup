@@ -41,7 +41,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
       <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-xs tracking-wide text-slate-500 uppercase">{label}</p>
+      <p className="text-xs tracking-wide text-slate-400 uppercase">{label}</p>
     </div>
   );
 }

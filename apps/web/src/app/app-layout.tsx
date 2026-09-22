@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router';
 
 import { Button } from '../components/ui/button';
 import { LogOutIcon } from '../components/ui/icons';
+import { Spinner } from '../components/ui/surfaces';
 import { useAuth } from '../features/auth/auth-context';
 
 export function AppLayout() {
@@ -37,7 +39,7 @@ export function AppLayout() {
                 <Link to="/analytics" className="text-sm text-slate-300 hover:text-white">
                   Analytics
                 </Link>
-                <span className="hidden text-sm text-slate-500 sm:inline">{user?.displayName}</span>
+                <span className="hidden text-sm text-slate-400 sm:inline">{user?.displayName}</span>
                 <Button variant="ghost" size="sm" onClick={() => void handleSignOut()}>
                   <LogOutIcon className="h-4 w-4" />
                   Sign out
@@ -58,10 +60,18 @@ export function AppLayout() {
       </header>
 
       <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="flex justify-center py-16">
+              <Spinner label="Loading page" />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
 
-      <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-600">
+      <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-400">
         DeckUp · Epic 03 — Education
       </footer>
     </div>

@@ -182,7 +182,7 @@ export function DeckDetailPage() {
           <h2 className="text-lg font-semibold text-white">Cards</h2>
           <div className="flex flex-wrap gap-3">
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 className="pl-9"
                 placeholder="Search cards"

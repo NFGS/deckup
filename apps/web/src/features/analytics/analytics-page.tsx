@@ -126,9 +126,9 @@ export function AnalyticsPage() {
 function MetricCard({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
     <Card className="flex flex-col gap-1">
-      <p className="text-xs tracking-wide text-slate-500 uppercase">{label}</p>
+      <p className="text-xs tracking-wide text-slate-400 uppercase">{label}</p>
       <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-xs text-slate-500">{hint}</p>
+      <p className="text-xs text-slate-400">{hint}</p>
     </Card>
   );
 }

@@ -17,7 +17,7 @@ export function Field({ label, htmlFor, error, hint, children }: FieldProps) {
         {label}
       </label>
       {children}
-      {hint && !error ? <p className="text-xs text-slate-500">{hint}</p> : null}
+      {hint && !error ? <p className="text-xs text-slate-400">{hint}</p> : null}
       {error ? (
         <p role="alert" className="text-xs text-rose-400">
           {error}
