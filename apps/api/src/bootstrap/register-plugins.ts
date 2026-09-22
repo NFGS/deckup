@@ -13,4 +13,12 @@ export async function registerPlugins(app: NestFastifyApplication): Promise<void
   await app.register(fastifyCookie);
   await app.register(helmet, { contentSecurityPolicy: false });
   await app.register(multipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 } });
+
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook('onRequest', (request, reply, done) => {
+      void reply.header('x-request-id', request.id);
+      done();
+    });
 }

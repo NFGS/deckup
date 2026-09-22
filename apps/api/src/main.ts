@@ -1,8 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { AppModule } from './app.module.js';
+import { createFastifyAdapter } from './bootstrap/fastify-adapter.js';
 import { registerPlugins } from './bootstrap/register-plugins.js';
 
 function resolveCorsOrigins(): string[] {
@@ -15,7 +16,8 @@ function resolveCorsOrigins(): string[] {
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ trustProxy: true }),
+    // Structured request logs with a correlation id (NFR-07).
+    createFastifyAdapter({ logger: { level: process.env.LOG_LEVEL ?? 'info' } }),
   );
 
   await registerPlugins(app);

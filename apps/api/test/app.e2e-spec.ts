@@ -23,4 +23,13 @@ describe('AppController (e2e)', () => {
       service: 'deckup-api',
     });
   });
+
+  it('returns a request id header for correlation (NFR-07)', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/v1/health')
+      .set('x-request-id', 'test-correlation-id')
+      .expect(200);
+
+    expect(response.headers['x-request-id']).toBe('test-correlation-id');
+  });
 });

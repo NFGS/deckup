@@ -113,6 +113,16 @@ describe('Auth (e2e)', () => {
     });
   });
 
+  it('rejects an invalid timezone', async () => {
+    const token = await registerAccount(app);
+
+    await request(server())
+      .patch(`${API_PREFIX}/users/me`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ timezone: 'Mars/Olympus' })
+      .expect(422);
+  });
+
   it('rotates refresh tokens and detects reuse', async () => {
     const registered = await request(server())
       .post(`${API_PREFIX}/auth/register`)
