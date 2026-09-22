@@ -139,7 +139,7 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | TC-32 | Reject AI generation for empty or oversized input      | RF-12       |
 
 Detailed test design (preconditions, steps, expected results) lives in
-[`../03-testing/test-cases.md`](../03-testing/test-cases.md) (Phase 7).
+[`../03-testing/test-cases.md`](../03-testing/test-cases.md).
 
 ## 5. Coverage summary
 
