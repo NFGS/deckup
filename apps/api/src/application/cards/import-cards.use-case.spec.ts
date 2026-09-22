@@ -35,7 +35,7 @@ describe('ImportCardsUseCase', () => {
 
     const summary = await useCase.execute(deckId, OWNER_ID, csv);
 
-    expect(summary).toEqual({ imported: 2, skipped: 0, errors: [] });
+    expect(summary).toEqual({ imported: 2, skipped: 0, errors: [], duplicateRows: [] });
     expect(cards.cards.size).toBe(2);
 
     const imported = await cards.findAllByDeck(deckId);
@@ -90,6 +90,24 @@ describe('ImportCardsUseCase', () => {
     const csv = ['front,back', 'Q1,A1'].join('\n');
 
     await expect(useCase.execute(deckId, OTHER_ID, csv)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('flags duplicated rows but still imports them (E1)', async () => {
+    const csv = ['front,back', 'Q1,A1', 'Q1,A1 again', 'Q2,A2'].join('\n');
+
+    const summary = await useCase.execute(deckId, OWNER_ID, csv);
+
+    expect(summary.imported).toBe(3);
+    expect(summary.duplicateRows).toEqual([3]);
+  });
+
+  it('reports a notice for a header-only file (E2)', async () => {
+    const csv = 'front,back\n';
+
+    const summary = await useCase.execute(deckId, OWNER_ID, csv);
+
+    expect(summary.imported).toBe(0);
+    expect(summary.notice).toMatch(/header row/i);
   });
 
   it('imports nothing when every row is invalid', async () => {

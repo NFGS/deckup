@@ -54,19 +54,29 @@ export class ImportCardsUseCase {
 
     const valid: Card[] = [];
     const errors: ImportSummary['errors'] = [];
+    const duplicateRows: number[] = [];
+    const seenFronts = new Set<string>();
 
     for (const row of parsed.rows) {
       try {
-        valid.push(
-          Card.create({
-            deckId,
-            front: row.values.front ?? '',
-            back: row.values.back ?? '',
-            hint: row.values.hint,
-            difficulty: parseDifficulty(row.values.difficulty),
-            tags: parseTags(row.values.tags),
-          }),
-        );
+        const card = Card.create({
+          deckId,
+          front: row.values.front ?? '',
+          back: row.values.back ?? '',
+          hint: row.values.hint,
+          difficulty: parseDifficulty(row.values.difficulty),
+          tags: parseTags(row.values.tags),
+        });
+
+        const fingerprint = card.front.toLowerCase();
+
+        if (seenFronts.has(fingerprint)) {
+          duplicateRows.push(row.row);
+        } else {
+          seenFronts.add(fingerprint);
+        }
+
+        valid.push(card);
       } catch (error) {
         errors.push({
           row: row.row,
@@ -83,6 +93,10 @@ export class ImportCardsUseCase {
       imported: valid.length,
       skipped: errors.length,
       errors: errors.slice(0, MAX_REPORTED_ERRORS),
+      duplicateRows,
+      ...(parsed.rows.length === 0
+        ? { notice: 'The file only contained a header row; no cards were imported.' }
+        : {}),
     };
   }
 }

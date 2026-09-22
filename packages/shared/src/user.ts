@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { hasAtLeastOneKey } from './utils.js';
+import { hasAtLeastOneKey, isValidTimeZone } from './utils.js';
 
 export const userSchema = z.object({
   id: z.uuid(),
@@ -15,7 +15,13 @@ export type User = z.infer<typeof userSchema>;
 export const updateUserSchema = z
   .object({
     displayName: z.string().trim().min(1).max(80).optional(),
-    timezone: z.string().trim().min(1).max(64).optional(),
+    timezone: z
+      .string()
+      .trim()
+      .min(1)
+      .max(64)
+      .refine(isValidTimeZone, { message: 'Use a valid IANA timezone like America/Bogota' })
+      .optional(),
   })
   .refine(hasAtLeastOneKey, { message: 'At least one field must be provided' });
 

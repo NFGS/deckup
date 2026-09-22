@@ -46,7 +46,11 @@ export class PrismaStudyQueueRepository extends StudyQueueRepositoryPort {
 function buildQueueWhere(deckId: string, mode: StudyMode, now: Date): Prisma.CardWhereInput {
   const base: Prisma.CardWhereInput = { deckId, deletedAt: null };
 
-  if (mode !== 'DUE') {
+  if (mode === 'AHEAD') {
+    return { ...base, reviewState: { is: { dueAt: { gt: now } } } };
+  }
+
+  if (mode === 'ALL') {
     return base;
   }
 

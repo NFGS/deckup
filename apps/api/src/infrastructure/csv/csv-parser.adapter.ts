@@ -7,8 +7,8 @@ import type { CsvRow, ParsedCsv } from '../../domain/ports/csv-parser.port.js';
 
 const BOM = '\uFEFF';
 
-interface CsvRecord {
-  record: Record<string, string>;
+interface CsvRawRecord {
+  record: string[];
   info?: { lines?: number };
 }
 
@@ -21,7 +21,6 @@ export class CsvParserAdapter extends CsvParserPort {
 
     try {
       raw = parse(normalized, {
-        columns: (header: string[]) => header.map((column) => column.trim().toLowerCase()),
         skip_empty_lines: true,
         trim: true,
         bom: true,
@@ -36,17 +35,23 @@ export class CsvParserAdapter extends CsvParserPort {
       throw new ValidationError('The file is not a valid CSV document', { field: 'file' });
     }
 
-    const records = raw as CsvRecord[];
+    const records = raw as CsvRawRecord[];
 
     if (records.length === 0) {
       throw new ValidationError('The CSV file must contain a header row', { field: 'file' });
     }
 
-    const columns = Object.keys(records[0]?.record ?? {});
-    const rows: CsvRow[] = records.map((entry, index) => ({
-      row: entry.info?.lines ?? index + 1,
-      values: entry.record,
-    }));
+    const columns = (records[0]?.record ?? []).map((column) => column.trim().toLowerCase());
+
+    const rows: CsvRow[] = records.slice(1).map((entry, index) => {
+      const values: Record<string, string> = {};
+
+      columns.forEach((column, position) => {
+        values[column] = entry.record[position] ?? '';
+      });
+
+      return { row: entry.info?.lines ?? index + 2, values };
+    });
 
     return { columns, rows };
   }

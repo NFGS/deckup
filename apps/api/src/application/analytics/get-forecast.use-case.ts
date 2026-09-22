@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { isValidTimeZone } from '@deckup/shared';
 
 import { NotFoundError } from '../../domain/errors/domain-errors.js';
 import { StudyAnalyticsRepositoryPort as StudyAnalyticsRepository } from '../../domain/ports/study-analytics.repository.js';
@@ -26,8 +27,9 @@ export class GetForecastUseCase {
     }
 
     const now = new Date();
-    const rows = await this.analytics.dueByDay(userId, user.timezone, now, days);
+    const timezone = isValidTimeZone(user.timezone) ? user.timezone : 'UTC';
+    const rows = await this.analytics.dueByDay(userId, timezone, now, days);
 
-    return this.metrics.forecast(rows, localDateKey(now, user.timezone), days);
+    return this.metrics.forecast(rows, localDateKey(now, timezone), days);
   }
 }
