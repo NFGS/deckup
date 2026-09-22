@@ -14,7 +14,9 @@ import {
   createDeck,
   deleteCard,
   deleteDeck,
+  exportDeck,
   getDeck,
+  importCards,
   listCards,
   listDecks,
   updateCard,
@@ -108,5 +110,22 @@ export function useDeleteCard(deckId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['decks', deckId] });
     },
+  });
+}
+
+export function useImportCards(deckId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => importCards(deckId, file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['decks', deckId] });
+    },
+  });
+}
+
+export function useExportDeck() {
+  return useMutation({
+    mutationFn: (deckId: string) => exportDeck(deckId),
   });
 }

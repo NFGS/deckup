@@ -67,6 +67,44 @@ export async function apiRequest<T>(path: string, options: RequestOptions<T> = {
   return handleResponse<T>(response, options);
 }
 
+export async function apiUpload<T>(
+  path: string,
+  formData: FormData,
+  options: RequestOptions<T> = {},
+): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    credentials: 'include',
+    body: formData,
+  });
+
+  return handleResponse<T>(response, options);
+}
+
+export interface DownloadedFile {
+  blob: Blob;
+  filename: string | null;
+}
+
+export async function apiDownload(path: string): Promise<DownloadedFile> {
+  const response = await send(path, {});
+
+  if (!response.ok) {
+    throw new ApiError(response.status, await readProblem(response));
+  }
+
+  return {
+    blob: await response.blob(),
+    filename: filenameFrom(response.headers.get('content-disposition')),
+  };
+}
+
+function filenameFrom(header: string | null): string | null {
+  const match = header?.match(/filename="([^"]+)"/);
+  return match?.[1] ?? null;
+}
+
 export async function refreshAccessToken(): Promise<boolean> {
   try {
     const response = await fetch(`${API_URL}/auth/refresh`, {

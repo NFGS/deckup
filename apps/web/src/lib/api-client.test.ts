@@ -1,8 +1,8 @@
-import { userSchema } from '@deckup/shared';
+import { importSummarySchema, userSchema } from '@deckup/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { jsonResponse, requestUrl } from '../test/http';
-import { ApiError, apiRequest, setAccessToken } from './api-client';
+import { ApiError, apiRequest, apiUpload, setAccessToken } from './api-client';
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -98,5 +98,22 @@ describe('apiRequest', () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ unexpected: true }));
 
     await expect(apiRequest('/users/me', { schema: userSchema })).rejects.toThrow();
+  });
+
+  it('uploads multipart form data without overriding the content type', async () => {
+    setAccessToken('token-123');
+    fetchMock.mockResolvedValueOnce(jsonResponse({ imported: 1, skipped: 0, errors: [] }));
+
+    const formData = new FormData();
+    formData.append('file', new File(['front,back'], 'cards.csv', { type: 'text/csv' }));
+
+    const result = await apiUpload('/decks/x/import', formData, { schema: importSummarySchema });
+
+    expect(result.imported).toBe(1);
+
+    const init = fetchMock.mock.calls[0]?.[1];
+
+    expect(init?.body).toBe(formData);
+    expect((init?.headers as Record<string, string>)['Content-Type']).toBeUndefined();
   });
 });

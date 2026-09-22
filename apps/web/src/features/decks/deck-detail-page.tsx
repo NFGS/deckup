@@ -15,6 +15,7 @@ import {
   Spinner,
 } from '../../components/ui/surfaces';
 import { ApiError } from '../../lib/api-client';
+import { downloadBlob } from '../../lib/download';
 import { CardForm } from './card-form';
 import type { CardFormPayload } from './card-form';
 import { DeckForm } from './deck-form';
@@ -25,9 +26,11 @@ import {
   useDeck,
   useDeleteCard,
   useDeleteDeck,
+  useExportDeck,
   useUpdateCard,
   useUpdateDeck,
 } from './hooks';
+import { ImportCardsModal } from './import-cards-modal';
 
 const PAGE_SIZE = 20;
 
@@ -41,6 +44,7 @@ export function DeckDetailPage() {
   const [page, setPage] = useState(1);
   const [isEditOpen, setEditOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
+  const [isImportOpen, setImportOpen] = useState(false);
   const [cardModal, setCardModal] = useState<CardModalState>(null);
   const [cardToDelete, setCardToDelete] = useState<Card | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -54,6 +58,7 @@ export function DeckDetailPage() {
 
   const updateDeck = useUpdateDeck(deckId);
   const deleteDeck = useDeleteDeck();
+  const exportDeck = useExportDeck();
   const createCard = useCreateCard(deckId);
   const updateCard = useUpdateCard(deckId);
   const deleteCard = useDeleteCard(deckId);
@@ -99,6 +104,17 @@ export function DeckDetailPage() {
   const handleDeleteDeck = async () => {
     await deleteDeck.mutateAsync(deckId);
     void navigate('/dashboard', { replace: true });
+  };
+
+  const handleExport = async () => {
+    setFormError(null);
+
+    try {
+      const { blob, filename } = await exportDeck.mutateAsync(deckId);
+      downloadBlob(blob, filename ?? `${deck.title}.csv`);
+    } catch (error) {
+      setFormError(error instanceof ApiError ? error.message : 'Unable to export the deck');
+    }
   };
 
   const handleCardSubmit = async (payload: CardFormPayload) => {
@@ -164,7 +180,7 @@ export function DeckDetailPage() {
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-semibold text-white">Cards</h2>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <div className="relative">
               <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <Input
@@ -178,6 +194,16 @@ export function DeckDetailPage() {
                 }}
               />
             </div>
+            <Button variant="secondary" onClick={() => setImportOpen(true)}>
+              Import
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={exportDeck.isPending}
+              onClick={() => void handleExport()}
+            >
+              {exportDeck.isPending ? 'Exporting…' : 'Export'}
+            </Button>
             <Button
               onClick={() => {
                 setFormError(null);
@@ -246,6 +272,8 @@ export function DeckDetailPage() {
           </div>
         ) : null}
       </section>
+
+      <ImportCardsModal deckId={deckId} open={isImportOpen} onClose={() => setImportOpen(false)} />
 
       <Modal open={isEditOpen} title="Edit deck" onClose={() => setEditOpen(false)}>
         <DeckForm

@@ -1,0 +1,109 @@
+import type { ImportSummary } from '@deckup/shared';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+
+import { Button } from '../../components/ui/button';
+import { Field, FormError } from '../../components/ui/field';
+import { Modal } from '../../components/ui/modal';
+import { ApiError } from '../../lib/api-client';
+import { useImportCards } from './hooks';
+
+export interface ImportCardsModalProps {
+  deckId: string;
+  open: boolean;
+  onClose: () => void;
+}
+
+const FILE_INPUT_CLASSES =
+  'block w-full cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300 ' +
+  'file:mr-3 file:rounded-md file:border-0 file:bg-slate-700 file:px-3 file:py-1.5 file:text-slate-100 ' +
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500';
+
+export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [summary, setSummary] = useState<ImportSummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const importCards = useImportCards(deckId);
+
+  const close = () => {
+    setFile(null);
+    setSummary(null);
+    setError(null);
+    onClose();
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!file) {
+      setError('Choose a CSV file first');
+      return;
+    }
+
+    setError(null);
+
+    try {
+      setSummary(await importCards.mutateAsync(file));
+    } catch (caught) {
+      setError(caught instanceof ApiError ? caught.message : 'Unable to import the file');
+    }
+  };
+
+  return (
+    <Modal open={open} title="Import cards from CSV" onClose={close}>
+      <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
+        <FormError message={error ?? undefined} />
+
+        <Field
+          label="CSV file"
+          htmlFor="import-file"
+          hint="Columns: front, back, hint, difficulty, tags. Up to 1 MB and 1 000 rows."
+        >
+          <input
+            id="import-file"
+            type="file"
+            accept=".csv,text/csv"
+            className={FILE_INPUT_CLASSES}
+            onChange={(event) => {
+              setFile(event.target.files?.[0] ?? null);
+              setSummary(null);
+            }}
+          />
+        </Field>
+
+        {summary ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-sm"
+          >
+            <p className="text-slate-200">
+              {summary.imported} {summary.imported === 1 ? 'card' : 'cards'} imported
+              {summary.skipped > 0 ? ` · ${summary.skipped} skipped` : ''}
+            </p>
+
+            {summary.errors.length > 0 ? (
+              <ul className="mt-2 flex flex-col gap-1 text-xs text-rose-300">
+                {summary.errors.map((rowError) => (
+                  <li key={`${rowError.row}-${rowError.message}`}>
+                    Row {rowError.row}: {rowError.message}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={close}>
+            Close
+          </Button>
+          <Button type="submit" disabled={importCards.isPending}>
+            {importCards.isPending ? 'Importing…' : 'Import'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}

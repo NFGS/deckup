@@ -3,6 +3,7 @@ import {
   createCardSchema,
   createDeckSchema,
   deckSchema,
+  importSummarySchema,
   pageSchema,
   updateCardSchema,
   updateDeckSchema,
@@ -14,12 +15,14 @@ import type {
   CreateDeck,
   Deck,
   DeckListQuery,
+  ImportSummary,
   Page,
   UpdateCard,
   UpdateDeck,
 } from '@deckup/shared';
 
-import { apiRequest } from '../../lib/api-client';
+import { apiDownload, apiRequest, apiUpload } from '../../lib/api-client';
+import type { DownloadedFile } from '../../lib/api-client';
 
 const deckPageSchema = pageSchema(deckSchema);
 const cardPageSchema = pageSchema(cardSchema);
@@ -103,4 +106,15 @@ export async function updateCard(cardId: string, input: UpdateCard): Promise<Car
 
 export async function deleteCard(cardId: string): Promise<void> {
   await apiRequest(`/cards/${cardId}`, { method: 'DELETE' });
+}
+
+export async function importCards(deckId: string, file: File): Promise<ImportSummary> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return apiUpload(`/decks/${deckId}/import`, formData, { schema: importSummarySchema });
+}
+
+export async function exportDeck(deckId: string): Promise<DownloadedFile> {
+  return apiDownload(`/decks/${deckId}/export`);
 }
