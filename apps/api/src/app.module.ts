@@ -11,9 +11,11 @@ import { DecksModule } from './decks.module.js';
 import { AppConfigModule } from './infrastructure/config/app-config.module.js';
 import { PersistenceModule } from './infrastructure/prisma/persistence.module.js';
 import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
+import { SchedulingModule } from './infrastructure/scheduling/scheduling.module.js';
 import { SecurityModule } from './infrastructure/security/security.module.js';
 import { DomainExceptionFilter } from './presentation/common/filters/domain-exception.filter.js';
 import { JwtAuthGuard } from './presentation/common/guards/jwt-auth.guard.js';
+import { StudyModule } from './study.module.js';
 import { UsersModule } from './users.module.js';
 
 @Module({
@@ -27,10 +29,12 @@ import { UsersModule } from './users.module.js';
     PrismaModule,
     PersistenceModule,
     SecurityModule,
+    SchedulingModule,
     AuthModule,
     UsersModule,
     DecksModule,
     CardsModule,
+    StudyModule,
   ],
   controllers: [AppController],
   providers: [

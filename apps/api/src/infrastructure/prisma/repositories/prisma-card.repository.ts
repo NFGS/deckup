@@ -8,7 +8,6 @@ import { CardRepositoryPort } from '../../../domain/ports/card.repository.js';
 import type { CardListResult } from '../../../domain/ports/card.repository.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { toDomainCard } from '../mappers/card.mapper.js';
-import type { CardRow } from '../mappers/card.mapper.js';
 import { PrismaService } from '../prisma.service.js';
 
 const CARD_INCLUDE = { cardTags: { include: { tag: true } } } as const;
@@ -21,6 +20,11 @@ export class PrismaCardRepository extends CardRepositoryPort {
 
   async create(card: Card): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
+      const deck = await tx.deck.findUniqueOrThrow({
+        where: { id: card.deckId },
+        select: { ownerId: true },
+      });
+
       await tx.card.create({
         data: {
           id: card.id,
@@ -36,7 +40,17 @@ export class PrismaCardRepository extends CardRepositoryPort {
         },
       });
 
-      await this.replaceTags(tx, card);
+      await tx.reviewState.create({
+        data: {
+          cardId: card.id,
+          userId: deck.ownerId,
+          dueAt: card.createdAt,
+          createdAt: card.createdAt,
+          updatedAt: card.updatedAt,
+        },
+      });
+
+      await this.replaceTags(tx, card, deck.ownerId);
     });
   }
 
@@ -79,13 +93,18 @@ export class PrismaCardRepository extends CardRepositoryPort {
     ]);
 
     return {
-      items: rows.map((row) => toDomainCard(row as CardRow)),
+      items: rows.map((row) => toDomainCard(row)),
       total,
     };
   }
 
   async update(card: Card): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
+      const deck = await tx.deck.findUniqueOrThrow({
+        where: { id: card.deckId },
+        select: { ownerId: true },
+      });
+
       await tx.card.update({
         where: { id: card.id },
         data: {
@@ -99,7 +118,7 @@ export class PrismaCardRepository extends CardRepositoryPort {
         },
       });
 
-      await this.replaceTags(tx, card);
+      await this.replaceTags(tx, card, deck.ownerId);
     });
   }
 
@@ -110,18 +129,17 @@ export class PrismaCardRepository extends CardRepositoryPort {
     });
   }
 
-  private async replaceTags(tx: Prisma.TransactionClient, card: Card): Promise<void> {
+  private async replaceTags(
+    tx: Prisma.TransactionClient,
+    card: Card,
+    ownerId: string,
+  ): Promise<void> {
     await tx.cardTag.deleteMany({ where: { cardId: card.id } });
-
-    const deck = await tx.deck.findUniqueOrThrow({
-      where: { id: card.deckId },
-      select: { ownerId: true },
-    });
 
     for (const name of card.tags) {
       const tag = await tx.tag.upsert({
-        where: { ownerId_name: { ownerId: deck.ownerId, name } },
-        create: { id: randomUUID(), ownerId: deck.ownerId, name },
+        where: { ownerId_name: { ownerId, name } },
+        create: { id: randomUUID(), ownerId, name },
         update: {},
       });
 

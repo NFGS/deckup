@@ -34,10 +34,10 @@ export function toDomainDeck(row: DeckRow): Deck {
   });
 }
 
-export function toDeckWithCounts(row: DeckRow): DeckWithCounts {
+export function toDeckWithCounts(row: DeckRow, dueCount: number): DeckWithCounts {
   return {
     deck: toDomainDeck(row),
     cardCount: row._count.cards,
-    dueCount: 0,
+    dueCount,
   };
 }

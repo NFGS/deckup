@@ -28,6 +28,32 @@ enum CardDifficulty {
   HARD
 }
 
+enum CardState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+}
+
+enum ReviewRating {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+enum SessionMode {
+  DUE
+  AHEAD
+  ALL
+}
+
 model User {
   id           String   @id @db.Uuid
   email        String   @unique
@@ -41,6 +67,9 @@ model User {
   decks         Deck[]
   tags          Tag[]
   refreshTokens RefreshToken[]
+  reviewStates  ReviewState[]
+  reviewLogs    ReviewLog[]
+  studySessions StudySession[]
 
   @@map("users")
 }
@@ -76,6 +105,8 @@ model Deck {
   owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   cards    Card[]
   deckTags DeckTag[]
+
+  studySessions StudySession[]
 
   @@index([ownerId, deletedAt])
   @@index([ownerId, subject])
@@ -123,6 +154,9 @@ model Card {
   deck     Deck      @relation(fields: [deckId], references: [id], onDelete: Cascade)
   cardTags CardTag[]
 
+  reviewState ReviewState?
+  reviewLogs  ReviewLog[]
+
   @@index([deckId, deletedAt])
   @@map("cards")
 }
@@ -136,4 +170,69 @@ model CardTag {
 
   @@id([cardId, tagId])
   @@map("card_tags")
+}
+
+model ReviewState {
+  cardId           String    @id @map("card_id") @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  stability        Float     @default(0)
+  difficulty       Float     @default(0)
+  state            CardState @default(NEW)
+  reps             Int       @default(0)
+  lapses           Int       @default(0)
+  scheduledDays    Int       @default(0) @map("scheduled_days")
+  lastReviewAt     DateTime? @map("last_review_at") @db.Timestamptz(3)
+  dueAt            DateTime  @default(now()) @map("due_at") @db.Timestamptz(3)
+  schedulerVersion String    @default("fsrs-6") @map("scheduler_version")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dueAt])
+  @@map("review_states")
+}
+
+model ReviewLog {
+  id              String       @id @db.Uuid
+  cardId          String       @map("card_id") @db.Uuid
+  userId          String       @map("user_id") @db.Uuid
+  sessionId       String?      @map("session_id") @db.Uuid
+  rating          ReviewRating
+  reviewedAt      DateTime     @map("reviewed_at") @db.Timestamptz(3)
+  elapsedMs       Int?         @map("elapsed_ms")
+  scheduledDays   Int          @map("scheduled_days")
+  previousDueAt   DateTime?    @map("previous_due_at") @db.Timestamptz(3)
+  nextDueAt       DateTime     @map("next_due_at") @db.Timestamptz(3)
+  stabilityAfter  Float        @map("stability_after")
+  difficultyAfter Float        @map("difficulty_after")
+
+  card    Card          @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([cardId, reviewedAt])
+  @@index([userId, reviewedAt])
+  @@map("review_logs")
+}
+
+model StudySession {
+  id            String        @id @db.Uuid
+  userId        String        @map("user_id") @db.Uuid
+  deckId        String        @map("deck_id") @db.Uuid
+  mode          SessionMode   @default(DUE)
+  status        SessionStatus @default(ACTIVE)
+  startedAt     DateTime      @default(now()) @map("started_at") @db.Timestamptz(3)
+  endedAt       DateTime?     @map("ended_at") @db.Timestamptz(3)
+  cardsReviewed Int           @default(0) @map("cards_reviewed")
+  correctCount  Int           @default(0) @map("correct_count")
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deck Deck        @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  logs ReviewLog[]
+
+  @@index([userId, startedAt])
+  @@index([deckId, status])
+  @@map("study_sessions")
 }

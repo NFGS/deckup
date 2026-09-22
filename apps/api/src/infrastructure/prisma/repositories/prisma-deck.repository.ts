@@ -12,7 +12,6 @@ import type {
 } from '../../../domain/ports/deck.repository.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { toDeckWithCounts } from '../mappers/deck.mapper.js';
-import type { DeckRow } from '../mappers/deck.mapper.js';
 import { PrismaService } from '../prisma.service.js';
 
 const DECK_INCLUDE = {
@@ -52,7 +51,12 @@ export class PrismaDeckRepository extends DeckRepositoryPort {
       include: DECK_INCLUDE,
     });
 
-    return row ? toDeckWithCounts(row) : null;
+    if (!row) {
+      return null;
+    }
+
+    const dueCount = await this.countDue(row.id, new Date());
+    return toDeckWithCounts(row, dueCount);
   }
 
   async listByOwner(
@@ -79,8 +83,13 @@ export class PrismaDeckRepository extends DeckRepositoryPort {
       this.prisma.deck.count({ where }),
     ]);
 
+    const dueCounts = await this.dueCountsByDeck(
+      rows.map((row) => row.id),
+      new Date(),
+    );
+
     return {
-      items: rows.map((row) => toDeckWithCounts(row as DeckRow)),
+      items: rows.map((row) => toDeckWithCounts(row, dueCounts.get(row.id) ?? 0)),
       total,
     };
   }
@@ -134,4 +143,29 @@ export class PrismaDeckRepository extends DeckRepositoryPort {
       await tx.deckTag.create({ data: { deckId, tagId: tag.id } });
     }
   }
+
+  private async countDue(deckId: string, now: Date): Promise<number> {
+    return this.prisma.card.count({ where: { deckId, ...dueCondition(now) } });
+  }
+
+  private async dueCountsByDeck(deckIds: string[], now: Date): Promise<Map<string, number>> {
+    if (deckIds.length === 0) {
+      return new Map();
+    }
+
+    const grouped = await this.prisma.card.groupBy({
+      by: ['deckId'],
+      where: { deckId: { in: deckIds }, ...dueCondition(now) },
+      _count: { _all: true },
+    });
+
+    return new Map(grouped.map((entry) => [entry.deckId, entry._count._all]));
+  }
+}
+
+function dueCondition(now: Date): Prisma.CardWhereInput {
+  return {
+    deletedAt: null,
+    OR: [{ reviewState: { is: null } }, { reviewState: { dueAt: { lte: now } } }],
+  };
 }
