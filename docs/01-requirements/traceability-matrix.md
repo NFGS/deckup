@@ -65,23 +65,25 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | RF-05       | US-03      | CU#06 (CU-I) | TC-07 … TC-10              | Partial — hint, difficulty and tags done; image upload pending (Phase 3) |
 | RF-06       | US-03      | CU#07 (CU-V) | TC-11 … TC-14              | Planned (Phase 3)                                                        |
 | RF-07       | Epic       | CU#10        | TC-27, TC-28               | Planned (Phase 6)                                                        |
-| RF-08       | US-04      | CU#08 (CU-Q) | TC-15, TC-16, TC-24        | Planned (Phase 3)                                                        |
-| RF-09       | US-04      | CU#08 (CU-S) | TC-17, TC-18, TC-25, TC-26 | Planned (Phase 3)                                                        |
+| RF-08       | US-04      | CU#08 (CU-Q) | TC-15, TC-16, TC-24        | Implemented (Phase 3)                                                    |
+| RF-09       | US-04      | CU#08 (CU-S) | TC-17, TC-18, TC-25, TC-26 | Implemented (Phase 3)                                                    |
 | RF-10       | US-04      | CU#09 (CU-E) | TC-19 … TC-23              | Planned (Phase 5)                                                        |
 | RF-11       | Epic       | CU#11        | TC-29, TC-30               | Phase 8                                                                  |
 | RF-12       | Epic       | CU#12        | TC-31, TC-32               | Phase 8                                                                  |
 
 ### 3.1 Automated coverage status (Phase 2)
 
-| Suite                        | File                                      | Covers                                                    |
-| ---------------------------- | ----------------------------------------- | --------------------------------------------------------- |
-| Domain unit                  | `apps/api/src/domain/**/*.spec.ts`        | Entity and value-object rules                             |
-| Application unit             | `apps/api/src/application/auth/*.spec.ts` | Registration and refresh rotation (incl. reuse detection) |
-| API integration (auth)       | `apps/api/test/auth.e2e-spec.ts`          | TC-A1 … TC-A4, profile, CSRF, logout                      |
-| API integration (decks)      | `apps/api/test/decks.e2e-spec.ts`         | TC-01, TC-05, TC-06, ownership isolation, soft delete     |
-| API integration (cards)      | `apps/api/test/cards.e2e-spec.ts`         | TC-03, TC-04, TC-09, ownership isolation                  |
-| API integration (throttling) | `apps/api/test/throttling.e2e-spec.ts`    | Brute-force protection (429)                              |
-| API integration (health)     | `apps/api/test/app.e2e-spec.ts`           | Operational health endpoint                               |
+| Suite                        | File                                                               | Covers                                                    |
+| ---------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------- |
+| Domain unit                  | `apps/api/src/domain/**/*.spec.ts`                                 | Entity and value-object rules                             |
+| Application unit             | `apps/api/src/application/auth/*.spec.ts`                          | Registration and refresh rotation (incl. reuse detection) |
+| API integration (auth)       | `apps/api/test/auth.e2e-spec.ts`                                   | TC-A1 … TC-A4, profile, CSRF, logout                      |
+| API integration (decks)      | `apps/api/test/decks.e2e-spec.ts`                                  | TC-01, TC-05, TC-06, ownership isolation, soft delete     |
+| API integration (cards)      | `apps/api/test/cards.e2e-spec.ts`                                  | TC-03, TC-04, TC-09, ownership isolation                  |
+| API integration (throttling) | `apps/api/test/throttling.e2e-spec.ts`                             | Brute-force protection (429)                              |
+| API integration (health)     | `apps/api/test/app.e2e-spec.ts`                                    | Operational health endpoint                               |
+| API integration (study)      | `apps/api/test/study.e2e-spec.ts`                                  | TC-15 … TC-19, TC-24, TC-25, review-ahead mode, isolation |
+| Scheduling unit              | `apps/api/src/infrastructure/scheduling/ts-fsrs.scheduler.spec.ts` | FSRS transitions for the four ratings                     |
 
 ## 4. Test case catalog
 

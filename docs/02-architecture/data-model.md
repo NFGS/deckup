@@ -4,7 +4,7 @@
 | ----------- | --------------------------------------------------------------------------------------------------------- |
 | **Version** | 1.0                                                                                                       |
 | **Date**    | 2026-09-22                                                                                                |
-| **Status**  | Approved — implemented with Prisma migrations (Phase 2)                                                   |
+| **Status**  | Approved — implemented with Prisma migrations (Phases 2–3)                                                |
 | **Related** | [`overview.md`](./overview.md) · [`adr/ADR-0003-database-and-orm.md`](./adr/ADR-0003-database-and-orm.md) |
 
 ---
@@ -119,6 +119,7 @@ erDiagram
         uuid id PK
         uuid user_id FK
         uuid deck_id FK
+        enum mode
         enum status
         timestamptz started_at
         timestamptz ended_at
@@ -239,6 +240,7 @@ Rows are append-only: no update or delete endpoints exist for review logs.
 | `id`             | `uuid`          | PK                         |                                    |
 | `user_id`        | `uuid`          | FK → `User`, cascade       |                                    |
 | `deck_id`        | `uuid`          | FK → `Deck`, cascade       |                                    |
+| `mode`           | `SessionMode`   | not null, default `DUE`    | `DUE`, `AHEAD`, `ALL`              |
 | `status`         | `SessionStatus` | not null, default `ACTIVE` | `ACTIVE`, `COMPLETED`, `ABANDONED` |
 | `started_at`     | `timestamptz`   | not null                   |                                    |
 | `ended_at`       | `timestamptz`   | nullable                   |                                    |

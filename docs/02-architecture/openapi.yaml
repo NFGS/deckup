@@ -854,6 +854,11 @@ components:
       type: string
       enum: [ACTIVE, COMPLETED, ABANDONED]
 
+    StudyMode:
+      type: string
+      enum: [DUE, AHEAD, ALL]
+      description: DUE builds the daily queue; AHEAD and ALL support reviewing ahead
+
     Deck:
       type: object
       required: [id, title, visibility, createdAt, updatedAt]
@@ -1119,14 +1124,11 @@ components:
       type: object
       properties:
         mode:
-          type: string
-          enum: [DUE, AHEAD, ALL]
-          default: DUE
-          description: DUE builds the daily queue; AHEAD/ALL support the empty-state flow (AC-04.7)
+          $ref: '#/components/schemas/StudyMode'
 
     StudySession:
       type: object
-      required: [id, deckId, status, startedAt, cardsReviewed, correctCount]
+      required: [id, deckId, mode, status, startedAt, cardsReviewed, correctCount]
       properties:
         id:
           type: string
@@ -1134,6 +1136,8 @@ components:
         deckId:
           type: string
           format: uuid
+        mode:
+          $ref: '#/components/schemas/StudyMode'
         status:
           $ref: '#/components/schemas/SessionStatus'
         startedAt:
