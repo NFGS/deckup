@@ -1,5 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// DeckUp — Prisma schema
+// Documentation: docs/02-architecture/data-model.md
+// Migrations are immutable once applied (SPEC.md §4).
 
 generator client {
   provider = "prisma-client"
@@ -8,4 +9,131 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum DeckVisibility {
+  PRIVATE
+  UNLISTED
+  PUBLIC
+}
+
+enum CardDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model User {
+  id           String   @id @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  timezone     String   @default("UTC")
+  role         UserRole @default(STUDENT)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  decks         Deck[]
+  tags          Tag[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  familyId  String    @map("family_id") @db.Uuid
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_tokens")
+}
+
+model Deck {
+  id          String         @id @db.Uuid
+  ownerId     String         @map("owner_id") @db.Uuid
+  title       String
+  description String?
+  subject     String?
+  color       String?
+  visibility  DeckVisibility @default(PRIVATE)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(3)
+
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  cards    Card[]
+  deckTags DeckTag[]
+
+  @@index([ownerId, deletedAt])
+  @@index([ownerId, subject])
+  @@map("decks")
+}
+
+model Tag {
+  id        String   @id @db.Uuid
+  ownerId   String   @map("owner_id") @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  deckTags DeckTag[]
+  cardTags CardTag[]
+
+  @@unique([ownerId, name])
+  @@map("tags")
+}
+
+model DeckTag {
+  deckId String @map("deck_id") @db.Uuid
+  tagId  String @map("tag_id") @db.Uuid
+
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([deckId, tagId])
+  @@map("deck_tags")
+}
+
+model Card {
+  id            String          @id @db.Uuid
+  deckId        String          @map("deck_id") @db.Uuid
+  front         String
+  back          String
+  hint          String?
+  imageUrl      String?         @map("image_url")
+  imagePublicId String?         @map("image_public_id")
+  difficulty    CardDifficulty?
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt     DateTime?       @map("deleted_at") @db.Timestamptz(3)
+
+  deck     Deck      @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  cardTags CardTag[]
+
+  @@index([deckId, deletedAt])
+  @@map("cards")
+}
+
+model CardTag {
+  cardId String @map("card_id") @db.Uuid
+  tagId  String @map("tag_id") @db.Uuid
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, tagId])
+  @@map("card_tags")
 }

@@ -1,21 +1,14 @@
-import { Test, type TestingModule } from '@nestjs/testing';
-import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import request from 'supertest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { AppModule } from './../src/app.module.js';
+import { createTestApp } from './utils/test-app.js';
 
 describe('AppController (e2e)', () => {
   let app: NestFastifyApplication;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    app.setGlobalPrefix('api/v1');
-    await app.init();
-    await app.getHttpAdapter().getInstance().ready();
+    app = await createTestApp();
   });
 
   afterAll(async () => {
