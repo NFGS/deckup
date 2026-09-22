@@ -1,3 +1,8 @@
+import { Link } from 'react-router';
+
+import { Button } from '../../components/ui/button';
+import { useAuth } from '../auth/auth-context';
+
 const FEATURES = [
   {
     title: 'Custom decks',
@@ -13,10 +18,13 @@ const FEATURES = [
   },
 ] as const;
 
-export function App() {
+export function LandingPage() {
+  const { status } = useAuth();
+  const isAuthenticated = status === 'authenticated';
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-12 px-6 py-16">
-      <header className="flex max-w-2xl flex-col items-center gap-4 text-center">
+    <main className="flex flex-col items-center gap-12 py-10">
+      <header className="flex max-w-2xl flex-col items-center gap-5 text-center">
         <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1 text-xs font-semibold tracking-widest text-emerald-300 uppercase">
           Epic 03 · Education
         </span>
@@ -24,6 +32,23 @@ export function App() {
         <p className="text-lg text-slate-300">
           Custom flashcards with spaced repetition, built for students preparing final exams.
         </p>
+
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {isAuthenticated ? (
+            <Link to="/dashboard">
+              <Button>Go to my decks</Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/register">
+                <Button>Get started</Button>
+              </Link>
+              <Link to="/login">
+                <Button variant="secondary">Sign in</Button>
+              </Link>
+            </>
+          )}
+        </div>
       </header>
 
       <section className="grid w-full max-w-4xl gap-6 sm:grid-cols-3">
@@ -37,10 +62,6 @@ export function App() {
           </article>
         ))}
       </section>
-
-      <footer className="text-xs text-slate-500">
-        Foundation build · Phase 0 — monorepo, tooling and CI ready
-      </footer>
     </main>
   );
 }
