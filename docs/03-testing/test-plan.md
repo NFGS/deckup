@@ -33,7 +33,9 @@
 - Ports are replaced by in-memory doubles (`apps/api/src/testing/fakes`).
 - The FSRS adapter is tested against the real `ts-fsrs` library (deterministic
   assertions on state transitions and interval ordering).
-- Coverage target: ≥ 90 % of `domain/` and `application/` statements.
+- Coverage floor enforced by `pnpm --filter @deckup/api test:cov` for `src/domain`:
+  80 % statements, 85 % branches, 75 % functions, 80 % lines. Application use
+  cases are verified by the integration suite rather than unit coverage.
 
 ### 2.2 Integration tests
 
@@ -50,7 +52,7 @@
   started by Playwright (`playwright.config.ts`).
 - Journeys covered: landing, login form, protected-route redirect, full study
   journey (register → deck → card → study → analytics) and WCAG 2.1 A/AA scans
-  on public pages.
+  on public pages, authenticated screens and an open dialog.
 - Traces are captured on first retry; retries are enabled on CI (2) and
   disabled locally (0).
 
@@ -72,12 +74,12 @@
 
 ## 5. Non-functional testing
 
-| Attribute         | Approach                                                                                                                                                                                                                                        |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Performance**   | Budget: web entry chunk ≤ 200 kB gzip, vendor chunk ≤ 100 kB gzip, API p95 < 300 ms. Recharts and the study screen are lazy-loaded; vendor chunks are split for cacheability.                                                                   |
-| **Accessibility** | Automated WCAG 2.1 A/AA scans (`@axe-core/playwright`) on `/`, `/login` and `/register`; serious/critical violations fail the build. Manual keyboard pass on study mode (`Space`, `1`–`4`).                                                     |
-| **Security**      | Static scan of the repository (secrets, injection patterns), `pnpm audit --audit-level critical` in CI, Argon2id + rotating refresh tokens, rate limiting, RFC 9457 errors. See [`../04-operations/security.md`](../04-operations/security.md). |
-| **Reliability**   | Reviews are recorded in a single transaction; imports are all-or-nothing for valid rows.                                                                                                                                                        |
+| Attribute         | Approach                                                                                                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Performance**   | Budget: web entry chunk ≤ 200 kB gzip, vendor chunk ≤ 100 kB gzip, API p95 < 300 ms. Recharts and the study screen are lazy-loaded; vendor chunks are split for cacheability.                                                                           |
+| **Accessibility** | Automated WCAG 2.1 A/AA scans (`@axe-core/playwright`) on `/`, `/login`, `/register`, plus the dashboard, deck detail, analytics and an open dialog; serious/critical violations fail the build. Manual keyboard pass on study mode (`Space`, `1`–`4`). |
+| **Security**      | Static scan of the repository (secrets, injection patterns), `pnpm audit --audit-level critical` in CI, Argon2id + rotating refresh tokens, rate limiting, RFC 9457 errors. See [`../04-operations/security.md`](../04-operations/security.md).         |
+| **Reliability**   | Reviews are recorded in a single transaction; imports are all-or-nothing for valid rows.                                                                                                                                                                |
 
 ## 6. Entry and exit criteria
 
@@ -86,8 +88,8 @@
 **Exit (definition of done for a change)**
 
 - [ ] `pnpm lint` and `pnpm typecheck` pass.
-- [ ] `pnpm test` passes (unit + integration).
-- [ ] `pnpm --filter @deckup/api test:e2e` passes against PostgreSQL.
+- [ ] `pnpm test` passes (unit).
+- [ ] `pnpm --filter @deckup/api test:e2e` passes against PostgreSQL (integration).
 - [ ] `pnpm build` succeeds.
 - [ ] `pnpm test:e2e` passes (journeys + a11y) against the production builds.
 - [ ] New requirements are traced in the traceability matrix.
@@ -96,11 +98,11 @@
 
 | Suite                       | Files | Tests |
 | --------------------------- | ----- | ----- |
-| Shared contracts (unit)     | 4     | 8     |
-| API (unit)                  | 14    | 77    |
-| Web (unit/component)        | 10    | 36    |
-| API integration (Supertest) | 10    | 52    |
-| Browser E2E (Playwright)    | 3     | 7     |
+| Shared contracts (unit)     | 3     | 8     |
+| API (unit)                  | 19    | 110   |
+| Web (unit/component)        | 11    | 38    |
+| API integration (Supertest) | 11    | 66    |
+| Browser E2E (Playwright)    | 3     | 8     |
 
 ## 8. Risks and mitigations
 

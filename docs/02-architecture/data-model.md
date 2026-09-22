@@ -249,21 +249,21 @@ Rows are append-only: no update or delete endpoints exist for review logs.
 
 ## 3. Indexes and query rationale
 
-| Index                                     | Serves                                           |
-| ----------------------------------------- | ------------------------------------------------ |
-| `User(email)` unique                      | Sign in / registration duplicate check           |
-| `RefreshToken(token_hash)` unique         | Refresh validation                               |
-| `RefreshToken(user_id)`                   | Revoke all sessions of a user                    |
-| `Deck(owner_id, deleted_at)`              | Deck list (active decks first)                   |
-| `Deck(owner_id, subject)`                 | Filter by subject (US-02, AC-02.2)               |
-| `Deck(visibility)` partial `WHERE PUBLIC` | Public catalog (Phase 8)                         |
-| `Tag(owner_id, name)` unique              | Tag reuse and deduplication                      |
-| `Card(deck_id, deleted_at)`               | Deck detail listing                              |
-| `ReviewState(user_id, due_at)`            | Daily queue (US-04, AC-04.1) — the hottest query |
-| `ReviewLog(user_id, reviewed_at)`         | Streak and retention windows (AC-04.4, AC-04.5)  |
-| `ReviewLog(card_id, reviewed_at)`         | Card history and first-review retention rule     |
-| `StudySession(user_id, started_at)`       | Session history and dashboard                    |
-| `StudySession(deck_id, status)`           | Resume/abandon active sessions                   |
+| Index                               | Serves                                           |
+| ----------------------------------- | ------------------------------------------------ |
+| `User(email)` unique                | Sign in / registration duplicate check           |
+| `RefreshToken(token_hash)` unique   | Refresh validation                               |
+| `RefreshToken(user_id)`             | Revoke all sessions of a user                    |
+| `Deck(owner_id, deleted_at)`        | Deck list (active decks first)                   |
+| `Deck(owner_id, subject)`           | Filter by subject (US-02, AC-02.2)               |
+| `Deck(visibility)`                  | Public catalog (Phase 8)                         |
+| `Tag(owner_id, name)` unique        | Tag reuse and deduplication                      |
+| `Card(deck_id, deleted_at)`         | Deck detail listing                              |
+| `ReviewState(user_id, due_at)`      | Daily queue (US-04, AC-04.1) — the hottest query |
+| `ReviewLog(user_id, reviewed_at)`   | Streak and retention windows (AC-04.4, AC-04.5)  |
+| `ReviewLog(card_id, reviewed_at)`   | Card history and first-review retention rule     |
+| `StudySession(user_id, started_at)` | Session history and dashboard                    |
+| `StudySession(deck_id, status)`     | Resume/abandon active sessions                   |
 
 ## 4. Design decisions
 

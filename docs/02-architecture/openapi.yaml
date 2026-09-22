@@ -142,7 +142,11 @@ paths:
     post:
       operationId: signOut
       summary: Revoke the current refresh token family
+      description: Requires the refresh cookie and the `X-Requested-With` header (CSRF guard).
       tags: [Auth]
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfHeader'
       responses:
         '204':
           description: Session revoked; refresh cookie cleared
@@ -371,6 +375,59 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /cards/{cardId}/image:
+    post:
+      operationId: uploadCardImage
+      summary: Upload or replace the card image (RF-05)
+      description: |
+        Accepts a JPEG or PNG file of at most 5 MB. Replacing an image deletes the
+        previous asset. Answers `503` when image storage is not configured.
+      tags: [Cards]
+      parameters:
+        - $ref: '#/components/parameters/CardId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG or PNG up to 5 MB
+      responses:
+        '201':
+          description: Image stored and card updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '503':
+          description: Image storage is not configured on this deployment
+    delete:
+      operationId: removeCardImage
+      summary: Remove the card image (RF-05)
+      tags: [Cards]
+      parameters:
+        - $ref: '#/components/parameters/CardId'
+      responses:
+        '200':
+          description: Image removed and card updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /decks/{deckId}/import:
     post:
       operationId: importCards
@@ -428,13 +485,15 @@ paths:
   /decks/{deckId}/study-sessions:
     post:
       operationId: startStudySession
-      summary: Start a study session for a deck
-      description: Creates the session and freezes the daily queue (AC-04.1).
+      summary: Start (or resume) a study session for a deck
+      description: |
+        Creates the session for the deck and mode, or resumes the active session
+        already in progress for that deck and mode (AC-04.1, edge case E3).
       tags: [Study]
       parameters:
         - $ref: '#/components/parameters/DeckId'
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
@@ -453,7 +512,10 @@ paths:
     get:
       operationId: getStudyQueue
       summary: Get the session queue
-      description: Returns due cards ordered by due date, oldest first (AC-04.1, AC-04.2).
+      description: |
+        Returns the live queue for the session, ordered by due date, oldest first
+        (AC-04.1). `DUE` lists cards due now or earlier, `AHEAD` the next scheduled
+        cards (even if not due yet) and `ALL` every card of the deck.
       tags: [Study]
       parameters:
         - $ref: '#/components/parameters/SessionId'
@@ -474,6 +536,8 @@ paths:
       description: |
         Applies the FSRS-6 transition, persists the review log and returns the next
         due date. Ratings: `AGAIN`, `HARD`, `GOOD`, `EASY` (AC-04.2, BR-04.2).
+        When `clientReviewId` is provided the operation is idempotent: replaying the
+        same review returns the stored result without applying it twice.
       tags: [Study]
       parameters:
         - $ref: '#/components/parameters/SessionId'
@@ -513,6 +577,28 @@ paths:
                 $ref: '#/components/schemas/SessionSummary'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /study-sessions/{sessionId}/abandon:
+    post:
+      operationId: abandonStudySession
+      summary: Abandon an active session
+      description: Marks the session as `ABANDONED`; it can no longer be reviewed or completed.
+      tags: [Study]
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session abandoned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudySession'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /analytics/overview:
     get:
@@ -572,7 +658,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeckPage'
+                $ref: '#/components/schemas/PublicDeckPage'
 
   /decks/{deckId}/clone:
     post:
@@ -998,6 +1084,31 @@ components:
         total:
           type: integer
 
+    PublicDeck:
+      allOf:
+        - $ref: '#/components/schemas/Deck'
+        - type: object
+          required: [authorName]
+          properties:
+            authorName:
+              type: string
+              description: Display name of the student who published the deck
+
+    PublicDeckPage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicDeck'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
     Card:
       type: object
       required: [id, deckId, front, back, createdAt, updatedAt]
@@ -1129,7 +1240,7 @@ components:
 
     ImportSummary:
       type: object
-      required: [imported, skipped, errors]
+      required: [imported, skipped, errors, duplicateRows]
       properties:
         imported:
           type: integer
@@ -1149,6 +1260,14 @@ components:
               message:
                 type: string
                 example: 'Missing required column: back'
+        duplicateRows:
+          type: array
+          items:
+            type: integer
+          description: Row numbers whose front repeats an earlier row (still imported)
+        notice:
+          type: string
+          description: Human-readable note, for example a header-only file
 
     StartSessionRequest:
       type: object
@@ -1236,6 +1355,10 @@ components:
           type: integer
           minimum: 0
           description: Time spent answering, used for analytics only
+        clientReviewId:
+          type: string
+          format: uuid
+          description: Client-generated id that makes offline replay idempotent
 
     ReviewResult:
       type: object
@@ -1293,7 +1416,7 @@ components:
           type: number
           minimum: 0
           maximum: 1
-          description: Share of first reviews not rated AGAIN in 30 days (BR-04.4)
+          description: Share of first reviews rated GOOD or EASY in 30 days (BR-04.4)
           example: 0.87
         totalCards:
           type: integer

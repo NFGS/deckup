@@ -179,7 +179,7 @@ CI/CD: GitHub Actions runs the five quality gates on every push/PR and deploys `
 | **Security**      | Argon2id passwords, JWT access + rotating refresh cookies, rate limiting, Zod validation at the edge, CORS allow-list (ADR-0006). |
 | **Contracts**     | Zod schemas in `@deckup/shared`; OpenAPI document as the published REST contract.                                                 |
 | **Errors**        | Typed domain errors mapped to RFC 7807-style problem responses by an exception filter.                                            |
-| **Observability** | Structured logging (pino) with request IDs; `/health` endpoint; request metrics.                                                  |
+| **Observability** | Structured Fastify logs with request IDs (`x-request-id` echoed); `/health` endpoint.                                             |
 | **Testing**       | Domain unit tests (Vitest), API integration with real PostgreSQL, web E2E with Playwright.                                        |
 | **Accessibility** | WCAG 2.1 AA, keyboard-first study mode.                                                                                           |
 | **Time**          | All instants stored in UTC; local-day logic applies the student's IANA timezone.                                                  |

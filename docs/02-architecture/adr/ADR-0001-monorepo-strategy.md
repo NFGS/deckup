@@ -60,13 +60,14 @@ no benefit at this scale; Nx would add capability the project will not use.
 ## Consequences
 
 - **Positive**: one `pnpm install`, one quality-gate command set, one CI pipeline, shared
-  TypeScript presets, cached incremental builds.
+  TypeScript presets (`packages/config`, consumed by `packages/shared`), cached incremental
+  builds.
 - **Negative / risks**: the repository grows as a whole; Turborepo cache must be understood
   (a stale cache can mask a broken build — mitigated by `--force` in releases and by CI
   running without remote cache initially).
-- **Required actions**: keep `turbo.json` task graph accurate; every package declares
-  explicit `lint`, `typecheck`, `test` and `build` scripts; CI runs with
-  `--frozen-lockfile`.
+- **Required actions**: keep `turbo.json` task graph accurate; every code package declares
+  explicit `lint`, `typecheck`, `test` and `build` scripts (`packages/config` is
+  configuration-only); CI runs with `--frozen-lockfile`.
 
 ## References SWEBOK
 

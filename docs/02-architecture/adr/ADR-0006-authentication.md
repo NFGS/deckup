@@ -25,7 +25,7 @@ Implement first-party authentication:
 - **Refresh token**: opaque random token, **rotating on every use**, delivered in an
   `httpOnly; Secure; SameSite=Lax` cookie scoped to the auth endpoints, hashed at rest.
 - **Replay detection**: reusing a rotated refresh token revokes the whole token family.
-- **Rate limiting** on `/auth/*` (per IP and per account) with `@nestjs/throttler`.
+- **Rate limiting** on `/auth/*` (per client IP; account-level limiting is a future step) with `@nestjs/throttler`.
 - **CSRF**: the refresh cookie is `SameSite=Lax` and the refresh endpoint requires a
   custom header, which cross-site form posts cannot set.
 

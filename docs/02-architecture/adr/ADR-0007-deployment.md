@@ -26,7 +26,7 @@ Deploy each container to a managed platform, all driven from GitHub:
 | **Database** | **Neon**    | Serverless PostgreSQL 17, branching for preview environments |
 
 - Secrets live in each platform's environment settings; `.env` files are never committed.
-- `prisma migrate deploy` runs as a release step before the API container is promoted.
+- `prisma migrate deploy` runs as a release step in the `Deploy` workflow (which is gated on a green CI run) before the API container is promoted.
 - Rollback strategy: Vercel instant rollback; Railway redeploy of the previous image;
   Neon point-in-time restore.
 

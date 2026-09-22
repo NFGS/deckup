@@ -77,8 +77,9 @@ keeps the toolchain small.
 - **Negative / risks**: integration tests require a running PostgreSQL (Compose locally,
   service container in CI); E2E flakiness must be managed with retries and trace artifacts;
   Playwright browsers add ~150 MB to CI cache.
-- **Required actions**: CI starts a PostgreSQL service for integration tests; E2E runs on
-  `main` merges and on demand; coverage thresholds are enforced for domain/application.
+- **Required actions**: CI starts a PostgreSQL service and runs the API integration suite; E2E
+  runs on `main` merges and on demand; domain coverage thresholds are enforced through
+  `pnpm --filter @deckup/api test:cov`.
 
 ## References SWEBOK
 

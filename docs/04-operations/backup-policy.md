@@ -39,7 +39,7 @@
 
    Store the dump outside the repository (encrypted drive or private object
    storage). Dumps contain personal data: never commit them (`.gitignore`
-   already excludes `*.dump` patterns through `*.local`; verify before adding).
+   excludes `*.dump`; verify before adding).
 
 3. **Development data** — the local Docker volume
    (`deckup_deckup-db-data`) is disposable. It is recreated with

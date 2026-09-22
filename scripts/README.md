@@ -17,7 +17,7 @@ Automation scripts for the DeckUp monorepo.
   request.
 - **Idempotent**: before publishing, child pages with the same title are
   archived, so re-runs refresh the documentation instead of duplicating it.
-- Last sync: 2026-09-22 — 10 documents (915 blocks).
+- Last sync: 2026-09-22 — 10 documents (931 blocks at the latest dry run).
 - `--dry-run` prints the block counts without calling the API:
 
   ```bash

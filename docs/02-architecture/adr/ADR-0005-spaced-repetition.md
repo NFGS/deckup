@@ -24,15 +24,16 @@ encapsulated behind a domain port:
 
 ```ts
 // domain/ports/scheduler.port.ts
-export interface SchedulerPort {
-  schedule(state: CardSchedule, rating: ReviewRating, now: Date): CardSchedule;
+export abstract class SchedulerPort {
+  abstract readonly version: string;
+  abstract schedule(request: ScheduleRequest): SchedulingOutcome;
 }
 ```
 
 - The **domain service** (`SchedulingService`) owns the rules and calls the port.
 - The **infrastructure adapter** wraps `ts-fsrs` (FSRS-6) and is the only place importing it.
-- Scheduling parameters (desired retention, learning steps, fuzz) are configuration, versioned
-  with the review state so future parameter changes remain auditable.
+- Scheduling parameters (fuzz, short-term learning steps) use the `ts-fsrs` defaults, and the
+  `schedulerVersion` is stored with every review state so a future parameter set stays auditable.
 
 ## Alternatives considered
 
@@ -78,7 +79,7 @@ the _interval mathematics_.
   the review state).
 - **Required actions**: wrap the library, never import it in domain/application; store
   `stability`, `difficulty`, `state`, `reps`, `lapses`, `dueAt` and `schedulerVersion`;
-  document the rating semantics (ADR-0004 glossary).
+  document the rating semantics (see [`../../01-requirements/glossary.md`](../../01-requirements/glossary.md)).
 
 ## References SWEBOK
 

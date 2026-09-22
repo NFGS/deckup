@@ -2,7 +2,7 @@
 
 | Field       | Value                                                                                                                           |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Version** | 1.0                                                                                                                             |
+| **Version** | 1.1                                                                                                                             |
 | **Date**    | 2026-09-22                                                                                                                      |
 | **Related** | [`../02-architecture/adr/ADR-0007-deployment.md`](../02-architecture/adr/ADR-0007-deployment.md) · [`runbook.md`](./runbook.md) |
 
@@ -19,19 +19,28 @@
 
 ### API (Railway)
 
-| Variable                 | Example                                        | Notes                                  |
-| ------------------------ | ---------------------------------------------- | -------------------------------------- |
-| `DATABASE_URL`           | `postgresql://user:pass@host/db?schema=public` | Neon pooled connection string          |
-| `JWT_ACCESS_SECRET`      | 32+ random characters                          | Rotating it invalidates sessions       |
-| `JWT_ACCESS_TTL_SECONDS` | `900`                                          | Access token lifetime                  |
-| `REFRESH_TOKEN_TTL_DAYS` | `30`                                           | Refresh token lifetime                 |
-| `COOKIE_SECURE`          | `true`                                         | Required in production                 |
-| `CORS_ORIGINS`           | `https://deckup.vercel.app`                    | Comma-separated allow-list             |
-| `PORT`                   | `3000`                                         | Railway injects it automatically       |
-| `LLM_PROVIDER`           | `disabled` \| `openai`                         | Optional AI card generation            |
-| `LLM_API_KEY`            | `sk-…`                                         | Required when the provider is `openai` |
-| `LLM_MODEL`              | `gpt-4o-mini`                                  | Model used for suggestions             |
-| `LLM_BASE_URL`           | `https://api.openai.com/v1`                    | Any OpenAI-compatible gateway          |
+| Variable                 | Example                                        | Notes                                    |
+| ------------------------ | ---------------------------------------------- | ---------------------------------------- |
+| `DATABASE_URL`           | `postgresql://user:pass@host/db?schema=public` | Neon pooled connection string            |
+| `JWT_ACCESS_SECRET`      | 32+ random characters                          | Rotating it invalidates sessions         |
+| `JWT_ACCESS_TTL_SECONDS` | `900`                                          | Access token lifetime                    |
+| `REFRESH_TOKEN_TTL_DAYS` | `30`                                           | Refresh token lifetime                   |
+| `COOKIE_SECURE`          | `true`                                         | Required in production                   |
+| `CORS_ORIGINS`           | `https://deckup.vercel.app`                    | Comma-separated allow-list               |
+| `PORT`                   | `3000`                                         | Railway injects it automatically         |
+| `APP_VERSION`            | `0.1.0`                                        | Reported by `/health`                    |
+| `IMAGE_STORAGE`          | `disabled` \| `cloudinary`                     | Card image uploads (RF-05)               |
+| `CLOUDINARY_CLOUD_NAME`  | `deckup`                                       | Required when `IMAGE_STORAGE=cloudinary` |
+| `CLOUDINARY_API_KEY`     | `1234567890`                                   | Required when `IMAGE_STORAGE=cloudinary` |
+| `CLOUDINARY_API_SECRET`  | `…`                                            | Required when `IMAGE_STORAGE=cloudinary` |
+| `CLOUDINARY_FOLDER`      | `deckup/cards`                                 | Optional asset folder                    |
+| `LLM_PROVIDER`           | `disabled` \| `openai`                         | Optional AI card generation              |
+| `LLM_API_KEY`            | `sk-…`                                         | Required when the provider is `openai`   |
+| `LLM_MODEL`              | `gpt-4o-mini`                                  | Model used for suggestions               |
+| `LLM_BASE_URL`           | `https://api.openai.com/v1`                    | Any OpenAI-compatible gateway            |
+| `LOG_LEVEL`              | `info`                                         | Fastify structured logger level          |
+
+Boot validation fails fast when a feature is enabled without its credentials.
 
 ### Web (Vercel)
 
@@ -45,38 +54,46 @@
 
 1. **Database (Neon)** — create a PostgreSQL 17 project, copy the pooled
    connection string into Railway as `DATABASE_URL`.
-2. **API (Railway)** — create a service from the GitHub repository with:
-   - `RAILWAY_DOCKERFILE_PATH=apps/api/Dockerfile`
-   - Root directory: repository root (the Dockerfile expects it as context).
-   - Healthcheck path: `/api/v1/health`.
+2. **API (Railway)** — create a service from the GitHub repository. The
+   committed [`railway.json`](../../railway.json) points the build at
+   `apps/api/Dockerfile` and sets the health check to `/api/v1/health`.
 3. **Web (Vercel)** — import the repository, set **Root Directory** to
-   `apps/web` (the committed `vercel.json` handles install, build and the SPA
-   rewrite), and define `VITE_API_URL`.
+   `apps/web` (the committed `vercel.json` handles install, builds the
+   workspace dependencies with Turbo and applies the SPA rewrite), and define
+   `VITE_API_URL`.
 4. **GitHub** — add the deployment secrets so the `Deploy` workflow can run:
-   `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `RAILWAY_TOKEN`
-   (and optionally the `RAILWAY_SERVICE` repository variable).
-   The workflow skips a platform gracefully when its token is missing.
+   `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `RAILWAY_TOKEN` and
+   `DATABASE_URL` (used for the release migration). Optionally set the
+   `RAILWAY_SERVICE` repository variable. The workflow skips a platform
+   gracefully when its token is missing.
+
+### Demo data (optional)
+
+```bash
+pnpm --filter @deckup/api prisma:seed
+```
+
+Creates `demo@deckup.local` (password `deckup-demo-1`, override with
+`SEED_EMAIL`/`SEED_PASSWORD`) with a Biology deck and five cards.
 
 ## 4. Release process
 
 ```bash
 # 1. Quality gates on main
 pnpm install --frozen-lockfile
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm lint && pnpm typecheck && pnpm test
 pnpm --filter @deckup/api test:e2e
-pnpm test:e2e
-
-# 2. Database migration (release step, before promoting the API)
-pnpm --filter @deckup/api exec prisma migrate deploy
-
-# 3. Deploy
-#    - API:    Railway builds apps/api/Dockerfile and rolls out the container
-#    - Web:    Vercel builds apps/web and promotes the deployment
+pnpm build && pnpm test:e2e
 ```
 
-The `Deploy` workflow automates steps 2–3 on every push to `main` (or manually
-via `workflow_dispatch`). Migrations are **additive and immutable**: never edit
-an applied migration (SPEC.md §4); destructive changes use expand/contract.
+The `Deploy` workflow listens for the CI workflow to complete on `main` and
+only runs when it succeeded (or on a manual `workflow_dispatch`). It then:
+
+1. **Migrates** — `prisma migrate deploy` against `secrets.DATABASE_URL`
+   (additive and immutable migrations; SPEC.md §4).
+2. **Deploys the API** — `railway up` builds `apps/api/Dockerfile` and rolls
+   out the container.
+3. **Deploys the web** — Vercel builds and promotes the deployment.
 
 ### Docker (portable artifact)
 
@@ -117,7 +134,12 @@ docker run --rm -p 3000:3000 \
 
 - The web app ships as an installable PWA (`vite-plugin-pwa`): the app shell is
   precached and authenticated GETs (`/api/v1/*`, excluding `/auth/*`) are cached
-  per browser with a one-day expiration so decks stay readable offline.
-- Reviews submitted while offline are queued in the browser and replayed when
-  connectivity returns (see the study screen banner).
+  per browser with a one-day expiration, so recently visited decks stay readable
+  while offline.
+- A full offline reload still requires a network round-trip to restore the
+  session (`/auth/refresh` is never cached); the service worker cache is purged
+  on sign-out to avoid leaking data between accounts on a shared device.
+- Reviews graded offline are queued in the browser with an idempotency key and
+  replayed when connectivity returns while a study screen is open (or on the
+  next visit), even if the response to the original request was lost.
 - `VITE_API_URL` is embedded at build time; changing it requires a redeploy.

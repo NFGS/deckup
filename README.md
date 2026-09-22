@@ -80,6 +80,9 @@ The web app runs on http://localhost:5173 and the API on http://localhost:3000
 Both features degrade gracefully when disabled: the API responds `503` with
 problem details instead of failing at startup.
 
+Run `pnpm --filter @deckup/api prisma:seed` to create a demo student
+(`demo@deckup.local`) with a Biology deck and five cards.
+
 ## Commands
 
 | Task            | Command                                                         |
@@ -89,6 +92,7 @@ problem details instead of failing at startup.
 | Typecheck       | `pnpm typecheck`                                                |
 | Unit tests      | `pnpm test`                                                     |
 | API integration | `docker compose up -d db && pnpm --filter @deckup/api test:e2e` |
+| Seed demo data  | `pnpm --filter @deckup/api prisma:seed`                         |
 | Browser E2E     | `pnpm test:e2e` (builds, then Playwright)                       |
 | Build           | `pnpm build`                                                    |
 | Format          | `pnpm format`                                                   |
