@@ -71,7 +71,10 @@ pnpm test:e2e    # Playwright smoke (web)
 ## 7. Notion
 
 - Workspace root page: **Ningendo Bee Projects** (global agent registry).
-- DeckUp root page ID: _pending — set when the page is created (Phase 8, Notion sync)._
+- DeckUp root page ID: **`3e3aee9c-1744-8107-aeeb-ea3c3a6db64b`**
+  (`https://app.notion.com/p/DeckUp-3e3aee9c17448107aeebea3c3a6db64b`).
+- Documentation sync: `NOTION_TOKEN=… NOTION_PAGE_ID=3e3aee9c-1744-8107-aeeb-ea3c3a6db64b pnpm sync:notion`
+  (dry run: add `--dry-run`).
 
 ## 8. Skills
 

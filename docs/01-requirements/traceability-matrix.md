@@ -68,8 +68,8 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | RF-08       | US-04      | CU#08 (CU-Q) | TC-15, TC-16, TC-24        | Implemented (Phase 3)                                                    |
 | RF-09       | US-04      | CU#08 (CU-S) | TC-17, TC-18, TC-25, TC-26 | Implemented (Phase 3)                                                    |
 | RF-10       | US-04      | CU#09 (CU-E) | TC-19 … TC-23              | Implemented (Phase 5)                                                    |
-| RF-11       | Epic       | CU#11        | TC-29, TC-30               | Phase 8                                                                  |
-| RF-12       | Epic       | CU#12        | TC-31, TC-32               | Phase 8                                                                  |
+| RF-11       | Epic       | CU#11        | TC-29, TC-30               | Implemented (Phase 8)                                                    |
+| RF-12       | Epic       | CU#12        | TC-31, TC-32               | Implemented (Phase 8)                                                    |
 
 ### 3.1 Automated coverage status (Phases 2–4)
 
@@ -96,6 +96,12 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | Web component (analytics)    | `apps/web/src/features/analytics/analytics-page.test.tsx`          | Metrics cards, forecast section, error state              |
 | Web component (import)       | `apps/web/src/features/decks/import-cards-modal.test.tsx`          | File upload, import summary and validation errors         |
 | Web e2e (Playwright)         | `e2e/smoke.spec.ts`                                                | Landing, login form and protected-route redirect          |
+| Public decks (e2e)           | `apps/api/test/public-decks.e2e-spec.ts`                           | TC-29, TC-30, catalogue filters and isolation             |
+| AI generation (unit)         | `apps/api/src/infrastructure/ai/openai-card-generator.spec.ts`     | Provider parsing, trimming and failure modes              |
+| AI generation (e2e)          | `apps/api/test/ai.e2e-spec.ts`                                     | TC-31, TC-32 (disabled provider, validation)              |
+| Web component (explore)      | `apps/web/src/features/explore/explore-page.test.tsx`              | Catalogue listing and cloning                             |
+| Web component (AI)           | `apps/web/src/features/ai/generate-cards-modal.test.tsx`           | Suggestions, selection and provider errors                |
+| Offline queue (unit)         | `apps/web/src/lib/offline-queue.test.ts`                           | Queueing, flushing and failure retention                  |
 
 ## 4. Test case catalog
 

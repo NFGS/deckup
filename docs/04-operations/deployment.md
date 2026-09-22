@@ -19,15 +19,19 @@
 
 ### API (Railway)
 
-| Variable                 | Example                                        | Notes                            |
-| ------------------------ | ---------------------------------------------- | -------------------------------- |
-| `DATABASE_URL`           | `postgresql://user:pass@host/db?schema=public` | Neon pooled connection string    |
-| `JWT_ACCESS_SECRET`      | 32+ random characters                          | Rotating it invalidates sessions |
-| `JWT_ACCESS_TTL_SECONDS` | `900`                                          | Access token lifetime            |
-| `REFRESH_TOKEN_TTL_DAYS` | `30`                                           | Refresh token lifetime           |
-| `COOKIE_SECURE`          | `true`                                         | Required in production           |
-| `CORS_ORIGINS`           | `https://deckup.vercel.app`                    | Comma-separated allow-list       |
-| `PORT`                   | `3000`                                         | Railway injects it automatically |
+| Variable                 | Example                                        | Notes                                  |
+| ------------------------ | ---------------------------------------------- | -------------------------------------- |
+| `DATABASE_URL`           | `postgresql://user:pass@host/db?schema=public` | Neon pooled connection string          |
+| `JWT_ACCESS_SECRET`      | 32+ random characters                          | Rotating it invalidates sessions       |
+| `JWT_ACCESS_TTL_SECONDS` | `900`                                          | Access token lifetime                  |
+| `REFRESH_TOKEN_TTL_DAYS` | `30`                                           | Refresh token lifetime                 |
+| `COOKIE_SECURE`          | `true`                                         | Required in production                 |
+| `CORS_ORIGINS`           | `https://deckup.vercel.app`                    | Comma-separated allow-list             |
+| `PORT`                   | `3000`                                         | Railway injects it automatically       |
+| `LLM_PROVIDER`           | `disabled` \| `openai`                         | Optional AI card generation            |
+| `LLM_API_KEY`            | `sk-…`                                         | Required when the provider is `openai` |
+| `LLM_MODEL`              | `gpt-4o-mini`                                  | Model used for suggestions             |
+| `LLM_BASE_URL`           | `https://api.openai.com/v1`                    | Any OpenAI-compatible gateway          |
 
 ### Web (Vercel)
 
@@ -108,3 +112,12 @@ docker run --rm -p 3000:3000 \
 - Vercel Hobby, Railway trial credits and Neon free tier cover the expected
   academic load. A scheduled health ping prevents idle suspension; if the free
   tier is exhausted, the same Docker image runs on any VPS with Caddy.
+
+## 8. Web client specifics
+
+- The web app ships as an installable PWA (`vite-plugin-pwa`): the app shell is
+  precached and authenticated GETs (`/api/v1/*`, excluding `/auth/*`) are cached
+  per browser with a one-day expiration so decks stay readable offline.
+- Reviews submitted while offline are queued in the browser and replayed when
+  connectivity returns (see the study screen banner).
+- `VITE_API_URL` is embedded at build time; changing it requires a redeploy.
