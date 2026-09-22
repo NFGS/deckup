@@ -1,0 +1,9 @@
+{
+  "name": "@deckup/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript configuration presets for the DeckUp monorepo",
+  "files": [
+    "tsconfig"
+  ]
+}
