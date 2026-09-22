@@ -54,7 +54,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
       );
     }
 
-    void response.status(status).send(problem);
+    void response.status(status).header('Content-Type', 'application/problem+json').send(problem);
   }
 
   private toProblem(

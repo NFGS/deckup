@@ -42,3 +42,4 @@ apps/api/prisma/*.db
 
 # Misc
 *.local
+*.dump
