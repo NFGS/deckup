@@ -21,6 +21,7 @@
     "pretest:e2e": "prisma generate",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "prisma:generate": "prisma generate",
+    "prisma:seed": "nest build && node dist/scripts/seed.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio"

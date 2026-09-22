@@ -53,4 +53,32 @@ describe('StudySession', () => {
     expect(completed.endedAt?.toISOString()).toBe(now.toISOString());
     expect(completed.complete(new Date('2026-09-22T12:00:00.000Z'))).toBe(completed);
   });
+
+  it('abandons an active session and stays idempotent', () => {
+    const now = new Date('2026-09-22T11:00:00.000Z');
+    const abandoned = startSession().abandon(now);
+
+    expect(abandoned.status).toBe('ABANDONED');
+    expect(abandoned.isActive).toBe(false);
+    expect(abandoned.endedAt?.toISOString()).toBe(now.toISOString());
+    expect(abandoned.abandon(new Date('2026-09-22T12:00:00.000Z'))).toBe(abandoned);
+  });
+
+  it('rejects completing an abandoned session', () => {
+    const abandoned = startSession().abandon();
+
+    expect(() => abandoned.complete()).toThrow(ConflictError);
+  });
+
+  it('rejects abandoning a completed session', () => {
+    const completed = startSession().complete();
+
+    expect(() => completed.abandon()).toThrow(ConflictError);
+  });
+
+  it('rejects reviews on an abandoned session', () => {
+    const abandoned = startSession().abandon();
+
+    expect(() => abandoned.recordReview('GOOD')).toThrow(ConflictError);
+  });
 });

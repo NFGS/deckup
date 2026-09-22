@@ -69,4 +69,28 @@ describe('ReviewState', () => {
     expect(updated.updatedAt.toISOString()).toBe(reviewedAt.toISOString());
     expect(updated.isNew).toBe(false);
   });
+
+  it('restores a persisted state', () => {
+    const state = ReviewState.restore({
+      cardId: CARD_ID,
+      userId: USER_ID,
+      stability: 3.2,
+      difficulty: 6.1,
+      state: 'RELEARNING',
+      reps: 4,
+      lapses: 1,
+      scheduledDays: 2,
+      lastReviewAt: NOW,
+      dueAt: NOW,
+      schedulerVersion: 'fsrs-6',
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+
+    expect(state.state).toBe('RELEARNING');
+    expect(state.reps).toBe(4);
+    expect(state.lapses).toBe(1);
+    expect(state.isNew).toBe(false);
+    expect(state.toSnapshot()).toMatchObject({ stability: 3.2, difficulty: 6.1 });
+  });
 });
