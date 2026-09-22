@@ -91,6 +91,21 @@ export class DomainExceptionFilter implements ExceptionFilter {
       };
     }
 
+    if (isStatusCarryingError(exception)) {
+      const status = exception.statusCode;
+
+      return {
+        status,
+        problem: {
+          type: `https://deckup.app/problems/http-${status}`,
+          title: TITLE_BY_STATUS[status] ?? 'Request failed',
+          status,
+          detail: exception.message,
+          instance,
+        },
+      };
+    }
+
     return {
       status: 500,
       problem: {
@@ -102,4 +117,18 @@ export class DomainExceptionFilter implements ExceptionFilter {
       },
     };
   }
+}
+
+/**
+ * Fastify plugins (multipart, body limits) throw plain errors carrying a
+ * numeric `statusCode`; they are not Nest exceptions.
+ */
+function isStatusCarryingError(value: unknown): value is { statusCode: number; message: string } {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const candidate = value as { statusCode?: unknown; message?: unknown };
+
+  return typeof candidate.statusCode === 'number' && typeof candidate.message === 'string';
 }

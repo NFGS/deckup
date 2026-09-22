@@ -54,6 +54,48 @@ export class PrismaCardRepository extends CardRepositoryPort {
     });
   }
 
+  async createMany(cards: Card[]): Promise<void> {
+    const first = cards[0];
+
+    if (!first) {
+      return;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const deck = await tx.deck.findUniqueOrThrow({
+        where: { id: first.deckId },
+        select: { ownerId: true },
+      });
+
+      await tx.card.createMany({
+        data: cards.map((card) => ({
+          id: card.id,
+          deckId: card.deckId,
+          front: card.front,
+          back: card.back,
+          hint: card.hint,
+          imageUrl: card.imageUrl,
+          imagePublicId: card.imagePublicId,
+          difficulty: card.difficulty,
+          createdAt: card.createdAt,
+          updatedAt: card.updatedAt,
+        })),
+      });
+
+      await tx.reviewState.createMany({
+        data: cards.map((card) => ({
+          cardId: card.id,
+          userId: deck.ownerId,
+          dueAt: card.createdAt,
+          createdAt: card.createdAt,
+          updatedAt: card.updatedAt,
+        })),
+      });
+
+      await this.linkTags(tx, cards, deck.ownerId);
+    });
+  }
+
   async findByIdForOwner(id: string, ownerId: string): Promise<Card | null> {
     const row = await this.prisma.card.findFirst({
       where: { id, deletedAt: null, deck: { ownerId, deletedAt: null } },
@@ -96,6 +138,16 @@ export class PrismaCardRepository extends CardRepositoryPort {
       items: rows.map((row) => toDomainCard(row)),
       total,
     };
+  }
+
+  async findAllByDeck(deckId: string): Promise<Card[]> {
+    const rows = await this.prisma.card.findMany({
+      where: { deckId, deletedAt: null },
+      include: CARD_INCLUDE,
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return rows.map((row) => toDomainCard(row));
   }
 
   async update(card: Card): Promise<void> {
@@ -144,6 +196,40 @@ export class PrismaCardRepository extends CardRepositoryPort {
       });
 
       await tx.cardTag.create({ data: { cardId: card.id, tagId: tag.id } });
+    }
+  }
+
+  private async linkTags(
+    tx: Prisma.TransactionClient,
+    cards: Card[],
+    ownerId: string,
+  ): Promise<void> {
+    const uniqueNames = [...new Set(cards.flatMap((card) => card.tags))];
+
+    if (uniqueNames.length === 0) {
+      return;
+    }
+
+    await tx.tag.createMany({
+      data: uniqueNames.map((name) => ({ id: randomUUID(), ownerId, name })),
+      skipDuplicates: true,
+    });
+
+    const tags = await tx.tag.findMany({
+      where: { ownerId, name: { in: uniqueNames } },
+      select: { id: true, name: true },
+    });
+    const tagIdByName = new Map(tags.map((tag) => [tag.name, tag.id]));
+
+    const links = cards.flatMap((card) =>
+      card.tags.flatMap((name) => {
+        const tagId = tagIdByName.get(name);
+        return tagId ? [{ cardId: card.id, tagId }] : [];
+      }),
+    );
+
+    if (links.length > 0) {
+      await tx.cardTag.createMany({ data: links, skipDuplicates: true });
     }
   }
 }

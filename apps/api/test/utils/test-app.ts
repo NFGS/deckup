@@ -2,9 +2,9 @@ import { Test } from '@nestjs/testing';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ThrottlerStorage } from '@nestjs/throttler';
-import fastifyCookie from '@fastify/cookie';
 
 import { AppModule } from '../../src/app.module.js';
+import { registerPlugins } from '../../src/bootstrap/register-plugins.js';
 import { PrismaService } from '../../src/infrastructure/prisma/prisma.service.js';
 
 export interface TestAppOptions {
@@ -35,7 +35,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<NestF
   const moduleRef = await builder.compile();
 
   const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-  await app.register(fastifyCookie);
+  await registerPlugins(app);
   app.setGlobalPrefix('api/v1');
   await app.init();
   await app.getHttpAdapter().getInstance().ready();

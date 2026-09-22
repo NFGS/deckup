@@ -1,10 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import fastifyCookie from '@fastify/cookie';
-import helmet from '@fastify/helmet';
 
 import { AppModule } from './app.module.js';
+import { registerPlugins } from './bootstrap/register-plugins.js';
 
 function resolveCorsOrigins(): string[] {
   return (process.env.CORS_ORIGINS ?? 'http://localhost:5173')
@@ -19,8 +18,7 @@ async function bootstrap(): Promise<void> {
     new FastifyAdapter({ trustProxy: true }),
   );
 
-  await app.register(fastifyCookie);
-  await app.register(helmet, { contentSecurityPolicy: false });
+  await registerPlugins(app);
 
   app.setGlobalPrefix('api/v1');
   app.enableCors({
