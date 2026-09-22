@@ -228,4 +228,68 @@ describe('Study (e2e)', () => {
       .send({ cardId: cardIds[0], rating: 'PERFECT' })
       .expect(422);
   });
+
+  it('resumes the active session instead of creating a new one', async () => {
+    const first = await startSession();
+    const second = await startSession();
+
+    expect(second.id).toBe(first.id);
+  });
+
+  it('abandons a session and blocks further reviews', async () => {
+    const session = await startSession();
+
+    const abandoned = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/abandon`)
+      .set(auth(token))
+      .expect(200);
+
+    expect(abandoned.body).toMatchObject({ id: session.id, status: 'ABANDONED' });
+
+    await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+      .set(auth(token))
+      .send({ cardId: cardIds[0], rating: 'GOOD' })
+      .expect(409);
+
+    await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/complete`)
+      .set(auth(token))
+      .expect(409);
+
+    const restarted = await startSession();
+    expect(restarted.id).not.toBe(session.id);
+  });
+
+  it('applies a replayed review only once (idempotency)', async () => {
+    const session = await startSession();
+    const clientReviewId = '11111111-2222-4333-8444-555555555555';
+
+    const first = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+      .set(auth(token))
+      .send({ cardId: cardIds[0], rating: 'GOOD', clientReviewId })
+      .expect(200);
+
+    const replay = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+      .set(auth(token))
+      .send({ cardId: cardIds[0], rating: 'GOOD', clientReviewId })
+      .expect(200);
+
+    const firstBody = first.body as ReviewBody;
+    const replayBody = replay.body as ReviewBody;
+
+    expect(replayBody).toMatchObject({
+      cardId: firstBody.cardId,
+      nextDueAt: firstBody.nextDueAt,
+    });
+
+    const summary = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/complete`)
+      .set(auth(token))
+      .expect(200);
+
+    expect(summary.body).toMatchObject({ cardsReviewed: 1, correctCount: 1 });
+  });
 });
