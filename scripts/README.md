@@ -2,12 +2,21 @@
 
 Automation scripts for the DeckUp monorepo.
 
-## Planned
+| Script           | Purpose                                                                                                           | Command                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `notion-sync.ts` | Publishes the requirements, architecture, testing and operations docs as child pages of the DeckUp page in Notion | `NOTION_TOKEN=… NOTION_PAGE_ID=… pnpm sync:notion` |
 
-| Script           | Purpose                                                                  |
-| ---------------- | ------------------------------------------------------------------------ |
-| `notion-sync.ts` | Publish requirements/architecture docs to the Notion workspace (Phase 8) |
-| `seed.ts`        | Seed the development database with demo decks and cards                  |
+## Notion sync
 
-Prefer TypeScript scripts executed with `pnpm exec tsx <script>` so they share
-types and contracts with the applications.
+- Root page: **DeckUp** inside _Ningendo Bee Projects_ — ID
+  `3e3aee9c-1744-8107-aeeb-ea3c3a6db64b` (see SPEC.md §7).
+- Create an internal integration token with _insert content_ permission on that
+  page and expose it as `NOTION_TOKEN`.
+- The script converts markdown to Notion blocks (headings, paragraphs, lists,
+  quotes, code fences and tables) and chunks the payload at 100 blocks per
+  request.
+- `--dry-run` prints the block counts without calling the API:
+
+  ```bash
+  pnpm sync:notion --dry-run
+  ```

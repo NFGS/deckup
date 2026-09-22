@@ -15,6 +15,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "pnpm build && playwright test",
+    "sync:notion": "node --experimental-strip-types scripts/notion-sync.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
