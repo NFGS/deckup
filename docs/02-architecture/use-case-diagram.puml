@@ -1,0 +1,137 @@
+@startuml DeckUp-Use-Cases
+' ============================================================
+' DeckUp — UML Use Case Diagram
+' Epic 03: Education (REQUIREMENTS.pdf)
+'
+' Conventions applied (uml-use-case-diagram-builder skill):
+'   - Main use cases: CU#XX (verb + noun), solid line to actor
+'   - Derived use cases: CU-X, never linked directly to an actor
+'   - <<include>> arrow: base -> included (always executed)
+'   - <<extend>> arrow: extensor -> base (optional behavior)
+'   - Actors are singular nouns; system rectangle names the system
+'   - SENA color convention: blue primary actor, orange system actors
+'
+' Render:
+'   - Online:  https://www.plantuml.com/plantuml/uml/
+'   - VS Code: PlantUML extension (jebbs.plantuml), Alt+D
+'   - CLI:     java -jar plantuml.jar use-case-diagram.puml
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam packageStyle rectangle
+
+skinparam actor {
+    BorderColor #1E88E5
+    FontColor #1E88E5
+    BackgroundColor #FFFFFF
+}
+
+skinparam usecase {
+    BorderColor #333333
+    BackgroundColor #E3F2FD
+    FontColor #000000
+    BorderThickness 1
+}
+
+skinparam arrow {
+    Color #333333
+    FontColor #333333
+}
+
+' ============================================================
+' ACTORS
+' ============================================================
+
+actor "Student" as STUDENT #1E88E5
+actor "Scheduler" as SCHEDULER #FB8C00
+actor "Cloudinary" as CLOUDINARY #FB8C00
+actor "AI Provider" as AI #FB8C00
+
+' ============================================================
+' SYSTEM BOUNDARY
+' ============================================================
+
+rectangle "DeckUp System" {
+
+    ' --- Main use cases (CU#XX) ---
+    usecase "CU#01: Register account" as CU01
+    usecase "CU#02: Sign in" as CU02
+    usecase "CU#03: Create deck" as CU03
+    usecase "CU#04: Organize deck" as CU04
+    usecase "CU#05: Add card" as CU05
+    usecase "CU#06: Enrich card" as CU06
+    usecase "CU#07: Import cards from CSV" as CU07
+    usecase "CU#08: Study deck" as CU08
+    usecase "CU#09: View study analytics" as CU09
+    usecase "CU#10: Export deck" as CU10
+    usecase "CU#11: Browse public decks" as CU11
+    usecase "CU#12: Generate cards with AI" as CU12
+
+    ' --- Derived use cases (CU-X) ---
+    usecase "CU-V: Validate CSV file" as CUV
+    usecase "CU-I: Store card image" as CUI
+    usecase "CU-Q: Build daily study queue" as CUQ
+    usecase "CU-S: Schedule next review" as CUS
+    usecase "CU-E: Aggregate review statistics" as CUE
+    usecase "CU-R: Review ahead of schedule" as CUR
+}
+
+' ============================================================
+' ACTOR <-> USE CASE ASSOCIATIONS (solid lines, main CUs only)
+' ============================================================
+
+STUDENT --> CU01
+STUDENT --> CU02
+STUDENT --> CU03
+STUDENT --> CU04
+STUDENT --> CU05
+STUDENT --> CU06
+STUDENT --> CU07
+STUDENT --> CU08
+STUDENT --> CU09
+STUDENT --> CU10
+STUDENT --> CU11
+STUDENT --> CU12
+
+' Secondary (non-human) actors participate in the use cases
+' where they provide or consume information.
+SCHEDULER --> CUQ
+SCHEDULER --> CUS
+CLOUDINARY --> CUI
+AI --> CU12
+
+' ============================================================
+' <<include>> RELATIONS (base always executes the included CU)
+' ============================================================
+
+CU06 ..> CUI : <<include>>
+CU07 ..> CUV : <<include>>
+CU08 ..> CUQ : <<include>>
+CU08 ..> CUS : <<include>>
+CU09 ..> CUE : <<include>>
+
+' ============================================================
+' <<extend>> RELATIONS (extensor is optional to the base CU)
+' ============================================================
+
+CUR ..> CU08 : <<extend>>
+
+' ============================================================
+' NOTES
+' ============================================================
+
+note bottom of CU11
+  CU#11 (Browse public decks) and CU#12 (Generate cards
+  with AI) belong to Phase 8 — optional scope (RF-11, RF-12).
+end note
+
+note right of CUS
+  FSRS-6 computes stability, difficulty
+  and the next due date from the rating
+  (Again / Hard / Good / Easy).
+end note
+
+@enduml

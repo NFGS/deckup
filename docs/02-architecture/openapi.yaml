@@ -1,0 +1,1315 @@
+openapi: 3.1.0
+info:
+  title: DeckUp API
+  version: 0.1.0
+  description: |
+    REST API for DeckUp — spaced-repetition flashcards for high school students
+    preparing final exams (Epic 03 — Education).
+
+    Conventions:
+
+    - All endpoints are versioned under `/api/v1`.
+    - Timestamps are ISO-8601 UTC strings; local-day logic uses the student's `timezone`.
+    - Errors follow RFC 9457 (`application/problem+json`).
+    - Authentication uses a short-lived Bearer access token plus a rotating refresh cookie.
+  contact:
+    name: Fabián Gallego
+  license:
+    name: Academic project
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: https://deckup-api.up.railway.app/api/v1
+    description: Production (Railway)
+
+tags:
+  - name: System
+    description: Health and operational endpoints
+  - name: Auth
+    description: Registration, sign in, token refresh and logout
+  - name: Users
+    description: Student profile and preferences
+  - name: Decks
+    description: Deck lifecycle and organization
+  - name: Cards
+    description: Card authoring and enrichment
+  - name: Imports
+    description: Bulk operations (CSV)
+  - name: Study
+    description: Study sessions, queues and review scheduling
+  - name: Analytics
+    description: Streaks, retention and workload forecast
+  - name: Phase 8
+    description: Optional scope — public decks and AI generation
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Service health
+      description: Liveness and readiness probe used by Railway and uptime monitors.
+      tags: [System]
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /auth/register:
+    post:
+      operationId: registerAccount
+      summary: Register a student account
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created; access token returned and refresh cookie set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Rotating refresh token (httpOnly, Secure, SameSite=Lax)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/login:
+    post:
+      operationId: signIn
+      summary: Sign in with email and password
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated; access token returned and refresh cookie set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/refresh:
+    post:
+      operationId: refreshSession
+      summary: Rotate the refresh token and issue a new access token
+      description: |
+        Requires the refresh cookie and the `X-Requested-With` header (CSRF guard).
+        Reuse of a rotated token revokes the whole token family.
+      tags: [Auth]
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfHeader'
+      responses:
+        '200':
+          description: New access token issued; refresh cookie rotated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      operationId: signOut
+      summary: Revoke the current refresh token family
+      tags: [Auth]
+      responses:
+        '204':
+          description: Session revoked; refresh cookie cleared
+
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get the authenticated student profile
+      tags: [Users]
+      responses:
+        '200':
+          description: Current profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    patch:
+      operationId: updateCurrentUser
+      summary: Update display name or timezone
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /decks:
+    get:
+      operationId: listDecks
+      summary: List the student's decks
+      tags: [Decks]
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: string
+          description: Filter by subject (AC-02.2)
+        - name: tag
+          in: query
+          schema:
+            type: string
+          description: Filter by tag name
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Case-insensitive title search
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated deck list with study counters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckPage'
+    post:
+      operationId: createDeck
+      summary: Create a deck
+      tags: [Decks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeckRequest'
+      responses:
+        '201':
+          description: Deck created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /decks/{deckId}:
+    parameters:
+      - $ref: '#/components/parameters/DeckId'
+    get:
+      operationId: getDeck
+      summary: Get a deck by id
+      tags: [Decks]
+      responses:
+        '200':
+          description: Deck detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateDeck
+      summary: Update deck metadata (title, subject, tags, visibility)
+      tags: [Decks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeckRequest'
+      responses:
+        '200':
+          description: Updated deck
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+    delete:
+      operationId: deleteDeck
+      summary: Soft-delete a deck and its cards
+      tags: [Decks]
+      responses:
+        '204':
+          description: Deck deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /decks/{deckId}/cards:
+    parameters:
+      - $ref: '#/components/parameters/DeckId'
+    get:
+      operationId: listCards
+      summary: List cards of a deck
+      tags: [Cards]
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search in front and back text
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated card list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardPage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: createCard
+      summary: Add a card to a deck
+      tags: [Cards]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCardRequest'
+      responses:
+        '201':
+          description: Card created (initial scheduling state attached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /cards/{cardId}:
+    parameters:
+      - $ref: '#/components/parameters/CardId'
+    get:
+      operationId: getCard
+      summary: Get a card with its scheduling state
+      tags: [Cards]
+      responses:
+        '200':
+          description: Card detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateCard
+      summary: Update card content, hint, difficulty, image or tags
+      tags: [Cards]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCardRequest'
+      responses:
+        '200':
+          description: Updated card
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+    delete:
+      operationId: deleteCard
+      summary: Soft-delete a card
+      tags: [Cards]
+      responses:
+        '204':
+          description: Card deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /decks/{deckId}/import:
+    post:
+      operationId: importCards
+      summary: Import cards from a CSV file
+      description: |
+        Accepts a `text/csv` file with a `front,back` header (optional `hint,tags`).
+        Valid rows are imported transactionally; invalid rows are reported with
+        their row numbers (AC-03.3, AC-03.4).
+      tags: [Imports]
+      parameters:
+        - $ref: '#/components/parameters/DeckId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CSV file up to 1 MB and 1 000 rows
+      responses:
+        '200':
+          description: Import completed (possibly with skipped rows)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /decks/{deckId}/export:
+    get:
+      operationId: exportDeck
+      summary: Export a deck as CSV
+      tags: [Imports]
+      parameters:
+        - $ref: '#/components/parameters/DeckId'
+      responses:
+        '200':
+          description: CSV file (`front,back,hint,difficulty,tags`)
+          content:
+            text/csv:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /decks/{deckId}/study-sessions:
+    post:
+      operationId: startStudySession
+      summary: Start a study session for a deck
+      description: Creates the session and freezes the daily queue (AC-04.1).
+      tags: [Study]
+      parameters:
+        - $ref: '#/components/parameters/DeckId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartSessionRequest'
+      responses:
+        '201':
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudySession'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /study-sessions/{sessionId}/queue:
+    get:
+      operationId: getStudyQueue
+      summary: Get the session queue
+      description: Returns due cards ordered by due date, oldest first (AC-04.1, AC-04.2).
+      tags: [Study]
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Queue with remaining count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /study-sessions/{sessionId}/reviews:
+    post:
+      operationId: submitReview
+      summary: Submit a card rating
+      description: |
+        Applies the FSRS-6 transition, persists the review log and returns the next
+        due date. Ratings: `AGAIN`, `HARD`, `GOOD`, `EASY` (AC-04.2, BR-04.2).
+      tags: [Study]
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitReviewRequest'
+      responses:
+        '200':
+          description: Review accepted and schedule updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /study-sessions/{sessionId}/complete:
+    post:
+      operationId: completeStudySession
+      summary: Complete the session and get the summary
+      tags: [Study]
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session summary (AC-04.3)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /analytics/overview:
+    get:
+      operationId: getAnalyticsOverview
+      summary: Dashboard overview
+      description: Streak, reviews today, due today and 30-day retention (AC-04.4, AC-04.5).
+      tags: [Analytics]
+      responses:
+        '200':
+          description: Aggregated metrics for the authenticated student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsOverview'
+
+  /analytics/forecast:
+    get:
+      operationId: getWorkloadForecast
+      summary: Upcoming workload forecast
+      description: Expected due cards per day for the next N local days (AC-04.6, BR-04.5).
+      tags: [Analytics]
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 7
+      responses:
+        '200':
+          description: Forecast series
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastResponse'
+
+  /decks/public:
+    get:
+      operationId: listPublicDecks
+      summary: Browse the public deck catalog (Phase 8)
+      tags: [Phase 8]
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated public deck list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckPage'
+
+  /ai/card-suggestions:
+    post:
+      operationId: generateCardSuggestions
+      summary: Generate card suggestions from notes (Phase 8)
+      description: |
+        Sends study notes to the configured LLM provider and returns draft cards for
+        the student to review before saving (RF-12).
+      tags: [Phase 8]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardSuggestionRequest'
+      responses:
+        '200':
+          description: Draft cards (not persisted)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardSuggestionResponse'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '503':
+          description: LLM provider unavailable
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Short-lived access token (15 minutes) kept in memory by the client.
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: deckup_refresh
+      description: Rotating refresh token (httpOnly, Secure, SameSite=Lax).
+
+  parameters:
+    DeckId:
+      name: deckId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CardId:
+      name: cardId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    CsrfHeader:
+      name: X-Requested-With
+      in: header
+      required: true
+      schema:
+        type: string
+        const: DeckUpWeb
+      description: Custom header required on cookie-based endpoints (CSRF guard).
+
+  responses:
+    Unauthorized:
+      description: Missing, expired or invalid credentials
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Resource not found or not owned by the caller
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: State conflict (duplicate email, stale session, replayed token)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ValidationFailed:
+      description: Request body or parameters failed validation
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ValidationProblem'
+    PayloadTooLarge:
+      description: Upload exceeds the size limit (5 MB image / 1 MB CSV)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457 problem details
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://deckup.app/problems/not-found
+        title:
+          type: string
+          example: Resource not found
+        status:
+          type: integer
+          example: 404
+        detail:
+          type: string
+          example: Deck 0f8c... does not exist or is not owned by the caller.
+        instance:
+          type: string
+          format: uri
+          example: /api/v1/decks/0f8c...
+
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                required: [path, message]
+                properties:
+                  path:
+                    type: string
+                    example: title
+                  message:
+                    type: string
+                    example: Title must not be empty
+
+    HealthResponse:
+      type: object
+      required: [status, service, version, uptimeSeconds, timestamp]
+      properties:
+        status:
+          type: string
+          const: ok
+        service:
+          type: string
+          example: deckup-api
+        version:
+          type: string
+          example: 0.1.0
+        uptimeSeconds:
+          type: number
+          example: 3600
+        timestamp:
+          type: string
+          format: date-time
+
+    RegisterRequest:
+      type: object
+      required: [email, password, displayName]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 10
+          maxLength: 72
+          description: Minimum 10 characters; hashed with Argon2id
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        timezone:
+          type: string
+          description: IANA timezone; defaults to UTC
+          example: America/Bogota
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthSession:
+      type: object
+      required: [accessToken, expiresIn, user]
+      properties:
+        accessToken:
+          type: string
+          description: JWT valid for 15 minutes
+        expiresIn:
+          type: integer
+          example: 900
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      required: [id, email, displayName, timezone, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        timezone:
+          type: string
+          example: America/Bogota
+        createdAt:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      minProperties: 1
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        timezone:
+          type: string
+          example: America/Bogota
+
+    DeckVisibility:
+      type: string
+      enum: [PRIVATE, UNLISTED, PUBLIC]
+
+    CardDifficulty:
+      type: string
+      enum: [EASY, MEDIUM, HARD]
+
+    ReviewRating:
+      type: string
+      enum: [AGAIN, HARD, GOOD, EASY]
+
+    CardState:
+      type: string
+      enum: [NEW, LEARNING, REVIEW, RELEARNING]
+
+    SessionStatus:
+      type: string
+      enum: [ACTIVE, COMPLETED, ABANDONED]
+
+    Deck:
+      type: object
+      required: [id, title, visibility, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        color:
+          type: string
+          nullable: true
+          example: '#1E88E5'
+        visibility:
+          $ref: '#/components/schemas/DeckVisibility'
+        tags:
+          type: array
+          items:
+            type: string
+          example: [exam-1, biology]
+        cardCount:
+          type: integer
+          example: 120
+        dueCount:
+          type: integer
+          example: 18
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateDeckRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+        subject:
+          type: string
+          maxLength: 60
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        visibility:
+          $ref: '#/components/schemas/DeckVisibility'
+        tags:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+
+    UpdateDeckRequest:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+        subject:
+          type: string
+          maxLength: 60
+          nullable: true
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          nullable: true
+        visibility:
+          $ref: '#/components/schemas/DeckVisibility'
+        tags:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+
+    DeckPage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Deck'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    Card:
+      type: object
+      required: [id, deckId, front, back, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        deckId:
+          type: string
+          format: uuid
+        front:
+          type: string
+        back:
+          type: string
+        hint:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        difficulty:
+          $ref: '#/components/schemas/CardDifficulty'
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        reviewState:
+          $ref: '#/components/schemas/ReviewState'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ReviewState:
+      type: object
+      required: [state, dueAt, reps, lapses]
+      properties:
+        state:
+          $ref: '#/components/schemas/CardState'
+        dueAt:
+          type: string
+          format: date-time
+        stability:
+          type: number
+        difficulty:
+          type: number
+        reps:
+          type: integer
+        lapses:
+          type: integer
+        lastReviewAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreateCardRequest:
+      type: object
+      required: [front, back]
+      properties:
+        front:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        back:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        hint:
+          type: string
+          maxLength: 300
+        imageUrl:
+          type: string
+          format: uri
+        difficulty:
+          $ref: '#/components/schemas/CardDifficulty'
+        tags:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+
+    UpdateCardRequest:
+      type: object
+      minProperties: 1
+      properties:
+        front:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        back:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        hint:
+          type: string
+          maxLength: 300
+          nullable: true
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        difficulty:
+          $ref: '#/components/schemas/CardDifficulty'
+          nullable: true
+        tags:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+
+    CardPage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    ImportSummary:
+      type: object
+      required: [imported, skipped, errors]
+      properties:
+        imported:
+          type: integer
+          example: 987
+        skipped:
+          type: integer
+          example: 13
+        errors:
+          type: array
+          items:
+            type: object
+            required: [row, message]
+            properties:
+              row:
+                type: integer
+                example: 42
+              message:
+                type: string
+                example: 'Missing required column: back'
+
+    StartSessionRequest:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [DUE, AHEAD, ALL]
+          default: DUE
+          description: DUE builds the daily queue; AHEAD/ALL support the empty-state flow (AC-04.7)
+
+    StudySession:
+      type: object
+      required: [id, deckId, status, startedAt, cardsReviewed, correctCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        deckId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/SessionStatus'
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+          nullable: true
+        cardsReviewed:
+          type: integer
+        correctCount:
+          type: integer
+
+    QueueItem:
+      type: object
+      required: [cardId, front, back, state, dueAt]
+      properties:
+        cardId:
+          type: string
+          format: uuid
+        front:
+          type: string
+        back:
+          type: string
+        hint:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        state:
+          $ref: '#/components/schemas/CardState'
+        dueAt:
+          type: string
+          format: date-time
+        isNew:
+          type: boolean
+
+    QueueResponse:
+      type: object
+      required: [sessionId, items, remaining]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueItem'
+        remaining:
+          type: integer
+          example: 42
+
+    SubmitReviewRequest:
+      type: object
+      required: [cardId, rating]
+      properties:
+        cardId:
+          type: string
+          format: uuid
+        rating:
+          $ref: '#/components/schemas/ReviewRating'
+        elapsedMs:
+          type: integer
+          minimum: 0
+          description: Time spent answering, used for analytics only
+
+    ReviewResult:
+      type: object
+      required: [cardId, rating, nextDueAt, state, remaining]
+      properties:
+        cardId:
+          type: string
+          format: uuid
+        rating:
+          $ref: '#/components/schemas/ReviewRating'
+        nextDueAt:
+          type: string
+          format: date-time
+        scheduledDays:
+          type: integer
+          example: 6
+        state:
+          $ref: '#/components/schemas/CardState'
+        remaining:
+          type: integer
+          example: 41
+
+    SessionSummary:
+      type: object
+      required: [sessionId, cardsReviewed, correctCount, accuracy, elapsedSeconds]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        cardsReviewed:
+          type: integer
+        correctCount:
+          type: integer
+        accuracy:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.82
+        elapsedSeconds:
+          type: integer
+
+    AnalyticsOverview:
+      type: object
+      required: [streak, reviewsToday, dueToday, retention30d, totalCards, totalDecks]
+      properties:
+        streak:
+          type: integer
+          description: Consecutive local days with at least one review (BR-04.3)
+          example: 12
+        reviewsToday:
+          type: integer
+        dueToday:
+          type: integer
+        retention30d:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Share of first reviews not rated AGAIN in 30 days (BR-04.4)
+          example: 0.87
+        totalCards:
+          type: integer
+        totalDecks:
+          type: integer
+
+    ForecastResponse:
+      type: object
+      required: [days]
+      properties:
+        days:
+          type: array
+          items:
+            type: object
+            required: [date, dueCount]
+            properties:
+              date:
+                type: string
+                format: date
+              dueCount:
+                type: integer
+
+    CardSuggestionRequest:
+      type: object
+      required: [notes]
+      properties:
+        notes:
+          type: string
+          minLength: 20
+          maxLength: 20000
+        maxCards:
+          type: integer
+          minimum: 1
+          maximum: 30
+          default: 10
+
+    CardSuggestionResponse:
+      type: object
+      required: [suggestions]
+      properties:
+        suggestions:
+          type: array
+          items:
+            type: object
+            required: [front, back]
+            properties:
+              front:
+                type: string
+              back:
+                type: string
+              hint:
+                type: string
+                nullable: true
