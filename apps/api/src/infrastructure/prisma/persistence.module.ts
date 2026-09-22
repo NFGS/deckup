@@ -6,6 +6,7 @@ import { RefreshTokenRepositoryPort } from '../../domain/ports/refresh-token.rep
 import { ReviewLogRepositoryPort } from '../../domain/ports/review-log.repository.js';
 import { ReviewRecorderPort } from '../../domain/ports/review-recorder.port.js';
 import { ReviewStateRepositoryPort } from '../../domain/ports/review-state.repository.js';
+import { StudyAnalyticsRepositoryPort } from '../../domain/ports/study-analytics.repository.js';
 import { StudyQueueRepositoryPort } from '../../domain/ports/study-queue.repository.js';
 import { StudySessionRepositoryPort } from '../../domain/ports/study-session.repository.js';
 import { UserRepositoryPort } from '../../domain/ports/user.repository.js';
@@ -15,6 +16,7 @@ import { PrismaRefreshTokenRepository } from './repositories/prisma-refresh-toke
 import { PrismaReviewLogRepository } from './repositories/prisma-review-log.repository.js';
 import { PrismaReviewRecorder } from './repositories/prisma-review-recorder.repository.js';
 import { PrismaReviewStateRepository } from './repositories/prisma-review-state.repository.js';
+import { PrismaStudyAnalyticsRepository } from './repositories/prisma-study-analytics.repository.js';
 import { PrismaStudyQueueRepository } from './repositories/prisma-study-queue.repository.js';
 import { PrismaStudySessionRepository } from './repositories/prisma-study-session.repository.js';
 import { PrismaUserRepository } from './repositories/prisma-user.repository.js';
@@ -30,6 +32,7 @@ import { PrismaUserRepository } from './repositories/prisma-user.repository.js';
     { provide: ReviewLogRepositoryPort, useClass: PrismaReviewLogRepository },
     { provide: StudySessionRepositoryPort, useClass: PrismaStudySessionRepository },
     { provide: StudyQueueRepositoryPort, useClass: PrismaStudyQueueRepository },
+    { provide: StudyAnalyticsRepositoryPort, useClass: PrismaStudyAnalyticsRepository },
     { provide: ReviewRecorderPort, useClass: PrismaReviewRecorder },
   ],
   exports: [
@@ -41,6 +44,7 @@ import { PrismaUserRepository } from './repositories/prisma-user.repository.js';
     ReviewLogRepositoryPort,
     StudySessionRepositoryPort,
     StudyQueueRepositoryPort,
+    StudyAnalyticsRepositoryPort,
     ReviewRecorderPort,
   ],
 })
