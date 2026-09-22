@@ -19,8 +19,10 @@ import {
   importCards,
   listCards,
   listDecks,
+  removeCardImage,
   updateCard,
   updateDeck,
+  uploadCardImage,
 } from './api';
 
 export function useDecks(query: Partial<DeckListQuery> = {}) {
@@ -107,6 +109,28 @@ export function useDeleteCard(deckId: string) {
 
   return useMutation({
     mutationFn: (cardId: string) => deleteCard(cardId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['decks', deckId] });
+    },
+  });
+}
+
+export function useUploadCardImage(deckId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ cardId, file }: { cardId: string; file: File }) => uploadCardImage(cardId, file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['decks', deckId] });
+    },
+  });
+}
+
+export function useRemoveCardImage(deckId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (cardId: string) => removeCardImage(cardId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['decks', deckId] });
     },

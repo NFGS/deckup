@@ -1,9 +1,10 @@
-import type { Card, Deck } from '@deckup/shared';
+import type { Card, CreateCard, Deck } from '@deckup/shared';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/controls';
+import { FormError } from '../../components/ui/field';
 import { PencilIcon, PlusIcon, SearchIcon, TrashIcon } from '../../components/ui/icons';
 import { Modal } from '../../components/ui/modal';
 import {
@@ -29,8 +30,10 @@ import {
   useDeleteCard,
   useDeleteDeck,
   useExportDeck,
+  useRemoveCardImage,
   useUpdateCard,
   useUpdateDeck,
+  useUploadCardImage,
 } from './hooks';
 import { ImportCardsModal } from './import-cards-modal';
 
@@ -51,6 +54,8 @@ export function DeckDetailPage() {
   const [cardModal, setCardModal] = useState<CardModalState>(null);
   const [cardToDelete, setCardToDelete] = useState<Card | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const deckQuery = useDeck(deckId);
   const cardsQuery = useCards(deckId, {
@@ -65,6 +70,8 @@ export function DeckDetailPage() {
   const createCard = useCreateCard(deckId);
   const updateCard = useUpdateCard(deckId);
   const deleteCard = useDeleteCard(deckId);
+  const uploadCardImage = useUploadCardImage(deckId);
+  const removeCardImage = useRemoveCardImage(deckId);
 
   if (deckQuery.isPending) {
     return (
@@ -105,8 +112,14 @@ export function DeckDetailPage() {
   };
 
   const handleDeleteDeck = async () => {
-    await deleteDeck.mutateAsync(deckId);
-    void navigate('/dashboard', { replace: true });
+    setDeleteError(null);
+
+    try {
+      await deleteDeck.mutateAsync(deckId);
+      void navigate('/dashboard', { replace: true });
+    } catch (error) {
+      setDeleteError(error instanceof ApiError ? error.message : 'Unable to delete the deck');
+    }
   };
 
   const handleExport = async () => {
@@ -133,11 +146,49 @@ export function DeckDetailPage() {
       if (cardModal?.mode === 'edit') {
         await updateCard.mutateAsync({ cardId: cardModal.card.id, input: payload });
       } else {
-        await createCard.mutateAsync(payload);
+        const createPayload: CreateCard = {
+          front: payload.front,
+          back: payload.back,
+          tags: payload.tags,
+          ...(payload.hint !== null ? { hint: payload.hint } : {}),
+          ...(payload.difficulty !== null ? { difficulty: payload.difficulty } : {}),
+        };
+
+        await createCard.mutateAsync(createPayload);
       }
       setCardModal(null);
     } catch (error) {
       setFormError(error instanceof ApiError ? error.message : 'Unable to save the card');
+    }
+  };
+
+  const handleUploadImage = async (file: File) => {
+    if (cardModal?.mode !== 'edit') {
+      return;
+    }
+
+    setImageError(null);
+
+    try {
+      const updated = await uploadCardImage.mutateAsync({ cardId: cardModal.card.id, file });
+      setCardModal({ mode: 'edit', card: updated });
+    } catch (error) {
+      setImageError(error instanceof ApiError ? error.message : 'Unable to upload the image');
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (cardModal?.mode !== 'edit') {
+      return;
+    }
+
+    setImageError(null);
+
+    try {
+      const updated = await removeCardImage.mutateAsync(cardModal.card.id);
+      setCardModal({ mode: 'edit', card: updated });
+    } catch (error) {
+      setImageError(error instanceof ApiError ? error.message : 'Unable to remove the image');
     }
   };
 
@@ -146,8 +197,14 @@ export function DeckDetailPage() {
       return;
     }
 
-    await deleteCard.mutateAsync(cardToDelete.id);
-    setCardToDelete(null);
+    setDeleteError(null);
+
+    try {
+      await deleteCard.mutateAsync(cardToDelete.id);
+      setCardToDelete(null);
+    } catch (error) {
+      setDeleteError(error instanceof ApiError ? error.message : 'Unable to delete the card');
+    }
   };
 
   return (
@@ -308,6 +365,7 @@ export function DeckDetailPage() {
           Deleting <strong className="text-white">{deck.title}</strong> also removes its cards.
           Review history is kept for your statistics.
         </p>
+        <FormError message={deleteError ?? undefined} />
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" onClick={() => setDeleteOpen(false)}>
             Cancel
@@ -332,6 +390,11 @@ export function DeckDetailPage() {
           submitLabel={cardModal?.mode === 'edit' ? 'Save changes' : 'Add card'}
           isSubmitting={createCard.isPending || updateCard.isPending}
           errorMessage={formError ?? undefined}
+          imageUrl={cardModal?.mode === 'edit' ? cardModal.card.imageUrl : null}
+          isImageBusy={uploadCardImage.isPending || removeCardImage.isPending}
+          imageErrorMessage={imageError ?? undefined}
+          onUploadImage={(file) => void handleUploadImage(file)}
+          onRemoveImage={() => void handleRemoveImage()}
           onSubmit={(payload) => void handleCardSubmit(payload)}
         />
       </Modal>
@@ -340,6 +403,7 @@ export function DeckDetailPage() {
         <p className="text-sm text-slate-300">
           This card will be removed from the deck. Its review history stays in your statistics.
         </p>
+        <FormError message={deleteError ?? undefined} />
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" onClick={() => setCardToDelete(null)}>
             Cancel
@@ -368,15 +432,25 @@ function CardRow({
 }) {
   return (
     <SurfaceCard className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
-      <div className="flex min-w-0 flex-col gap-1">
-        <CardTitle className="truncate">{card.front}</CardTitle>
-        <p className="line-clamp-2 text-sm text-slate-400">{card.back}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          {card.difficulty ? <Badge tone="amber">{card.difficulty.toLowerCase()}</Badge> : null}
-          {card.hint ? <Badge tone="sky">hint</Badge> : null}
-          {card.tags.map((tag) => (
-            <Badge key={tag}>{tag}</Badge>
-          ))}
+      <div className="flex min-w-0 gap-3">
+        {card.imageUrl ? (
+          <img
+            src={card.imageUrl}
+            alt={`Image of the card ${card.front}`}
+            className="h-16 w-16 shrink-0 rounded-lg bg-slate-950/40 object-cover"
+          />
+        ) : null}
+
+        <div className="flex min-w-0 flex-col gap-1">
+          <CardTitle className="truncate">{card.front}</CardTitle>
+          <p className="line-clamp-2 text-sm text-slate-400">{card.back}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            {card.difficulty ? <Badge tone="amber">{card.difficulty.toLowerCase()}</Badge> : null}
+            {card.hint ? <Badge tone="sky">hint</Badge> : null}
+            {card.tags.map((tag) => (
+              <Badge key={tag}>{tag}</Badge>
+            ))}
+          </div>
         </div>
       </div>
 

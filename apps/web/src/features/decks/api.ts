@@ -108,6 +108,17 @@ export async function deleteCard(cardId: string): Promise<void> {
   await apiRequest(`/cards/${cardId}`, { method: 'DELETE' });
 }
 
+export async function uploadCardImage(cardId: string, file: File): Promise<Card> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return apiUpload(`/cards/${cardId}/image`, formData, { schema: cardSchema });
+}
+
+export async function removeCardImage(cardId: string): Promise<Card> {
+  return apiRequest(`/cards/${cardId}/image`, { method: 'DELETE', schema: cardSchema });
+}
+
 export async function importCards(deckId: string, file: File): Promise<ImportSummary> {
   const formData = new FormData();
   formData.append('file', file);

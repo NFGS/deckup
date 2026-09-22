@@ -55,6 +55,14 @@ export function StudyCard({
       <Card className="flex min-h-64 flex-col items-center justify-center gap-6 p-8 text-center">
         <CardTitle className="text-xl">{item.front}</CardTitle>
 
+        {item.imageUrl ? (
+          <img
+            src={item.imageUrl}
+            alt={`Image of the card ${item.front}`}
+            className="max-h-48 rounded-lg bg-slate-950/40 object-contain"
+          />
+        ) : null}
+
         {item.hint && !revealed ? <CardDescription>Hint: {item.hint}</CardDescription> : null}
 
         {revealed ? (

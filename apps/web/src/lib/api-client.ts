@@ -72,12 +72,22 @@ export async function apiUpload<T>(
   formData: FormData,
   options: RequestOptions<T> = {},
 ): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: 'POST',
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-    credentials: 'include',
-    body: formData,
-  });
+  const send = () =>
+    fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      credentials: 'include',
+      body: formData,
+    });
+
+  let response = await send();
+
+  if (response.status === 401 && !options.skipAuthRefresh && accessToken !== null) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      response = await send();
+    }
+  }
 
   return handleResponse<T>(response, options);
 }
@@ -88,7 +98,14 @@ export interface DownloadedFile {
 }
 
 export async function apiDownload(path: string): Promise<DownloadedFile> {
-  const response = await send(path, {});
+  let response = await send(path, {});
+
+  if (response.status === 401 && accessToken !== null) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      response = await send(path, {});
+    }
+  }
 
   if (!response.ok) {
     throw new ApiError(response.status, await readProblem(response));
@@ -105,7 +122,22 @@ function filenameFrom(header: string | null): string | null {
   return match?.[1] ?? null;
 }
 
-export async function refreshAccessToken(): Promise<boolean> {
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * Rotates the refresh cookie. Concurrent callers share a single in-flight
+ * request: the API revokes the whole token family when it sees a reused
+ * refresh token, so parallel refreshes would sign the student out.
+ */
+export function refreshAccessToken(): Promise<boolean> {
+  refreshPromise ??= performRefresh().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
+}
+
+async function performRefresh(): Promise<boolean> {
   try {
     const response = await fetch(`${API_URL}/auth/refresh`, {
       method: 'POST',
@@ -129,6 +161,7 @@ export async function refreshAccessToken(): Promise<boolean> {
 
 export async function clearSession(): Promise<void> {
   setAccessToken(null);
+  await purgeApiCaches();
 
   try {
     await fetch(`${API_URL}/auth/logout`, {
@@ -138,6 +171,19 @@ export async function clearSession(): Promise<void> {
     });
   } catch {
     // Logging out locally is enough if the network call fails.
+  }
+}
+
+async function purgeApiCaches(): Promise<void> {
+  if (typeof caches === 'undefined') {
+    return;
+  }
+
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => key.includes('api')).map((key) => caches.delete(key)));
+  } catch {
+    // Cache storage is best-effort; never block sign-out on it.
   }
 }
 

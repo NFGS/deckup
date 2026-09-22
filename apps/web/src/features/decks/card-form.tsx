@@ -1,5 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CARD_IMAGE_MAX_BYTES, CARD_IMAGE_MIME_TYPES } from '@deckup/shared';
 import type { Card, CardDifficulty } from '@deckup/shared';
+import { useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -21,8 +24,8 @@ type CardFormValues = z.infer<typeof cardFormSchema>;
 export interface CardFormPayload {
   front: string;
   back: string;
-  hint?: string;
-  difficulty?: CardDifficulty;
+  hint: string | null;
+  difficulty: CardDifficulty | null;
   tags: string[];
 }
 
@@ -31,6 +34,12 @@ export interface CardFormProps {
   submitLabel: string;
   isSubmitting: boolean;
   errorMessage?: string;
+  /** Current image of the card (edit mode only). */
+  imageUrl?: string | null;
+  isImageBusy?: boolean;
+  imageErrorMessage?: string;
+  onUploadImage?: (file: File) => void;
+  onRemoveImage?: () => void;
   onSubmit: (payload: CardFormPayload) => void;
 }
 
@@ -39,8 +48,15 @@ export function CardForm({
   submitLabel,
   isSubmitting,
   errorMessage,
+  imageUrl,
+  isImageBusy = false,
+  imageErrorMessage,
+  onUploadImage,
+  onRemoveImage,
   onSubmit,
 }: CardFormProps) {
+  const [imageError, setImageError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -60,11 +76,33 @@ export function CardForm({
     onSubmit({
       front: values.front,
       back: values.back,
-      hint: values.hint || undefined,
-      difficulty: values.difficulty || undefined,
+      hint: values.hint || null,
+      difficulty: values.difficulty || null,
       tags: parseTags(values.tags),
     });
   });
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file || !onUploadImage) {
+      return;
+    }
+
+    if (!(CARD_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
+      setImageError('Choose a JPEG or PNG image');
+      return;
+    }
+
+    if (file.size > CARD_IMAGE_MAX_BYTES) {
+      setImageError('The image must be at most 5 MB');
+      return;
+    }
+
+    setImageError(null);
+    onUploadImage(file);
+  };
 
   return (
     <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-4" noValidate>
@@ -90,6 +128,48 @@ export function CardForm({
       >
         <Input id="card-hint" placeholder="Think about the nucleus" {...register('hint')} />
       </Field>
+
+      {onUploadImage ? (
+        <fieldset className="flex flex-col gap-3 rounded-xl border border-slate-700/60 p-4">
+          <legend className="px-1 text-sm text-slate-300">Image</legend>
+
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={card ? `Image of the card ${card.front}` : 'Card image'}
+              className="max-h-44 w-full rounded-lg bg-slate-950/40 object-contain"
+            />
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="inline-flex cursor-pointer items-center rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-700 has-disabled:cursor-not-allowed has-disabled:opacity-50">
+              {imageUrl ? 'Replace image' : 'Upload image'}
+              <input
+                type="file"
+                accept={CARD_IMAGE_MIME_TYPES.join(',')}
+                className="sr-only"
+                disabled={isImageBusy}
+                onChange={handleFileChange}
+              />
+            </label>
+
+            {imageUrl && onRemoveImage ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={isImageBusy}
+                onClick={onRemoveImage}
+              >
+                Remove image
+              </Button>
+            ) : null}
+          </div>
+
+          <p className="text-xs text-slate-500">JPEG or PNG, up to 5 MB.</p>
+          <FormError message={imageError ?? imageErrorMessage} />
+        </fieldset>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Difficulty" htmlFor="card-difficulty" error={errors.difficulty?.message}>

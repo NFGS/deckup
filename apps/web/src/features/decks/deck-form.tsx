@@ -28,9 +28,9 @@ type DeckFormValues = z.infer<typeof deckFormSchema>;
 
 export interface DeckFormPayload {
   title: string;
-  subject?: string;
-  description?: string;
-  color?: string;
+  subject: string | null;
+  description: string | null;
+  color: string | null;
   visibility: DeckVisibility;
   tags: string[];
 }
@@ -69,9 +69,9 @@ export function DeckForm({
   const submit = handleSubmit((values) => {
     onSubmit({
       title: values.title,
-      subject: values.subject || undefined,
-      description: values.description || undefined,
-      color: values.color || undefined,
+      subject: values.subject || null,
+      description: values.description || null,
+      color: values.color || null,
       visibility: values.visibility,
       tags: parseTags(values.tags),
     });
