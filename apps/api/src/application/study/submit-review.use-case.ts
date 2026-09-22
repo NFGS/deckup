@@ -6,6 +6,8 @@ import { ReviewState } from '../../domain/entities/review-state.entity.js';
 import { ConflictError, NotFoundError } from '../../domain/errors/domain-errors.js';
 import { CardRepositoryPort as CardRepository } from '../../domain/ports/card.repository.js';
 import type { CardRepositoryPort } from '../../domain/ports/card.repository.js';
+import { ReviewLogRepositoryPort as ReviewLogRepository } from '../../domain/ports/review-log.repository.js';
+import type { ReviewLogRepositoryPort } from '../../domain/ports/review-log.repository.js';
 import { ReviewRecorderPort as ReviewRecorder } from '../../domain/ports/review-recorder.port.js';
 import type { ReviewRecorderPort } from '../../domain/ports/review-recorder.port.js';
 import { ReviewStateRepositoryPort as ReviewStateRepository } from '../../domain/ports/review-state.repository.js';
@@ -31,6 +33,7 @@ export class SubmitReviewUseCase {
     @Inject(StudySessionRepository) private readonly sessions: StudySessionRepositoryPort,
     @Inject(CardRepository) private readonly cards: CardRepositoryPort,
     @Inject(ReviewStateRepository) private readonly reviewStates: ReviewStateRepositoryPort,
+    @Inject(ReviewLogRepository) private readonly reviewLogs: ReviewLogRepositoryPort,
     @Inject(ReviewRecorder) private readonly recorder: ReviewRecorderPort,
     @Inject(StudyQueueRepository) private readonly queue: StudyQueueRepositoryPort,
     private readonly scheduling: SchedulingService,
@@ -52,6 +55,25 @@ export class SubmitReviewUseCase {
     }
 
     const now = new Date();
+
+    if (input.clientReviewId) {
+      const existing = await this.reviewLogs.findByClientReviewId(session.id, input.clientReviewId);
+
+      if (existing) {
+        const state = await this.reviewStates.findByCardId(card.id);
+        const remaining = await this.queue.count(session.deckId, session.mode, now);
+
+        return {
+          cardId: card.id,
+          rating: existing.rating,
+          nextDueAt: existing.nextDueAt,
+          scheduledDays: existing.scheduledDays,
+          state: state?.state ?? 'NEW',
+          remaining,
+        };
+      }
+    }
+
     const current =
       (await this.reviewStates.findByCardId(card.id)) ??
       ReviewState.createNew({
@@ -68,6 +90,7 @@ export class SubmitReviewUseCase {
       cardId: card.id,
       userId,
       sessionId: session.id,
+      clientReviewId: input.clientReviewId ?? null,
       rating: input.rating,
       reviewedAt: now,
       elapsedMs: input.elapsedMs ?? null,

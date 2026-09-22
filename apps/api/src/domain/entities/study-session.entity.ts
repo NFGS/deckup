@@ -115,6 +115,18 @@ export class StudySession {
     return new StudySession({ ...this.props, status: 'COMPLETED', endedAt: now });
   }
 
+  abandon(now = new Date()): StudySession {
+    if (this.props.status === 'COMPLETED') {
+      throw new ConflictError('A completed session cannot be abandoned');
+    }
+
+    if (this.props.status === 'ABANDONED') {
+      return this;
+    }
+
+    return new StudySession({ ...this.props, status: 'ABANDONED', endedAt: now });
+  }
+
   get accuracy(): number {
     return this.props.cardsReviewed === 0 ? 0 : this.props.correctCount / this.props.cardsReviewed;
   }

@@ -19,6 +19,7 @@ import type {
   SubmitReview,
 } from '@deckup/shared';
 
+import { AbandonStudySessionUseCase } from '../application/study/abandon-study-session.use-case.js';
 import { CompleteStudySessionUseCase } from '../application/study/complete-study-session.use-case.js';
 import { GetStudyQueueUseCase } from '../application/study/get-study-queue.use-case.js';
 import { StartStudySessionUseCase } from '../application/study/start-study-session.use-case.js';
@@ -42,6 +43,7 @@ export class StudyController {
     private readonly getQueue: GetStudyQueueUseCase,
     private readonly submitReview: SubmitReviewUseCase,
     private readonly completeSession: CompleteStudySessionUseCase,
+    private readonly abandonSession: AbandonStudySessionUseCase,
   ) {}
 
   @Post('decks/:deckId/study-sessions')
@@ -79,5 +81,14 @@ export class StudyController {
     @Param('sessionId', ParseUUIDPipe) sessionId: string,
   ): Promise<SessionSummary> {
     return toSessionSummary(await this.completeSession.execute(sessionId, user.sub));
+  }
+
+  @Post('study-sessions/:sessionId/abandon')
+  @HttpCode(HttpStatus.OK)
+  async abandon(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+  ): Promise<StudySessionResponse> {
+    return toStudySessionResponse(await this.abandonSession.execute(sessionId, user.sub));
   }
 }

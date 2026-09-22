@@ -65,6 +65,8 @@ export const submitReviewSchema = z.object({
   cardId: z.uuid(),
   rating: reviewRatingSchema,
   elapsedMs: z.number().int().nonnegative().optional(),
+  /** Client-generated id that makes offline replay idempotent. */
+  clientReviewId: z.uuid().optional(),
 });
 
 export type SubmitReview = z.infer<typeof submitReviewSchema>;

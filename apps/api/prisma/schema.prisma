@@ -110,6 +110,7 @@ model Deck {
 
   @@index([ownerId, deletedAt])
   @@index([ownerId, subject])
+  @@index([visibility])
   @@map("decks")
 }
 
@@ -199,6 +200,7 @@ model ReviewLog {
   cardId          String       @map("card_id") @db.Uuid
   userId          String       @map("user_id") @db.Uuid
   sessionId       String?      @map("session_id") @db.Uuid
+  clientReviewId  String?      @map("client_review_id") @db.Uuid
   rating          ReviewRating
   reviewedAt      DateTime     @map("reviewed_at") @db.Timestamptz(3)
   elapsedMs       Int?         @map("elapsed_ms")
@@ -212,6 +214,7 @@ model ReviewLog {
   user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   session StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
 
+  @@unique([sessionId, clientReviewId])
   @@index([cardId, reviewedAt])
   @@index([userId, reviewedAt])
   @@map("review_logs")

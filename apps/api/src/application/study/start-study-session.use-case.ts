@@ -21,6 +21,11 @@ export class StartStudySessionUseCase {
       throw new NotFoundError('Deck', deckId);
     }
 
+    const active = await this.sessions.findActiveForDeck(userId, deckId, input.mode);
+    if (active) {
+      return active;
+    }
+
     const session = StudySession.start({ userId, deckId, mode: input.mode });
     await this.sessions.create(session);
 

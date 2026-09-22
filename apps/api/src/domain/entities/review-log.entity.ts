@@ -7,6 +7,7 @@ export interface ReviewLogProps {
   cardId: string;
   userId: string;
   sessionId: string | null;
+  clientReviewId: string | null;
   rating: ReviewRating;
   reviewedAt: Date;
   elapsedMs: number | null;
@@ -21,6 +22,7 @@ export interface CreateReviewLogInput {
   cardId: string;
   userId: string;
   sessionId: string | null;
+  clientReviewId?: string | null;
   rating: ReviewRating;
   reviewedAt: Date;
   elapsedMs?: number | null;
@@ -44,6 +46,7 @@ export class ReviewLog {
       cardId: input.cardId,
       userId: input.userId,
       sessionId: input.sessionId,
+      clientReviewId: input.clientReviewId ?? null,
       rating: input.rating,
       reviewedAt: input.reviewedAt,
       elapsedMs: input.elapsedMs ?? null,
@@ -73,6 +76,10 @@ export class ReviewLog {
 
   get sessionId(): string | null {
     return this.props.sessionId;
+  }
+
+  get clientReviewId(): string | null {
+    return this.props.clientReviewId;
   }
 
   get rating(): ReviewRating {
