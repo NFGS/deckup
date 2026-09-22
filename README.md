@@ -16,14 +16,16 @@ study time.
 ```
 .
 ├── apps/
-│   ├── web/        # React 19 + Vite + Tailwind CSS + shadcn/ui
-│   └── api/        # NestJS + Fastify + Prisma (Clean Architecture)
+│   ├── web/        # React 19 + Vite + Tailwind CSS
+│   └── api/        # NestJS 12 + Fastify + Prisma (Clean Architecture)
 ├── packages/
 │   ├── shared/     # Zod schemas, shared types and constants
-│   └── config/     # Shared ESLint / TypeScript / Prettier presets
+│   └── config/     # Shared TypeScript presets
 ├── docs/           # Requirements, architecture, testing, operations
+├── e2e/            # Playwright journeys and accessibility scans
 ├── scripts/        # Automation (Notion sync, seeds)
 ├── docker-compose.yml
+├── PLAN.md         # Remediation plan and current backlog
 └── SPEC.md         # Project specification and conventions
 ```
 
@@ -32,25 +34,72 @@ study time.
 | Layer      | Technology                                               |
 | ---------- | -------------------------------------------------------- |
 | Frontend   | React 19, Vite, TypeScript, Tailwind CSS, TanStack Query |
-| Backend    | NestJS 11 (Fastify adapter), Prisma ORM                  |
+| Backend    | NestJS 12 (Fastify adapter), Prisma ORM                  |
 | Database   | PostgreSQL 17                                            |
 | Scheduling | FSRS via `ts-fsrs`                                       |
 | Testing    | Vitest, Supertest, Playwright                            |
 | Tooling    | pnpm, Turborepo, ESLint, Prettier, Husky, commitlint     |
 
+## Prerequisites
+
+- Node.js 22+
+- pnpm 10+ (`corepack enable` recommended)
+- Docker (for the local PostgreSQL 17 instance)
+
 ## Quickstart
 
-> Commands are finalized during Phase 0. Placeholder:
-
 ```bash
+# 1. Install workspace dependencies
 pnpm install
-docker compose up -d
+
+# 2. Start PostgreSQL 17 (and Adminer on http://localhost:8080)
+docker compose up -d db
+
+# 3. Configure the API environment
+cp apps/api/.env.example apps/api/.env
+#    Set DATABASE_URL (default points at the Docker database) and a
+#    JWT_ACCESS_SECRET of at least 32 characters.
+
+# 4. Apply the database migrations
+pnpm --filter @deckup/api prisma:migrate
+
+# 5. Run the web app and the API in watch mode
 pnpm dev
 ```
 
+The web app runs on http://localhost:5173 and the API on http://localhost:3000
+(global prefix `/api/v1`, health check at `/api/v1/health`).
+
+### Optional integrations
+
+| Feature                | Variables                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| Card images (required) | `IMAGE_STORAGE=cloudinary`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` |
+| AI card generation     | `LLM_PROVIDER=openai`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL`                                  |
+
+Both features degrade gracefully when disabled: the API responds `503` with
+problem details instead of failing at startup.
+
+## Commands
+
+| Task            | Command                                                         |
+| --------------- | --------------------------------------------------------------- |
+| Dev (all)       | `pnpm dev`                                                      |
+| Lint            | `pnpm lint`                                                     |
+| Typecheck       | `pnpm typecheck`                                                |
+| Unit tests      | `pnpm test`                                                     |
+| API integration | `docker compose up -d db && pnpm --filter @deckup/api test:e2e` |
+| Browser E2E     | `pnpm test:e2e` (builds, then Playwright)                       |
+| Build           | `pnpm build`                                                    |
+| Format          | `pnpm format`                                                   |
+
+The first browser E2E run needs the Playwright browsers:
+`pnpm exec playwright install chromium`.
+
 ## Documentation
 
-See [`docs/`](./docs) and [`SPEC.md`](./SPEC.md).
+See [`docs/`](./docs) and [`SPEC.md`](./SPEC.md). The current remediation
+backlog lives in [`PLAN.md`](./PLAN.md).
 
 ## License
 
