@@ -70,3 +70,22 @@ export const deckListQuerySchema = paginationQuerySchema.extend({
 });
 
 export type DeckListQuery = z.infer<typeof deckListQuerySchema>;
+
+export const publicDeckSchema = deckSchema.extend({
+  authorName: z.string().min(1),
+});
+
+export type PublicDeck = z.infer<typeof publicDeckSchema>;
+
+export const publicDeckListQuerySchema = paginationQuerySchema.extend({
+  q: z.string().trim().min(1).max(120).optional(),
+  subject: z.string().trim().min(1).max(60).optional(),
+});
+
+export type PublicDeckListQuery = z.infer<typeof publicDeckListQuerySchema>;
+
+export const cloneDeckSchema = z.object({
+  title: z.string().trim().min(1).max(120).optional(),
+});
+
+export type CloneDeck = z.infer<typeof cloneDeckSchema>;
