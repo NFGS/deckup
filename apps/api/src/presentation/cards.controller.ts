@@ -10,8 +10,14 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
-import { cardListQuerySchema, createCardSchema, updateCardSchema } from '@deckup/shared';
+import {
+  CARD_IMAGE_MAX_BYTES,
+  cardListQuerySchema,
+  createCardSchema,
+  updateCardSchema,
+} from '@deckup/shared';
 import type {
   AccessTokenPayload,
   Card as CardResponse,
@@ -20,12 +26,16 @@ import type {
   Page,
   UpdateCard,
 } from '@deckup/shared';
+import type { FastifyRequest } from 'fastify';
 
 import { CreateCardUseCase } from '../application/cards/create-card.use-case.js';
 import { DeleteCardUseCase } from '../application/cards/delete-card.use-case.js';
 import { GetCardUseCase } from '../application/cards/get-card.use-case.js';
 import { ListCardsUseCase } from '../application/cards/list-cards.use-case.js';
+import { RemoveCardImageUseCase } from '../application/cards/remove-card-image.use-case.js';
 import { UpdateCardUseCase } from '../application/cards/update-card.use-case.js';
+import { UploadCardImageUseCase } from '../application/cards/upload-card-image.use-case.js';
+import { ValidationError } from '../domain/errors/domain-errors.js';
 import { CurrentUser } from './common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe.js';
 import { toCardPage, toCardResponse } from './common/presenters/card.presenter.js';
@@ -42,6 +52,8 @@ export class CardsController {
     private readonly getCard: GetCardUseCase,
     private readonly updateCard: UpdateCardUseCase,
     private readonly deleteCard: DeleteCardUseCase,
+    private readonly uploadCardImage: UploadCardImageUseCase,
+    private readonly removeCardImage: RemoveCardImageUseCase,
   ) {}
 
   @Get('decks/:deckId/cards')
@@ -79,6 +91,37 @@ export class CardsController {
     @Body(updateBody) body: UpdateCard,
   ): Promise<CardResponse> {
     return toCardResponse(await this.updateCard.execute(cardId, user.sub, body));
+  }
+
+  @Post('cards/:cardId/image')
+  async uploadImage(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('cardId', ParseUUIDPipe) cardId: string,
+    @Req() request: FastifyRequest,
+  ): Promise<CardResponse> {
+    const file = await request.file({ limits: { fileSize: CARD_IMAGE_MAX_BYTES, files: 1 } });
+
+    if (!file) {
+      throw new ValidationError('An image file is required', { field: 'file' });
+    }
+
+    const buffer = await file.toBuffer();
+
+    return toCardResponse(
+      await this.uploadCardImage.execute(cardId, user.sub, {
+        buffer,
+        mimeType: file.mimetype,
+        filename: file.filename,
+      }),
+    );
+  }
+
+  @Delete('cards/:cardId/image')
+  async removeImage(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('cardId', ParseUUIDPipe) cardId: string,
+  ): Promise<CardResponse> {
+    return toCardResponse(await this.removeCardImage.execute(cardId, user.sub));
   }
 
   @Delete('cards/:cardId')

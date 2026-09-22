@@ -19,6 +19,11 @@ export const envSchema = z
     LLM_API_KEY: z.string().min(1).optional(),
     LLM_MODEL: z.string().min(1).default('gpt-4o-mini'),
     LLM_BASE_URL: z.url().default('https://api.openai.com/v1'),
+    IMAGE_STORAGE: z.enum(['disabled', 'cloudinary']).default('disabled'),
+    CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
+    CLOUDINARY_API_KEY: z.string().min(1).optional(),
+    CLOUDINARY_API_SECRET: z.string().min(1).optional(),
+    CLOUDINARY_FOLDER: z.string().min(1).default('deckup/cards'),
   })
   .superRefine((env, ctx) => {
     if (env.LLM_PROVIDER === 'openai' && !env.LLM_API_KEY) {
@@ -27,6 +32,22 @@ export const envSchema = z
         path: ['LLM_API_KEY'],
         message: 'LLM_API_KEY is required when LLM_PROVIDER is openai',
       });
+    }
+
+    if (env.IMAGE_STORAGE === 'cloudinary') {
+      for (const key of [
+        'CLOUDINARY_CLOUD_NAME',
+        'CLOUDINARY_API_KEY',
+        'CLOUDINARY_API_SECRET',
+      ] as const) {
+        if (!env[key]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `${key} is required when IMAGE_STORAGE is cloudinary`,
+          });
+        }
+      }
     }
   });
 
@@ -49,6 +70,11 @@ export function loadEnv(config: ConfigService): AppEnv {
     LLM_API_KEY: config.get<string>('LLM_API_KEY'),
     LLM_MODEL: config.get<string>('LLM_MODEL'),
     LLM_BASE_URL: config.get<string>('LLM_BASE_URL'),
+    IMAGE_STORAGE: config.get<string>('IMAGE_STORAGE'),
+    CLOUDINARY_CLOUD_NAME: config.get<string>('CLOUDINARY_CLOUD_NAME'),
+    CLOUDINARY_API_KEY: config.get<string>('CLOUDINARY_API_KEY'),
+    CLOUDINARY_API_SECRET: config.get<string>('CLOUDINARY_API_SECRET'),
+    CLOUDINARY_FOLDER: config.get<string>('CLOUDINARY_FOLDER'),
   });
 
   if (!parsed.success) {

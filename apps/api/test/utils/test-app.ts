@@ -5,7 +5,9 @@ import { ThrottlerStorage } from '@nestjs/throttler';
 
 import { AppModule } from '../../src/app.module.js';
 import { registerPlugins } from '../../src/bootstrap/register-plugins.js';
+import { ImageStoragePort } from '../../src/domain/ports/image-storage.port.js';
 import { PrismaService } from '../../src/infrastructure/prisma/prisma.service.js';
+import { FakeImageStorage } from '../../src/testing/fakes/fake-image-storage.fake.js';
 
 export interface TestAppOptions {
   /**
@@ -13,6 +15,8 @@ export interface TestAppOptions {
    * functional tests are not affected by rate limits.
    */
   throttling?: boolean;
+  /** Image storage double used by the suite (no Cloudinary credentials needed). */
+  imageStorage?: ImageStoragePort;
 }
 
 const allowAllThrottlerStorage = {
@@ -31,6 +35,10 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<NestF
   if (!options.throttling) {
     builder.overrideProvider(ThrottlerStorage).useValue(allowAllThrottlerStorage);
   }
+
+  builder
+    .overrideProvider(ImageStoragePort)
+    .useValue(options.imageStorage ?? new FakeImageStorage());
 
   const moduleRef = await builder.compile();
 

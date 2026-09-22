@@ -13,6 +13,7 @@ import { DecksModule } from './decks.module.js';
 import { AppConfigModule } from './infrastructure/config/app-config.module.js';
 import { AiProviderModule } from './infrastructure/ai/ai-provider.module.js';
 import { CsvModule } from './infrastructure/csv/csv.module.js';
+import { ImageStorageProviderModule } from './infrastructure/images/image-storage-provider.module.js';
 import { PersistenceModule } from './infrastructure/prisma/persistence.module.js';
 import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
 import { SchedulingModule } from './infrastructure/scheduling/scheduling.module.js';
@@ -38,6 +39,7 @@ import { UsersModule } from './users.module.js';
     SchedulingModule,
     CsvModule,
     AiProviderModule,
+    ImageStorageProviderModule,
     AuthModule,
     UsersModule,
     PublicDecksModule,
