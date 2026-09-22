@@ -1,5 +1,5 @@
 export type DomainErrorCode =
-  'VALIDATION' | 'NOT_FOUND' | 'CONFLICT' | 'UNAUTHORIZED' | 'FORBIDDEN';
+  'VALIDATION' | 'NOT_FOUND' | 'CONFLICT' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'UNAVAILABLE';
 
 export class DomainError extends Error {
   constructor(
@@ -39,5 +39,11 @@ export class UnauthorizedError extends DomainError {
 export class ForbiddenError extends DomainError {
   constructor(message = 'You are not allowed to perform this action') {
     super('FORBIDDEN', message);
+  }
+}
+
+export class ServiceUnavailableError extends DomainError {
+  constructor(message = 'The service is temporarily unavailable') {
+    super('UNAVAILABLE', message);
   }
 }

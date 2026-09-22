@@ -18,6 +18,20 @@ export interface DeckListResult {
   total: number;
 }
 
+export interface PublicDeckWithAuthor extends DeckWithCounts {
+  authorName: string;
+}
+
+export interface PublicDeckListFilters {
+  search?: string;
+  subject?: string;
+}
+
+export interface PublicDeckListResult {
+  items: PublicDeckWithAuthor[];
+  total: number;
+}
+
 export abstract class DeckRepositoryPort {
   abstract create(deck: Deck): Promise<void>;
   abstract findByIdForOwner(id: string, ownerId: string): Promise<DeckWithCounts | null>;
@@ -26,6 +40,11 @@ export abstract class DeckRepositoryPort {
     filters: DeckListFilters,
     pagination: PaginationQuery,
   ): Promise<DeckListResult>;
+  abstract listPublic(
+    filters: PublicDeckListFilters,
+    pagination: PaginationQuery,
+  ): Promise<PublicDeckListResult>;
+  abstract findPublicById(id: string): Promise<PublicDeckWithAuthor | null>;
   abstract update(deck: Deck): Promise<void>;
   abstract softDelete(id: string, ownerId: string, now: Date): Promise<void>;
 }

@@ -4,6 +4,9 @@ import type {
   DeckListFilters,
   DeckListResult,
   DeckWithCounts,
+  PublicDeckListFilters,
+  PublicDeckListResult,
+  PublicDeckWithAuthor,
 } from '../../domain/ports/deck.repository.js';
 import type { PaginationQuery } from '@deckup/shared';
 
@@ -41,6 +44,40 @@ export class InMemoryDeckRepository extends DeckRepositoryPort {
       ),
       total: items.length,
     });
+  }
+
+  async listPublic(
+    filters: PublicDeckListFilters,
+    pagination: PaginationQuery,
+  ): Promise<PublicDeckListResult> {
+    const matches = (deck: Deck): boolean =>
+      deck.visibility === 'PUBLIC' &&
+      !deck.isDeleted &&
+      (filters.subject === undefined || deck.subject === filters.subject) &&
+      (filters.search === undefined ||
+        deck.title.toLowerCase().includes(filters.search.toLowerCase()));
+
+    const items = [...this.decks.values()]
+      .filter(matches)
+      .map((deck) => ({ deck, cardCount: 0, dueCount: 0, authorName: 'Fake Author' }));
+
+    return Promise.resolve({
+      items: items.slice(
+        (pagination.page - 1) * pagination.pageSize,
+        pagination.page * pagination.pageSize,
+      ),
+      total: items.length,
+    });
+  }
+
+  async findPublicById(id: string): Promise<PublicDeckWithAuthor | null> {
+    const deck = this.decks.get(id);
+
+    if (!deck || deck.visibility !== 'PUBLIC' || deck.isDeleted) {
+      return Promise.resolve(null);
+    }
+
+    return Promise.resolve({ deck, cardCount: 0, dueCount: 0, authorName: 'Fake Author' });
   }
 
   async update(deck: Deck): Promise<void> {

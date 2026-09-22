@@ -9,14 +9,22 @@ import type {
   DeckListFilters,
   DeckListResult,
   DeckWithCounts,
+  PublicDeckListFilters,
+  PublicDeckListResult,
+  PublicDeckWithAuthor,
 } from '../../../domain/ports/deck.repository.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
-import { toDeckWithCounts } from '../mappers/deck.mapper.js';
+import { toDeckWithCounts, toPublicDeckWithAuthor } from '../mappers/deck.mapper.js';
 import { PrismaService } from '../prisma.service.js';
 
 const DECK_INCLUDE = {
   deckTags: { include: { tag: true } },
   _count: { select: { cards: { where: { deletedAt: null } } } },
+} as const;
+
+const PUBLIC_DECK_INCLUDE = {
+  ...DECK_INCLUDE,
+  owner: { select: { displayName: true } },
 } as const;
 
 @Injectable()
@@ -92,6 +100,44 @@ export class PrismaDeckRepository extends DeckRepositoryPort {
       items: rows.map((row) => toDeckWithCounts(row, dueCounts.get(row.id) ?? 0)),
       total,
     };
+  }
+
+  async listPublic(
+    filters: PublicDeckListFilters,
+    pagination: PaginationQuery,
+  ): Promise<PublicDeckListResult> {
+    const where: Prisma.DeckWhereInput = {
+      visibility: 'PUBLIC',
+      deletedAt: null,
+      ...(filters.subject ? { subject: filters.subject } : {}),
+      ...(filters.search ? { title: { contains: filters.search, mode: 'insensitive' } } : {}),
+    };
+
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.deck.findMany({
+        where,
+        include: PUBLIC_DECK_INCLUDE,
+        orderBy: { updatedAt: 'desc' },
+        skip: (pagination.page - 1) * pagination.pageSize,
+        take: pagination.pageSize,
+      }),
+      this.prisma.deck.count({ where }),
+    ]);
+
+    return {
+      // The visitor has no schedule for these decks yet: due counts are theirs.
+      items: rows.map((row) => toPublicDeckWithAuthor(row, 0)),
+      total,
+    };
+  }
+
+  async findPublicById(id: string): Promise<PublicDeckWithAuthor | null> {
+    const row = await this.prisma.deck.findFirst({
+      where: { id, visibility: 'PUBLIC', deletedAt: null },
+      include: PUBLIC_DECK_INCLUDE,
+    });
+
+    return row ? toPublicDeckWithAuthor(row, 0) : null;
   }
 
   async update(deck: Deck): Promise<void> {

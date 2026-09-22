@@ -13,6 +13,10 @@ export const envSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  LLM_PROVIDER: z.enum(['disabled', 'openai']).default('disabled'),
+  LLM_API_KEY: z.string().min(1).optional(),
+  LLM_MODEL: z.string().min(1).default('gpt-4o-mini'),
+  LLM_BASE_URL: z.url().default('https://api.openai.com/v1'),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -29,6 +33,10 @@ export function loadEnv(config: ConfigService): AppEnv {
     JWT_ACCESS_TTL_SECONDS: config.get<string>('JWT_ACCESS_TTL_SECONDS'),
     REFRESH_TOKEN_TTL_DAYS: config.get<string>('REFRESH_TOKEN_TTL_DAYS'),
     COOKIE_SECURE: config.get<string>('COOKIE_SECURE'),
+    LLM_PROVIDER: config.get<string>('LLM_PROVIDER'),
+    LLM_API_KEY: config.get<string>('LLM_API_KEY'),
+    LLM_MODEL: config.get<string>('LLM_MODEL'),
+    LLM_BASE_URL: config.get<string>('LLM_BASE_URL'),
   });
 
   if (!parsed.success) {

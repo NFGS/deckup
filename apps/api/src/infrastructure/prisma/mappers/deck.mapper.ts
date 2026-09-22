@@ -1,7 +1,10 @@
 import type { DeckVisibility } from '@deckup/shared';
 
 import { Deck } from '../../../domain/entities/deck.entity.js';
-import type { DeckWithCounts } from '../../../domain/ports/deck.repository.js';
+import type {
+  DeckWithCounts,
+  PublicDeckWithAuthor,
+} from '../../../domain/ports/deck.repository.js';
 
 export interface DeckRow {
   id: string;
@@ -39,5 +42,16 @@ export function toDeckWithCounts(row: DeckRow, dueCount: number): DeckWithCounts
     deck: toDomainDeck(row),
     cardCount: row._count.cards,
     dueCount,
+  };
+}
+
+export interface PublicDeckRow extends DeckRow {
+  owner: { displayName: string };
+}
+
+export function toPublicDeckWithAuthor(row: PublicDeckRow, dueCount: number): PublicDeckWithAuthor {
+  return {
+    ...toDeckWithCounts(row, dueCount),
+    authorName: row.owner.displayName,
   };
 }

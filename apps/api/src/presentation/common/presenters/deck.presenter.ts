@@ -1,6 +1,9 @@
-import type { Deck as DeckResponse, Page } from '@deckup/shared';
+import type { Deck as DeckResponse, Page, PublicDeck as PublicDeckResponse } from '@deckup/shared';
 
-import type { DeckWithCounts } from '../../../domain/ports/deck.repository.js';
+import type {
+  DeckWithCounts,
+  PublicDeckWithAuthor,
+} from '../../../domain/ports/deck.repository.js';
 
 export function toDeckResponse(item: DeckWithCounts): DeckResponse {
   const { deck } = item;
@@ -27,4 +30,20 @@ export function toDeckPage(
   total: number,
 ): Page<DeckResponse> {
   return { items: items.map(toDeckResponse), page, pageSize, total };
+}
+
+export function toPublicDeckResponse(item: PublicDeckWithAuthor): PublicDeckResponse {
+  return {
+    ...toDeckResponse(item),
+    authorName: item.authorName,
+  };
+}
+
+export function toPublicDeckPage(
+  items: PublicDeckWithAuthor[],
+  page: number,
+  pageSize: number,
+  total: number,
+): Page<PublicDeckResponse> {
+  return { items: items.map(toPublicDeckResponse), page, pageSize, total };
 }

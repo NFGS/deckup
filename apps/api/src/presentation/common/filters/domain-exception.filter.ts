@@ -11,6 +11,7 @@ const STATUS_BY_CODE: Record<DomainErrorCode, number> = {
   CONFLICT: 409,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
+  UNAVAILABLE: 503,
 };
 
 const TITLE_BY_STATUS: Record<number, string> = {
@@ -23,6 +24,7 @@ const TITLE_BY_STATUS: Record<number, string> = {
   422: 'Validation failed',
   429: 'Too many requests',
   500: 'Internal server error',
+  503: 'Service unavailable',
 };
 
 interface ProblemPayload {
