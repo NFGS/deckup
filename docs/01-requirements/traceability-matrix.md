@@ -58,10 +58,10 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 
 | Requirement | User story | Use case     | Test cases                 | Status                                                                   |
 | ----------- | ---------- | ------------ | -------------------------- | ------------------------------------------------------------------------ |
-| RF-01       | Epic       | CU#01, CU#02 | TC-A1 … TC-A4              | Implemented (Phase 2)                                                    |
-| RF-02       | US-01      | CU#03        | TC-01, TC-02               | Implemented (Phase 2)                                                    |
-| RF-03       | US-02      | CU#04        | TC-05, TC-06               | Implemented (Phase 2)                                                    |
-| RF-04       | US-02      | CU#05        | TC-03, TC-04               | Implemented (Phase 2)                                                    |
+| RF-01       | Epic       | CU#01, CU#02 | TC-A1 … TC-A4              | Implemented (Phases 2–4)                                                 |
+| RF-02       | US-01      | CU#03        | TC-01, TC-02               | Implemented (Phases 2–4)                                                 |
+| RF-03       | US-02      | CU#04        | TC-05, TC-06               | Implemented (Phases 2–4)                                                 |
+| RF-04       | US-02      | CU#05        | TC-03, TC-04               | Implemented (Phases 2–4)                                                 |
 | RF-05       | US-03      | CU#06 (CU-I) | TC-07 … TC-10              | Partial — hint, difficulty and tags done; image upload pending (Phase 3) |
 | RF-06       | US-03      | CU#07 (CU-V) | TC-11 … TC-14              | Planned (Phase 3)                                                        |
 | RF-07       | Epic       | CU#10        | TC-27, TC-28               | Planned (Phase 6)                                                        |
@@ -71,7 +71,7 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | RF-11       | Epic       | CU#11        | TC-29, TC-30               | Phase 8                                                                  |
 | RF-12       | Epic       | CU#12        | TC-31, TC-32               | Phase 8                                                                  |
 
-### 3.1 Automated coverage status (Phase 2)
+### 3.1 Automated coverage status (Phases 2–4)
 
 | Suite                        | File                                                               | Covers                                                    |
 | ---------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------- |
@@ -84,6 +84,11 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | API integration (health)     | `apps/api/test/app.e2e-spec.ts`                                    | Operational health endpoint                               |
 | API integration (study)      | `apps/api/test/study.e2e-spec.ts`                                  | TC-15 … TC-19, TC-24, TC-25, review-ahead mode, isolation |
 | Scheduling unit              | `apps/api/src/infrastructure/scheduling/ts-fsrs.scheduler.spec.ts` | FSRS transitions for the four ratings                     |
+| Web unit (API client)        | `apps/web/src/lib/api-client.test.ts`                              | Bearer header, refresh-and-retry on 401, problem details  |
+| Web component (auth)         | `apps/web/src/features/auth/login-page.test.tsx`                   | Sign-in form, validation and credentials POST             |
+| Web component (decks)        | `apps/web/src/features/decks/deck-form.test.tsx`                   | Deck form validation, tag parsing and edit prefill        |
+| Web component (landing)      | `apps/web/src/features/landing/landing-page.test.tsx`              | Landing content and anonymous calls to action             |
+| Web e2e (Playwright)         | `e2e/smoke.spec.ts`                                                | Landing, login form and protected-route redirect          |
 
 ## 4. Test case catalog
 
