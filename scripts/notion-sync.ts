@@ -186,13 +186,64 @@ async function notionRequest(
   return (await response.json()) as Record<string, unknown>;
 }
 
+/** Titles of the child pages already published under the parent page. */
+async function listChildPages(token: string, parentPageId: string): Promise<Map<string, string>> {
+  const pages = new Map<string, string>();
+  let cursor: string | undefined;
+
+  do {
+    const query = new URLSearchParams({ page_size: '100' });
+
+    if (cursor) {
+      query.set('start_cursor', cursor);
+    }
+
+    const response = await notionRequest(
+      `/blocks/${parentPageId}/children?${query.toString()}`,
+      token,
+      { method: 'GET' },
+    );
+    const results = Array.isArray(response.results)
+      ? (response.results as Array<Record<string, unknown>>)
+      : [];
+
+    for (const block of results) {
+      const childPage = block.child_page as { title?: unknown } | undefined;
+      const title = childPage?.title;
+
+      if (block.type === 'child_page' && typeof title === 'string') {
+        pages.set(title, String(block.id));
+      }
+    }
+
+    cursor = typeof response.next_cursor === 'string' ? response.next_cursor : undefined;
+  } while (cursor);
+
+  return pages;
+}
+
+async function archivePage(token: string, pageId: string): Promise<void> {
+  await notionRequest(`/pages/${pageId}`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ archived: true }),
+  });
+}
+
 async function publishDocument(
   token: string,
   parentPageId: string,
   document: DocumentSpec,
+  existingPages: Map<string, string>,
 ): Promise<string> {
   const markdown = await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8');
   const blocks = markdownToBlocks(markdown);
+
+  const previousPageId = existingPages.get(document.title);
+
+  if (previousPageId) {
+    await archivePage(token, previousPageId);
+    console.log(`Archived previous "${document.title}" (${previousPageId})`);
+  }
 
   const page = await notionRequest('/pages', token, {
     method: 'POST',
@@ -236,8 +287,10 @@ async function main(): Promise<void> {
     return;
   }
 
+  const existingPages = await listChildPages(token, parentPageId);
+
   for (const document of DOCUMENTS) {
-    const pageId = await publishDocument(token, parentPageId, document);
+    const pageId = await publishDocument(token, parentPageId, document, existingPages);
     console.log(`Published "${document.title}" → ${pageId}`);
   }
 }

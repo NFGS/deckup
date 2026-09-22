@@ -74,7 +74,10 @@ pnpm test:e2e    # Playwright smoke (web)
 - DeckUp root page ID: **`3e3aee9c-1744-8107-aeeb-ea3c3a6db64b`**
   (`https://app.notion.com/p/DeckUp-3e3aee9c17448107aeebea3c3a6db64b`).
 - Documentation sync: `NOTION_TOKEN=… NOTION_PAGE_ID=3e3aee9c-1744-8107-aeeb-ea3c3a6db64b pnpm sync:notion`
-  (dry run: add `--dry-run`).
+  (dry run: add `--dry-run`). Last sync: **2026-09-22** — 10 documents published as child
+  pages (user stories, traceability, glossary, architecture, data model, test plan,
+  test cases, deployment, runbook, security). Re-runs archive the previous version of
+  each page before publishing.
 
 ## 8. Skills
 

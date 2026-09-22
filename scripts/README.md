@@ -15,6 +15,9 @@ Automation scripts for the DeckUp monorepo.
 - The script converts markdown to Notion blocks (headings, paragraphs, lists,
   quotes, code fences and tables) and chunks the payload at 100 blocks per
   request.
+- **Idempotent**: before publishing, child pages with the same title are
+  archived, so re-runs refresh the documentation instead of duplicating it.
+- Last sync: 2026-09-22 — 10 documents (915 blocks).
 - `--dry-run` prints the block counts without calling the API:
 
   ```bash
