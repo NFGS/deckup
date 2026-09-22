@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Audit dependencies (critical only)
+        run: pnpm audit --audit-level critical
+
       - name: Lint
         run: pnpm lint
 
@@ -40,3 +43,51 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    needs: quality
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: deckup
+          POSTGRES_PASSWORD: deckup
+          POSTGRES_DB: deckup
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U deckup"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://deckup:deckup@localhost:5432/deckup?schema=public
+      JWT_ACCESS_SECRET: ci-only-access-secret-0123456789abcdef
+      CORS_ORIGINS: http://localhost:5173
+      COOKIE_SECURE: 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspaces
+        run: pnpm build
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run end-to-end suite
+        run: pnpm exec playwright test

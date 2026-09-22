@@ -1,0 +1,12 @@
+.git
+.github
+**/node_modules
+**/dist
+**/.turbo
+**/coverage
+**/playwright-report
+**/test-results
+**/.env
+**/.env.*
+!**/.env.example
+REQUIREMENTS.pdf
