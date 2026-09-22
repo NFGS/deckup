@@ -7,6 +7,13 @@ export const cardDifficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD']);
 
 export type CardDifficulty = z.infer<typeof cardDifficultySchema>;
 
+/** Maximum size accepted for a card image (5 MB, NFR-03.1). */
+export const CARD_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+
+export const CARD_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png'] as const;
+
+export type CardImageMimeType = (typeof CARD_IMAGE_MIME_TYPES)[number];
+
 const cardTagSchema = z.string().trim().min(1).max(40);
 
 export const cardSchema = z.object({
