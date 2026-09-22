@@ -8,11 +8,14 @@ import { DeckDetailPage } from '../features/decks/deck-detail-page';
 import { ExplorePage } from '../features/explore/explore-page';
 import { LandingPage } from '../features/landing/landing-page';
 import { AppLayout } from './app-layout';
+import { NotFoundPage } from './not-found-page';
+import { RouteErrorPage } from './route-error-page';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       { index: true, element: <LandingPage /> },
       { path: 'login', element: <LoginPage /> },
@@ -39,6 +42,7 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);

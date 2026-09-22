@@ -21,6 +21,7 @@ const FILE_INPUT_CLASSES =
 
 export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProps) {
   const [file, setFile] = useState<File | null>(null);
+  const [importedFile, setImportedFile] = useState<File | null>(null);
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +29,7 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
 
   const close = () => {
     setFile(null);
+    setImportedFile(null);
     setSummary(null);
     setError(null);
     onClose();
@@ -44,11 +46,15 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
     setError(null);
 
     try {
-      setSummary(await importCards.mutateAsync(file));
+      const result = await importCards.mutateAsync(file);
+      setSummary(result);
+      setImportedFile(file);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : 'Unable to import the file');
     }
   };
+
+  const isImported = summary !== null && file === importedFile;
 
   return (
     <Modal open={open} title="Import cards from CSV" onClose={close}>
@@ -67,6 +73,7 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
             className={FILE_INPUT_CLASSES}
             onChange={(event) => {
               setFile(event.target.files?.[0] ?? null);
+              setImportedFile(null);
               setSummary(null);
             }}
           />
@@ -82,6 +89,16 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
               {summary.imported} {summary.imported === 1 ? 'card' : 'cards'} imported
               {summary.skipped > 0 ? ` · ${summary.skipped} skipped` : ''}
             </p>
+
+            {summary.notice ? (
+              <p className="mt-2 text-xs text-amber-300">{summary.notice}</p>
+            ) : null}
+
+            {summary.duplicateRows.length > 0 ? (
+              <p className="mt-2 text-xs text-amber-300">
+                Duplicated rows: {summary.duplicateRows.join(', ')}
+              </p>
+            ) : null}
 
             {summary.errors.length > 0 ? (
               <ul className="mt-2 flex flex-col gap-1 text-xs text-rose-300">
@@ -99,8 +116,8 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
           <Button variant="secondary" onClick={close}>
             Close
           </Button>
-          <Button type="submit" disabled={importCards.isPending}>
-            {importCards.isPending ? 'Importing…' : 'Import'}
+          <Button type="submit" disabled={importCards.isPending || isImported}>
+            {importCards.isPending ? 'Importing…' : isImported ? 'Imported' : 'Import'}
           </Button>
         </div>
       </form>

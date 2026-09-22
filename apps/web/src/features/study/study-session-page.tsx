@@ -147,7 +147,7 @@ export function StudySessionPage() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (summary || !current) {
+      if (summary || !current || event.repeat || submitReview.isPending) {
         return;
       }
 
@@ -169,7 +169,7 @@ export function StudySessionPage() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [current, revealed, summary, handleRate]);
+  }, [current, revealed, summary, handleRate, submitReview.isPending]);
 
   const restart = () => {
     setMode('DUE');
@@ -184,7 +184,8 @@ export function StudySessionPage() {
     );
   }
 
-  const isPreparing = sessionId === null || queue.isPending;
+  const isPreparing = sessionId === null && error === null;
+  const hasStartError = sessionId === null && error !== null;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -192,7 +193,7 @@ export function StudySessionPage() {
         ← Back to deck
       </Link>
 
-      <FormError message={error ?? undefined} />
+      {sessionId !== null ? <FormError message={error ?? undefined} /> : null}
 
       {queuedReviews > 0 ? (
         <p
@@ -205,7 +206,23 @@ export function StudySessionPage() {
         </p>
       ) : null}
 
-      {isPreparing ? (
+      {hasStartError ? (
+        <EmptyState
+          title="We could not start the session"
+          description={error ?? 'Check your connection and try again.'}
+          action={
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setError(null);
+                setRunId((value) => value + 1);
+              }}
+            >
+              Try again
+            </Button>
+          }
+        />
+      ) : isPreparing || queue.isPending ? (
         <div className="flex justify-center py-16">
           <Spinner label="Preparing your session" />
         </div>
@@ -213,6 +230,11 @@ export function StudySessionPage() {
         <EmptyState
           title="We could not load your queue"
           description="Check your connection and try again."
+          action={
+            <Button variant="secondary" onClick={() => void queue.refetch()}>
+              Try again
+            </Button>
+          }
         />
       ) : items.length === 0 ? (
         mode === 'DUE' ? (

@@ -16,16 +16,21 @@ import {
 import { ApiError } from '../../lib/api-client';
 import { useCloneDeck, usePublicDecks } from './hooks';
 
+const PAGE_SIZE = 24;
+
 export function ExplorePage() {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [cloningId, setCloningId] = useState<string | null>(null);
 
-  const decksQuery = usePublicDecks({ q: search || undefined });
+  const decksQuery = usePublicDecks({ q: search || undefined, page, pageSize: PAGE_SIZE });
   const cloneDeck = useCloneDeck();
   const navigate = useNavigate();
 
   const decks = decksQuery.data?.items ?? [];
+  const total = decksQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const handleClone = async (deck: PublicDeck) => {
     setError(null);
@@ -58,7 +63,10 @@ export function ExplorePage() {
             placeholder="Search public decks"
             aria-label="Search public decks"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </header>
@@ -80,6 +88,11 @@ export function ExplorePage() {
         <EmptyState
           title="We could not load the catalogue"
           description="Check your connection and try again."
+          action={
+            <Button variant="secondary" onClick={() => void decksQuery.refetch()}>
+              Try again
+            </Button>
+          }
         />
       ) : decks.length === 0 ? (
         <EmptyState
@@ -129,6 +142,32 @@ export function ExplorePage() {
           ))}
         </ul>
       )}
+
+      {totalPages > 1 ? (
+        <div className="flex items-center justify-between text-sm text-slate-400">
+          <span>
+            Page {page} of {totalPages} · {total} decks
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

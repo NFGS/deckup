@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { LoginInput, RegisterInput, User } from '@deckup/shared';
@@ -10,6 +11,7 @@ import type { AuthContextValue, AuthStatus } from './auth-context';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [user, setUser] = useState<User | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let active = true;
@@ -32,10 +34,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUnauthorizedHandler(() => {
       setUser(null);
       setStatus('anonymous');
+      queryClient.clear();
     });
 
     return () => setUnauthorizedHandler(null);
-  }, []);
+  }, [queryClient]);
 
   const handleSignIn = useCallback(async (input: LoginInput) => {
     const session = await signIn(input);
@@ -53,7 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut();
     setUser(null);
     setStatus('anonymous');
-  }, []);
+    queryClient.clear();
+  }, [queryClient]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
