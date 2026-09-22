@@ -63,8 +63,8 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | RF-03       | US-02      | CU#04        | TC-05, TC-06               | Implemented (Phases 2–4)                                                 |
 | RF-04       | US-02      | CU#05        | TC-03, TC-04               | Implemented (Phases 2–4)                                                 |
 | RF-05       | US-03      | CU#06 (CU-I) | TC-07 … TC-10              | Partial — hint, difficulty and tags done; image upload pending (Phase 3) |
-| RF-06       | US-03      | CU#07 (CU-V) | TC-11 … TC-14              | Planned (Phase 3)                                                        |
-| RF-07       | Epic       | CU#10        | TC-27, TC-28               | Planned (Phase 6)                                                        |
+| RF-06       | US-03      | CU#07 (CU-V) | TC-11 … TC-14              | Implemented (Phase 6)                                                    |
+| RF-07       | Epic       | CU#10        | TC-27, TC-28               | Implemented (Phase 6)                                                    |
 | RF-08       | US-04      | CU#08 (CU-Q) | TC-15, TC-16, TC-24        | Implemented (Phase 3)                                                    |
 | RF-09       | US-04      | CU#08 (CU-S) | TC-17, TC-18, TC-25, TC-26 | Implemented (Phase 3)                                                    |
 | RF-10       | US-04      | CU#09 (CU-E) | TC-19 … TC-23              | Implemented (Phase 5)                                                    |
@@ -85,13 +85,16 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | API integration (study)      | `apps/api/test/study.e2e-spec.ts`                                  | TC-15 … TC-19, TC-24, TC-25, review-ahead mode, isolation |
 | Scheduling unit              | `apps/api/src/infrastructure/scheduling/ts-fsrs.scheduler.spec.ts` | FSRS transitions for the four ratings                     |
 | Metrics unit                 | `apps/api/src/domain/services/study-metrics.service.spec.ts`       | Streak, retention and forecast rules                      |
+| Import unit                  | `apps/api/src/application/cards/import-cards.use-case.spec.ts`     | CSV edge cases, row reporting and limits                  |
 | API integration (analytics)  | `apps/api/test/analytics.e2e-spec.ts`                              | TC-20 … TC-23, empty state, window validation             |
+| API integration (imports)    | `apps/api/test/imports.e2e-spec.ts`                                | TC-11 … TC-14, TC-27, TC-28, 413 and isolation            |
 | Web unit (API client)        | `apps/web/src/lib/api-client.test.ts`                              | Bearer header, refresh-and-retry on 401, problem details  |
 | Web component (auth)         | `apps/web/src/features/auth/login-page.test.tsx`                   | Sign-in form, validation and credentials POST             |
 | Web component (decks)        | `apps/web/src/features/decks/deck-form.test.tsx`                   | Deck form validation, tag parsing and edit prefill        |
 | Web component (landing)      | `apps/web/src/features/landing/landing-page.test.tsx`              | Landing content and anonymous calls to action             |
 | Web component (study)        | `apps/web/src/features/study/study-session-page.test.tsx`          | Queue walk-through, keyboard shortcuts, empty state       |
 | Web component (analytics)    | `apps/web/src/features/analytics/analytics-page.test.tsx`          | Metrics cards, forecast section, error state              |
+| Web component (import)       | `apps/web/src/features/decks/import-cards-modal.test.tsx`          | File upload, import summary and validation errors         |
 | Web e2e (Playwright)         | `e2e/smoke.spec.ts`                                                | Landing, login form and protected-route redirect          |
 
 ## 4. Test case catalog
