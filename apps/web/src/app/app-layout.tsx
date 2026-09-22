@@ -27,6 +27,9 @@ export function AppLayout() {
                 <Link to="/dashboard" className="text-sm text-slate-300 hover:text-white">
                   My decks
                 </Link>
+                <Link to="/analytics" className="text-sm text-slate-300 hover:text-white">
+                  Analytics
+                </Link>
                 <span className="hidden text-sm text-slate-500 sm:inline">{user?.displayName}</span>
                 <Button variant="ghost" size="sm" onClick={() => void handleSignOut()}>
                   <LogOutIcon className="h-4 w-4" />

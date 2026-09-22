@@ -1,11 +1,13 @@
 import { createBrowserRouter } from 'react-router';
 
+import { AnalyticsPage } from '../features/analytics/analytics-page';
 import { LoginPage } from '../features/auth/login-page';
 import { ProtectedRoute } from '../features/auth/protected-route';
 import { RegisterPage } from '../features/auth/register-page';
 import { DashboardPage } from '../features/decks/dashboard-page';
 import { DeckDetailPage } from '../features/decks/deck-detail-page';
 import { LandingPage } from '../features/landing/landing-page';
+import { StudySessionPage } from '../features/study/study-session-page';
 import { AppLayout } from './app-layout';
 
 export const router = createBrowserRouter([
@@ -21,6 +23,8 @@ export const router = createBrowserRouter([
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'decks/:deckId', element: <DeckDetailPage /> },
+          { path: 'decks/:deckId/study', element: <StudySessionPage /> },
+          { path: 'analytics', element: <AnalyticsPage /> },
         ],
       },
     ],

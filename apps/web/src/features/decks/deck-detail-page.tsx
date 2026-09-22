@@ -147,6 +147,9 @@ export function DeckDetailPage() {
         </div>
 
         <div className="flex gap-2">
+          <Link to={`/decks/${deckId}/study`}>
+            <Button>Study</Button>
+          </Link>
           <Button variant="secondary" onClick={() => setEditOpen(true)}>
             <PencilIcon className="h-4 w-4" />
             Edit
