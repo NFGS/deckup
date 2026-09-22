@@ -1,9 +1,9 @@
 import { Test } from '@nestjs/testing';
-import { FastifyAdapter } from '@nestjs/platform-fastify';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ThrottlerStorage } from '@nestjs/throttler';
 
 import { AppModule } from '../../src/app.module.js';
+import { createFastifyAdapter } from '../../src/bootstrap/fastify-adapter.js';
 import { registerPlugins } from '../../src/bootstrap/register-plugins.js';
 import { ImageStoragePort } from '../../src/domain/ports/image-storage.port.js';
 import { PrismaService } from '../../src/infrastructure/prisma/prisma.service.js';
@@ -42,7 +42,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<NestF
 
   const moduleRef = await builder.compile();
 
-  const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+  const app = moduleRef.createNestApplication<NestFastifyApplication>(createFastifyAdapter());
   await registerPlugins(app);
   app.setGlobalPrefix('api/v1');
   await app.init();
