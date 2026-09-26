@@ -1,5 +1,5 @@
 import type { CreateDeck, Deck } from '@deckup/shared';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 
 import { Button } from '../../components/ui/button';
@@ -15,10 +15,11 @@ import {
   Spinner,
 } from '../../components/ui/surfaces';
 import { ApiError } from '../../lib/api-client';
+import { useDebouncedValue } from '../../lib/use-debounced-value';
 import { useAnalyticsOverview } from '../analytics/hooks';
 import { DeckForm } from './deck-form';
 import type { DeckFormPayload } from './deck-form';
-import { useCreateDeck, useDecks } from './hooks';
+import { useCreateDeck, useDecks, useDeckSubjects } from './hooks';
 
 const PAGE_SIZE = 24;
 
@@ -29,13 +30,15 @@ export function DashboardPage() {
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const debouncedSearch = useDebouncedValue(search, 300);
+
   const decksQuery = useDecks({
-    q: search || undefined,
+    q: debouncedSearch || undefined,
     subject: subject || undefined,
     page,
     pageSize: PAGE_SIZE,
   });
-  const allDecksQuery = useDecks({ pageSize: 100 });
+  const subjectsQuery = useDeckSubjects();
   const overviewQuery = useAnalyticsOverview();
   const createDeck = useCreateDeck();
 
@@ -44,18 +47,7 @@ export function DashboardPage() {
   const totalPages = Math.max(1, Math.ceil(totalDecks / PAGE_SIZE));
   const isFiltering = search.length > 0 || subject.length > 0;
   const streak = overviewQuery.data?.streak;
-
-  const subjects = useMemo(() => {
-    const values = new Set<string>();
-
-    for (const deck of allDecksQuery.data?.items ?? []) {
-      if (deck.subject) {
-        values.add(deck.subject);
-      }
-    }
-
-    return [...values].sort((left, right) => left.localeCompare(right));
-  }, [allDecksQuery.data]);
+  const subjects = subjectsQuery.data?.subjects ?? [];
 
   const handleCreate = async (payload: DeckFormPayload) => {
     setFormError(null);

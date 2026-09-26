@@ -1,6 +1,6 @@
-import { Link, isRouteErrorResponse, useRouteError } from 'react-router';
+import { isRouteErrorResponse, useRouteError } from 'react-router';
 
-import { Button } from '../components/ui/button';
+import { LinkButton } from '../components/ui/link-button';
 import { EmptyState } from '../components/ui/surfaces';
 
 export function RouteErrorPage() {
@@ -11,12 +11,13 @@ export function RouteErrorPage() {
 
   return (
     <EmptyState
+      titleAs="h1"
       title="Unexpected error"
       description={description}
       action={
-        <Link to="/">
-          <Button variant="secondary">Back to the home page</Button>
-        </Link>
+        <LinkButton to="/" variant="secondary">
+          Back to the home page
+        </LinkButton>
       }
     />
   );

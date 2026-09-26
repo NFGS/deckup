@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router';
 
 import { AppProviders } from './app/providers';
 import { router } from './app/router';
+import { PwaUpdatePrompt } from './components/ui/pwa-update-prompt';
 import './index.css';
 
 const rootElement = document.getElementById('root');
@@ -16,6 +17,7 @@ createRoot(rootElement).render(
   <StrictMode>
     <AppProviders>
       <RouterProvider router={router} />
+      <PwaUpdatePrompt />
     </AppProviders>
   </StrictMode>,
 );

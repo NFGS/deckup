@@ -1,5 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { deckVisibilitySchema } from '@deckup/shared';
+import {
+  DECK_DESCRIPTION_MAX_LENGTH,
+  DECK_SUBJECT_MAX_LENGTH,
+  DECK_TAGS_MAX_COUNT,
+  DECK_TAG_MAX_LENGTH,
+  DECK_TITLE_MAX_LENGTH,
+  deckVisibilitySchema,
+} from '@deckup/shared';
 import type { Deck, DeckVisibility } from '@deckup/shared';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -10,18 +17,45 @@ import { Field, FormError } from '../../components/ui/field';
 import { parseTags } from './tags';
 
 // UI shape: tags arrive as a comma-separated string and are mapped to the
-// shared contract array when submitting.
+// shared contract array when submitting. Limits come from @deckup/shared so
+// the form can never drift from the API contract.
 const deckFormSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required').max(120, 'At most 120 characters'),
-  subject: z.string().trim().max(60, 'At most 60 characters'),
-  description: z.string().trim().max(500, 'At most 500 characters'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Title is required')
+    .max(DECK_TITLE_MAX_LENGTH, `At most ${DECK_TITLE_MAX_LENGTH} characters`),
+  subject: z
+    .string()
+    .trim()
+    .max(DECK_SUBJECT_MAX_LENGTH, `At most ${DECK_SUBJECT_MAX_LENGTH} characters`),
+  description: z
+    .string()
+    .trim()
+    .max(DECK_DESCRIPTION_MAX_LENGTH, `At most ${DECK_DESCRIPTION_MAX_LENGTH} characters`),
   color: z
     .string()
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, 'Use a hex color like #1E88E5')
     .or(z.literal('')),
   visibility: deckVisibilitySchema,
-  tags: z.string().trim().max(400, 'Too many tags'),
+  tags: z
+    .string()
+    .trim()
+    .superRefine((value, ctx) => {
+      const tags = parseTags(value);
+
+      if (tags.length > DECK_TAGS_MAX_COUNT) {
+        ctx.addIssue({ code: 'custom', message: `At most ${DECK_TAGS_MAX_COUNT} tags` });
+      }
+
+      if (tags.some((tag) => tag.length > DECK_TAG_MAX_LENGTH)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Tags can be at most ${DECK_TAG_MAX_LENGTH} characters`,
+        });
+      }
+    }),
 });
 
 type DeckFormValues = z.infer<typeof deckFormSchema>;

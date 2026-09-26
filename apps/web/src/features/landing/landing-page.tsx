@@ -1,7 +1,5 @@
-import { Link } from 'react-router';
-
-import { Button } from '../../components/ui/button';
 import { useAuth } from '../auth/auth-context';
+import { LinkButton } from '../../components/ui/link-button';
 
 const FEATURES = [
   {
@@ -23,7 +21,7 @@ export function LandingPage() {
   const isAuthenticated = status === 'authenticated';
 
   return (
-    <main className="flex flex-col items-center gap-12 py-10">
+    <div className="flex flex-col items-center gap-12 py-10">
       <header className="flex max-w-2xl flex-col items-center gap-5 text-center">
         <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1 text-xs font-semibold tracking-widest text-emerald-300 uppercase">
           Epic 03 · Education
@@ -35,17 +33,13 @@ export function LandingPage() {
 
         <div className="flex flex-wrap items-center justify-center gap-3">
           {isAuthenticated ? (
-            <Link to="/dashboard">
-              <Button>Go to my decks</Button>
-            </Link>
+            <LinkButton to="/dashboard">Go to my decks</LinkButton>
           ) : (
             <>
-              <Link to="/register">
-                <Button>Get started</Button>
-              </Link>
-              <Link to="/login">
-                <Button variant="secondary">Sign in</Button>
-              </Link>
+              <LinkButton to="/register">Get started</LinkButton>
+              <LinkButton to="/login" variant="secondary">
+                Sign in
+              </LinkButton>
             </>
           )}
         </div>
@@ -62,6 +56,6 @@ export function LandingPage() {
           </article>
         ))}
       </section>
-    </main>
+    </div>
   );
 }

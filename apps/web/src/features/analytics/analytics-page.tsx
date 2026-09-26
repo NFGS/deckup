@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { Button } from '../../components/ui/button';
 import {
   Card,
   CardDescription,
@@ -26,8 +27,14 @@ export function AnalyticsPage() {
   if (overview.isError || !overview.data) {
     return (
       <EmptyState
+        titleAs="h1"
         title="We could not load your analytics"
         description="Check your connection and try again."
+        action={
+          <Button variant="secondary" onClick={() => void overview.refetch()}>
+            Try again
+          </Button>
+        }
       />
     );
   }
@@ -77,13 +84,20 @@ export function AnalyticsPage() {
 
       <Card className="flex flex-col gap-4">
         <div>
-          <CardTitle>Next {FORECAST_DAYS} days</CardTitle>
+          <CardTitle as="h2">Next {FORECAST_DAYS} days</CardTitle>
           <CardDescription>Cards expected to come due each day.</CardDescription>
         </div>
 
         {forecast.isPending ? (
           <div className="flex justify-center py-10">
             <Spinner label="Loading forecast" />
+          </div>
+        ) : forecast.isError ? (
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <p className="text-sm text-slate-400">We could not load the forecast.</p>
+            <Button variant="secondary" size="sm" onClick={() => void forecast.refetch()}>
+              Try again
+            </Button>
           </div>
         ) : (
           <div className="h-64 w-full">

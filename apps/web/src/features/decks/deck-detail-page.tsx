@@ -1,11 +1,12 @@
 import type { Card, CreateCard, Deck } from '@deckup/shared';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/controls';
 import { FormError } from '../../components/ui/field';
 import { PencilIcon, PlusIcon, SearchIcon, TrashIcon } from '../../components/ui/icons';
+import { LinkButton } from '../../components/ui/link-button';
 import { Modal } from '../../components/ui/modal';
 import {
   Badge,
@@ -17,8 +18,9 @@ import {
 } from '../../components/ui/surfaces';
 import { ApiError } from '../../lib/api-client';
 import { downloadBlob } from '../../lib/download';
+import { useDebouncedValue } from '../../lib/use-debounced-value';
 import { GenerateCardsModal } from '../ai/generate-cards-modal';
-import type { GeneratedCardInput } from '../ai/generate-cards-modal';
+import type { GeneratedCardInput, GeneratedCardsResult } from '../ai/generate-cards-modal';
 import { CardForm } from './card-form';
 import type { CardFormPayload } from './card-form';
 import { DeckForm } from './deck-form';
@@ -56,10 +58,12 @@ export function DeckDetailPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const deckQuery = useDeck(deckId);
+  const debouncedSearch = useDebouncedValue(cardSearch, 300);
   const cardsQuery = useCards(deckId, {
-    q: cardSearch || undefined,
+    q: debouncedSearch || undefined,
     page,
     pageSize: PAGE_SIZE,
   });
@@ -73,6 +77,14 @@ export function DeckDetailPage() {
   const uploadCardImage = useUploadCardImage(deckId);
   const removeCardImage = useRemoveCardImage(deckId);
 
+  const loadedCards = cardsQuery.data?.items.length ?? 0;
+
+  useEffect(() => {
+    if (cardsQuery.isSuccess && loadedCards === 0 && page > 1) {
+      setPage((current) => Math.max(1, current - 1));
+    }
+  }, [cardsQuery.isSuccess, loadedCards, page]);
+
   if (deckQuery.isPending) {
     return (
       <div className="flex justify-center py-16">
@@ -82,14 +94,27 @@ export function DeckDetailPage() {
   }
 
   if (deckQuery.isError || !deckQuery.data) {
+    const notFound = deckQuery.error instanceof ApiError && deckQuery.error.status === 404;
+
     return (
       <EmptyState
-        title="Deck not found"
-        description="It may have been deleted, or it belongs to another account."
+        titleAs="h1"
+        title={notFound ? 'Deck not found' : 'We could not load this deck'}
+        description={
+          notFound
+            ? 'It may have been deleted, or it belongs to another account.'
+            : 'Check your connection and try again.'
+        }
         action={
-          <Link to="/dashboard">
-            <Button variant="secondary">Back to my decks</Button>
-          </Link>
+          notFound ? (
+            <LinkButton to="/dashboard" variant="secondary">
+              Back to my decks
+            </LinkButton>
+          ) : (
+            <Button variant="secondary" onClick={() => void deckQuery.refetch()}>
+              Try again
+            </Button>
+          )
         }
       />
     );
@@ -123,20 +148,32 @@ export function DeckDetailPage() {
   };
 
   const handleExport = async () => {
-    setFormError(null);
+    setExportError(null);
 
     try {
       const { blob, filename } = await exportDeck.mutateAsync(deckId);
       downloadBlob(blob, filename ?? `${deck.title}.csv`);
     } catch (error) {
-      setFormError(error instanceof ApiError ? error.message : 'Unable to export the deck');
+      setExportError(error instanceof ApiError ? error.message : 'Unable to export the deck');
     }
   };
 
-  const handleAddGenerated = async (cards: GeneratedCardInput[]) => {
+  const handleAddGenerated = async (cards: GeneratedCardInput[]): Promise<GeneratedCardsResult> => {
+    let created = 0;
+
     for (const card of cards) {
-      await createCard.mutateAsync({ ...card, tags: [] });
+      try {
+        await createCard.mutateAsync({ ...card, tags: [] });
+        created += 1;
+      } catch (error) {
+        return {
+          created,
+          error: error instanceof ApiError ? error.message : 'Unable to add the generated cards',
+        };
+      }
     }
+
+    return { created };
   };
 
   const handleCardSubmit = async (payload: CardFormPayload) => {
@@ -167,11 +204,16 @@ export function DeckDetailPage() {
       return;
     }
 
+    const cardId = cardModal.card.id;
     setImageError(null);
 
     try {
-      const updated = await uploadCardImage.mutateAsync({ cardId: cardModal.card.id, file });
-      setCardModal({ mode: 'edit', card: updated });
+      const updated = await uploadCardImage.mutateAsync({ cardId, file });
+      setCardModal((current) =>
+        current?.mode === 'edit' && current.card.id === cardId
+          ? { mode: 'edit', card: updated }
+          : current,
+      );
     } catch (error) {
       setImageError(error instanceof ApiError ? error.message : 'Unable to upload the image');
     }
@@ -182,11 +224,16 @@ export function DeckDetailPage() {
       return;
     }
 
+    const cardId = cardModal.card.id;
     setImageError(null);
 
     try {
-      const updated = await removeCardImage.mutateAsync(cardModal.card.id);
-      setCardModal({ mode: 'edit', card: updated });
+      const updated = await removeCardImage.mutateAsync(cardId);
+      setCardModal((current) =>
+        current?.mode === 'edit' && current.card.id === cardId
+          ? { mode: 'edit', card: updated }
+          : current,
+      );
     } catch (error) {
       setImageError(error instanceof ApiError ? error.message : 'Unable to remove the image');
     }
@@ -229,9 +276,7 @@ export function DeckDetailPage() {
         </div>
 
         <div className="flex gap-2">
-          <Link to={`/decks/${deckId}/study`}>
-            <Button>Study</Button>
-          </Link>
+          <LinkButton to={`/decks/${deckId}/study`}>Study</LinkButton>
           <Button variant="secondary" onClick={() => setEditOpen(true)}>
             <PencilIcon className="h-4 w-4" />
             Edit
@@ -242,6 +287,8 @@ export function DeckDetailPage() {
           </Button>
         </div>
       </header>
+
+      <FormError message={exportError ?? undefined} />
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -276,6 +323,7 @@ export function DeckDetailPage() {
             <Button
               onClick={() => {
                 setFormError(null);
+                setImageError(null);
                 setCardModal({ mode: 'create' });
               }}
             >
@@ -289,6 +337,16 @@ export function DeckDetailPage() {
           <div className="flex justify-center py-12">
             <Spinner label="Loading cards" />
           </div>
+        ) : cardsQuery.isError ? (
+          <EmptyState
+            title="We could not load the cards"
+            description="Check your connection and try again."
+            action={
+              <Button variant="secondary" onClick={() => void cardsQuery.refetch()}>
+                Try again
+              </Button>
+            }
+          />
         ) : cards.length === 0 ? (
           <EmptyState
             title={cardSearch ? 'No cards match your search' : 'This deck has no cards yet'}
@@ -306,6 +364,7 @@ export function DeckDetailPage() {
                   card={card}
                   onEdit={() => {
                     setFormError(null);
+                    setImageError(null);
                     setCardModal({ mode: 'edit', card });
                   }}
                   onDelete={() => setCardToDelete(card)}
@@ -437,6 +496,9 @@ function CardRow({
           <img
             src={card.imageUrl}
             alt={`Image of the card ${card.front}`}
+            width={64}
+            height={64}
+            loading="lazy"
             className="h-16 w-16 shrink-0 rounded-lg bg-slate-950/40 object-cover"
           />
         ) : null}

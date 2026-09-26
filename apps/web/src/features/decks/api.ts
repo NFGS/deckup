@@ -3,6 +3,7 @@ import {
   createCardSchema,
   createDeckSchema,
   deckSchema,
+  deckSubjectsResponseSchema,
   importSummarySchema,
   pageSchema,
   updateCardSchema,
@@ -15,6 +16,7 @@ import type {
   CreateDeck,
   Deck,
   DeckListQuery,
+  DeckSubjectsResponse,
   ImportSummary,
   Page,
   UpdateCard,
@@ -23,23 +25,15 @@ import type {
 
 import { apiDownload, apiRequest, apiUpload } from '../../lib/api-client';
 import type { DownloadedFile } from '../../lib/api-client';
+import { toQueryString } from '../../lib/query-string';
 
 const deckPageSchema = pageSchema(deckSchema);
 const cardPageSchema = pageSchema(cardSchema);
 
-function toQueryString(entries: Record<string, string | number | undefined>): string {
-  const params = new URLSearchParams();
-
-  for (const [key, value] of Object.entries(entries)) {
-    if (value !== undefined && value !== '') {
-      params.set(key, String(value));
-    }
-  }
-
-  return params.toString();
-}
-
-export async function listDecks(query: Partial<DeckListQuery> = {}): Promise<Page<Deck>> {
+export async function listDecks(
+  query: Partial<DeckListQuery> = {},
+  signal?: AbortSignal,
+): Promise<Page<Deck>> {
   const search = toQueryString({
     q: query.q,
     subject: query.subject,
@@ -48,7 +42,11 @@ export async function listDecks(query: Partial<DeckListQuery> = {}): Promise<Pag
     pageSize: query.pageSize ?? 24,
   });
 
-  return apiRequest(`/decks?${search}`, { schema: deckPageSchema });
+  return apiRequest(`/decks?${search}`, { schema: deckPageSchema, signal });
+}
+
+export async function listDeckSubjects(signal?: AbortSignal): Promise<DeckSubjectsResponse> {
+  return apiRequest('/decks/subjects', { schema: deckSubjectsResponseSchema, signal });
 }
 
 export async function getDeck(deckId: string): Promise<Deck> {
@@ -78,6 +76,7 @@ export async function deleteDeck(deckId: string): Promise<void> {
 export async function listCards(
   deckId: string,
   query: Partial<CardListQuery> = {},
+  signal?: AbortSignal,
 ): Promise<Page<Card>> {
   const search = toQueryString({
     q: query.q,
@@ -85,7 +84,7 @@ export async function listCards(
     pageSize: query.pageSize ?? 50,
   });
 
-  return apiRequest(`/decks/${deckId}/cards?${search}`, { schema: cardPageSchema });
+  return apiRequest(`/decks/${deckId}/cards?${search}`, { schema: cardPageSchema, signal });
 }
 
 export async function createCard(deckId: string, input: CreateCard): Promise<Card> {

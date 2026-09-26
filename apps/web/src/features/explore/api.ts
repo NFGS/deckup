@@ -2,23 +2,13 @@ import { cloneDeckSchema, deckSchema, pageSchema, publicDeckSchema } from '@deck
 import type { CloneDeck, Deck, Page, PublicDeck, PublicDeckListQuery } from '@deckup/shared';
 
 import { apiRequest } from '../../lib/api-client';
+import { toQueryString } from '../../lib/query-string';
 
 const publicDeckPageSchema = pageSchema(publicDeckSchema);
 
-function toQueryString(entries: Record<string, string | number | undefined>): string {
-  const params = new URLSearchParams();
-
-  for (const [key, value] of Object.entries(entries)) {
-    if (value !== undefined && value !== '') {
-      params.set(key, String(value));
-    }
-  }
-
-  return params.toString();
-}
-
 export async function listPublicDecks(
   query: Partial<PublicDeckListQuery> = {},
+  signal?: AbortSignal,
 ): Promise<Page<PublicDeck>> {
   const search = toQueryString({
     q: query.q,
@@ -27,7 +17,7 @@ export async function listPublicDecks(
     pageSize: query.pageSize ?? 24,
   });
 
-  return apiRequest(`/decks/public?${search}`, { schema: publicDeckPageSchema });
+  return apiRequest(`/decks/public?${search}`, { schema: publicDeckPageSchema, signal });
 }
 
 export async function cloneDeck(deckId: string, input: CloneDeck = {}): Promise<Deck> {

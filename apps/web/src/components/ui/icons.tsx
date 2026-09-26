@@ -70,12 +70,3 @@ export function LogOutIcon(props: IconProps) {
     </Icon>
   );
 }
-
-export function CardsIcon(props: IconProps) {
-  return (
-    <Icon {...props}>
-      <rect x={3} y={8} width={13} height={13} rx={2} />
-      <path d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3" />
-    </Icon>
-  );
-}

@@ -1,17 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { queryKeys } from '../../lib/query-keys';
 import { fetchAnalyticsOverview, fetchForecast } from './api';
 
 export function useAnalyticsOverview() {
   return useQuery({
-    queryKey: ['analytics', 'overview'],
+    queryKey: queryKeys.analytics.overview,
     queryFn: fetchAnalyticsOverview,
   });
 }
 
 export function useForecast(days = 7) {
   return useQuery({
-    queryKey: ['analytics', 'forecast', days],
+    queryKey: queryKeys.analytics.forecast(days),
     queryFn: () => fetchForecast(days),
   });
 }

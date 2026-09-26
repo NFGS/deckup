@@ -16,13 +16,25 @@ export interface GeneratedCardInput {
   hint?: string;
 }
 
+export interface GeneratedCardsResult {
+  created: number;
+  error?: string;
+}
+
 export interface GenerateCardsModalProps {
   open: boolean;
   onClose: () => void;
-  onAddCards: (cards: GeneratedCardInput[]) => Promise<void>;
+  /**
+   * Adds the selected suggestions. Resolves with how many were persisted and,
+   * on a partial failure, the error to show; the modal keeps only the cards
+   * that were not added so retrying never duplicates them.
+   */
+  onAddCards: (cards: GeneratedCardInput[]) => Promise<GeneratedCardsResult>;
 }
 
 const DEFAULT_MAX_CARDS = 10;
+const MIN_CARDS = 1;
+const MAX_CARDS = 30;
 
 export function GenerateCardsModal({ open, onClose, onAddCards }: GenerateCardsModalProps) {
   const [notes, setNotes] = useState('');
@@ -33,6 +45,11 @@ export function GenerateCardsModal({ open, onClose, onAddCards }: GenerateCardsM
   const [isAdding, setAdding] = useState(false);
 
   const generate = useGenerateCardSuggestions();
+
+  const maxCardsError =
+    Number.isInteger(maxCards) && maxCards >= MIN_CARDS && maxCards <= MAX_CARDS
+      ? null
+      : `Choose a number between ${MIN_CARDS} and ${MAX_CARDS}`;
 
   const close = () => {
     setNotes('');
@@ -75,13 +92,19 @@ export function GenerateCardsModal({ open, onClose, onAddCards }: GenerateCardsM
   };
 
   const handleAdd = async () => {
-    const cards = suggestions
-      .filter((_, index) => selected.has(index))
-      .map((suggestion) => ({
+    const selectedIndexes = suggestions
+      .map((_, index) => index)
+      .filter((index) => selected.has(index));
+
+    const cards = selectedIndexes.map((index) => {
+      const suggestion = suggestions[index] as CardSuggestion;
+
+      return {
         front: suggestion.front,
         back: suggestion.back,
         hint: suggestion.hint ?? undefined,
-      }));
+      };
+    });
 
     if (cards.length === 0) {
       setError('Select at least one suggestion');
@@ -91,7 +114,20 @@ export function GenerateCardsModal({ open, onClose, onAddCards }: GenerateCardsM
     setAdding(true);
 
     try {
-      await onAddCards(cards);
+      const result = await onAddCards(cards);
+
+      if (result.error) {
+        const addedIndexes = new Set(selectedIndexes.slice(0, result.created));
+        const remaining = suggestions.filter((_, index) => !addedIndexes.has(index));
+
+        setSuggestions(remaining);
+        setSelected(new Set(remaining.map((_, index) => index)));
+        setError(
+          `${result.created} of ${cards.length} cards were added. ${result.error} Retry to add the rest.`,
+        );
+        return;
+      }
+
       close();
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : 'Unable to add the selected cards');
@@ -120,19 +156,25 @@ export function GenerateCardsModal({ open, onClose, onAddCards }: GenerateCardsM
         </Field>
 
         <div className="flex items-end gap-3">
-          <Field label="Cards" htmlFor="ai-max-cards">
+          <Field label="Cards" htmlFor="ai-max-cards" error={maxCardsError ?? undefined}>
             <Input
               id="ai-max-cards"
               type="number"
-              min={1}
-              max={30}
+              min={MIN_CARDS}
+              max={MAX_CARDS}
               className="w-24"
               value={maxCards}
-              onChange={(event) => setMaxCards(Number(event.target.value))}
+              onChange={(event) => {
+                const value = event.target.value;
+                setMaxCards(value === '' ? Number.NaN : Number(value));
+              }}
             />
           </Field>
 
-          <Button type="submit" disabled={generate.isPending || notes.trim().length < 20}>
+          <Button
+            type="submit"
+            disabled={generate.isPending || notes.trim().length < 20 || maxCardsError !== null}
+          >
             {generate.isPending ? 'Generating…' : 'Generate suggestions'}
           </Button>
         </div>

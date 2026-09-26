@@ -53,6 +53,10 @@ beforeEach(() => {
       );
     }
 
+    if (url.includes('/decks/subjects')) {
+      return Promise.resolve(jsonResponse({ subjects: ['Biology', 'History'] }));
+    }
+
     if (url.includes('/decks')) {
       const subject = new URL(url, 'http://localhost').searchParams.get('subject');
       const items = subject === 'Biology' ? [BIOLOGY_DECK] : [BIOLOGY_DECK, HISTORY_DECK];

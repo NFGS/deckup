@@ -23,6 +23,7 @@ export interface ModalProps {
 
 export function Modal({ open, title, onClose, children, footer }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const backdropPressedRef = useRef(false);
   const titleId = useId();
   const onCloseRef = useRef(onClose);
 
@@ -36,6 +37,8 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
     }
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -62,12 +65,20 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
 
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      const active = document.activeElement;
+
+      if (!panel.contains(active)) {
         event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+        first?.focus();
+        return;
+      }
+
+      if (event.shiftKey && active === first) {
         event.preventDefault();
-        first.focus();
+        last?.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first?.focus();
       }
     };
 
@@ -76,6 +87,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
       previouslyFocused?.focus();
     };
   }, [open]);
@@ -88,9 +100,14 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
+        backdropPressedRef.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        if (backdropPressedRef.current && event.target === event.currentTarget) {
           onClose();
         }
+
+        backdropPressedRef.current = false;
       }}
     >
       <div

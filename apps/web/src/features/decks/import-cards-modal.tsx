@@ -1,4 +1,5 @@
 import type { ImportSummary } from '@deckup/shared';
+import { IMPORT_MAX_BYTES } from '@deckup/shared';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
@@ -43,6 +44,11 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
       return;
     }
 
+    if (file.size > IMPORT_MAX_BYTES) {
+      setError('The CSV file must be at most 1 MB');
+      return;
+    }
+
     setError(null);
 
     try {
@@ -72,9 +78,19 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
             accept=".csv,text/csv"
             className={FILE_INPUT_CLASSES}
             onChange={(event) => {
-              setFile(event.target.files?.[0] ?? null);
+              const selected = event.target.files?.[0] ?? null;
+
               setImportedFile(null);
               setSummary(null);
+
+              if (selected && selected.size > IMPORT_MAX_BYTES) {
+                setFile(null);
+                setError('The CSV file must be at most 1 MB');
+                return;
+              }
+
+              setError(null);
+              setFile(selected);
             }}
           />
         </Field>
@@ -102,8 +118,8 @@ export function ImportCardsModal({ deckId, open, onClose }: ImportCardsModalProp
 
             {summary.errors.length > 0 ? (
               <ul className="mt-2 flex flex-col gap-1 text-xs text-rose-300">
-                {summary.errors.map((rowError) => (
-                  <li key={`${rowError.row}-${rowError.message}`}>
+                {summary.errors.map((rowError, index) => (
+                  <li key={`${rowError.row}-${rowError.message}-${index}`}>
                     Row {rowError.row}: {rowError.message}
                   </li>
                 ))}

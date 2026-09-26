@@ -1,5 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CARD_IMAGE_MAX_BYTES, CARD_IMAGE_MIME_TYPES } from '@deckup/shared';
+import {
+  CARD_BACK_MAX_LENGTH,
+  CARD_FRONT_MAX_LENGTH,
+  CARD_HINT_MAX_LENGTH,
+  CARD_IMAGE_MAX_BYTES,
+  CARD_IMAGE_MIME_TYPES,
+  CARD_TAGS_MAX_COUNT,
+  CARD_TAG_MAX_LENGTH,
+} from '@deckup/shared';
 import type { Card, CardDifficulty } from '@deckup/shared';
 import { useState } from 'react';
 import type { ChangeEvent } from 'react';
@@ -11,12 +19,37 @@ import { Input, Select, Textarea } from '../../components/ui/controls';
 import { Field, FormError } from '../../components/ui/field';
 import { parseTags } from './tags';
 
+// Limits come from @deckup/shared so the form can never drift from the API.
 const cardFormSchema = z.object({
-  front: z.string().trim().min(1, 'Front is required').max(2000, 'At most 2000 characters'),
-  back: z.string().trim().min(1, 'Back is required').max(2000, 'At most 2000 characters'),
-  hint: z.string().trim().max(300, 'At most 300 characters'),
+  front: z
+    .string()
+    .trim()
+    .min(1, 'Front is required')
+    .max(CARD_FRONT_MAX_LENGTH, `At most ${CARD_FRONT_MAX_LENGTH} characters`),
+  back: z
+    .string()
+    .trim()
+    .min(1, 'Back is required')
+    .max(CARD_BACK_MAX_LENGTH, `At most ${CARD_BACK_MAX_LENGTH} characters`),
+  hint: z.string().trim().max(CARD_HINT_MAX_LENGTH, `At most ${CARD_HINT_MAX_LENGTH} characters`),
   difficulty: z.enum(['', 'EASY', 'MEDIUM', 'HARD']),
-  tags: z.string().trim().max(400, 'Too many tags'),
+  tags: z
+    .string()
+    .trim()
+    .superRefine((value, ctx) => {
+      const tags = parseTags(value);
+
+      if (tags.length > CARD_TAGS_MAX_COUNT) {
+        ctx.addIssue({ code: 'custom', message: `At most ${CARD_TAGS_MAX_COUNT} tags` });
+      }
+
+      if (tags.some((tag) => tag.length > CARD_TAG_MAX_LENGTH)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Tags can be at most ${CARD_TAG_MAX_LENGTH} characters`,
+        });
+      }
+    }),
 });
 
 type CardFormValues = z.infer<typeof cardFormSchema>;

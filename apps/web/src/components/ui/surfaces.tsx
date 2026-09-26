@@ -37,8 +37,12 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('text-base font-semibold text-white', className)} {...props} />;
+export function CardTitle({
+  className,
+  as: Title = 'h3',
+  ...props
+}: HTMLAttributes<HTMLHeadingElement> & { as?: 'h1' | 'h2' | 'h3' | 'h4' }) {
+  return <Title className={cn('text-base font-semibold text-white', className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
@@ -69,14 +73,17 @@ export function EmptyState({
   title,
   description,
   action,
+  titleAs: Title = 'h3',
 }: {
   title: string;
   description?: string;
   action?: ReactNode;
+  /** Heading level for the title; use `h1` for full-page states. */
+  titleAs?: 'h1' | 'h2' | 'h3';
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 px-6 py-12 text-center">
-      <h3 className="text-base font-semibold text-white">{title}</h3>
+      <Title className="text-base font-semibold text-white">{title}</Title>
       {description ? <p className="max-w-md text-sm text-slate-400">{description}</p> : null}
       {action}
     </div>

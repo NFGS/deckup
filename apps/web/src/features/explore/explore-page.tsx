@@ -14,6 +14,7 @@ import {
   Spinner,
 } from '../../components/ui/surfaces';
 import { ApiError } from '../../lib/api-client';
+import { useDebouncedValue } from '../../lib/use-debounced-value';
 import { useCloneDeck, usePublicDecks } from './hooks';
 
 const PAGE_SIZE = 24;
@@ -24,7 +25,12 @@ export function ExplorePage() {
   const [error, setError] = useState<string | null>(null);
   const [cloningId, setCloningId] = useState<string | null>(null);
 
-  const decksQuery = usePublicDecks({ q: search || undefined, page, pageSize: PAGE_SIZE });
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const decksQuery = usePublicDecks({
+    q: debouncedSearch || undefined,
+    page,
+    pageSize: PAGE_SIZE,
+  });
   const cloneDeck = useCloneDeck();
   const navigate = useNavigate();
 

@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { cloneElement, isValidElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { cn } from '../../lib/utils';
 
@@ -10,16 +11,36 @@ export interface FieldProps {
   children: ReactNode;
 }
 
+interface AriaProps {
+  'aria-invalid'?: boolean;
+  'aria-describedby'?: string;
+}
+
 export function Field({ label, htmlFor, error, hint, children }: FieldProps) {
+  const hintId = `${htmlFor}-hint`;
+  const errorId = `${htmlFor}-error`;
+  const describedBy = error ? errorId : hint ? hintId : undefined;
+
+  const control = isValidElement(children)
+    ? cloneElement(children as ReactElement<AriaProps>, {
+        'aria-invalid': error ? true : undefined,
+        'aria-describedby': describedBy,
+      })
+    : children;
+
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={htmlFor} className="text-sm font-medium text-slate-200">
         {label}
       </label>
-      {children}
-      {hint && !error ? <p className="text-xs text-slate-400">{hint}</p> : null}
+      {control}
+      {hint && !error ? (
+        <p id={hintId} className="text-xs text-slate-400">
+          {hint}
+        </p>
+      ) : null}
       {error ? (
-        <p role="alert" className="text-xs text-rose-400">
+        <p id={errorId} role="alert" className="text-xs text-rose-400">
           {error}
         </p>
       ) : null}
