@@ -8,6 +8,7 @@ import { ImageStoragePort } from '../../domain/ports/image-storage.port.js';
 import type { ImageUploadInput, StoredImage } from '../../domain/ports/image-storage.port.js';
 
 const REQUEST_TIMEOUT_MS = 15_000;
+const DELIVERY_TYPE = 'authenticated';
 
 const uploadResponseSchema = z.object({
   secure_url: z.url(),
@@ -16,32 +17,91 @@ const uploadResponseSchema = z.object({
 
 const destroyResponseSchema = z.object({ result: z.string() });
 
+interface CloudinaryCredentials {
+  cloudName: string;
+  apiKey: string;
+  apiSecret: string;
+}
+
+export interface ConfigReader {
+  get(key: string): unknown;
+}
+
+function readString(config: ConfigReader, key: string): string | undefined {
+  const value = config.get(key);
+
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+/**
+ * Resolves Cloudinary credentials from the individual variables or from the
+ * `CLOUDINARY_URL` format (`cloudinary://api_key:api_secret@cloud_name`).
+ */
+export function resolveCloudinaryCredentials(config: ConfigReader): CloudinaryCredentials | null {
+  const cloudName = readString(config, 'CLOUDINARY_CLOUD_NAME');
+  const apiKey = readString(config, 'CLOUDINARY_API_KEY');
+  const apiSecret = readString(config, 'CLOUDINARY_API_SECRET');
+
+  if (cloudName && apiKey && apiSecret) {
+    return { cloudName, apiKey, apiSecret };
+  }
+
+  const url = readString(config, 'CLOUDINARY_URL');
+
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (
+      parsed.protocol !== 'cloudinary:' ||
+      !parsed.hostname ||
+      !parsed.username ||
+      !parsed.password
+    ) {
+      return null;
+    }
+
+    return {
+      cloudName: parsed.hostname,
+      apiKey: decodeURIComponent(parsed.username),
+      apiSecret: decodeURIComponent(parsed.password),
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Cloudinary adapter (RF-05, NFR-03.3): signed upload and destroy calls over
  * the REST API, so no provider SDK is required.
+ *
+ * Assets are uploaded as `authenticated` and the stored URL is signed, so a
+ * card image is only reachable through its owner's signed delivery URL.
  */
 export class CloudinaryImageStorage extends ImageStoragePort {
-  private readonly cloudName: string | undefined;
-  private readonly apiKey: string | undefined;
-  private readonly apiSecret: string | undefined;
+  private readonly credentials: CloudinaryCredentials | null;
   private readonly folder: string;
 
   constructor(config: ConfigService) {
     super();
-    this.cloudName = config.get<string>('CLOUDINARY_CLOUD_NAME');
-    this.apiKey = config.get<string>('CLOUDINARY_API_KEY');
-    this.apiSecret = config.get<string>('CLOUDINARY_API_SECRET');
+    this.credentials = resolveCloudinaryCredentials(config);
     this.folder = config.get<string>('CLOUDINARY_FOLDER') ?? 'deckup/cards';
   }
 
   get isEnabled(): boolean {
-    return Boolean(this.cloudName && this.apiKey && this.apiSecret);
+    return this.credentials !== null;
   }
 
   async upload(input: ImageUploadInput): Promise<StoredImage> {
-    const credentials = this.credentials();
+    const credentials = this.requireCredentials();
     const timestamp = Math.floor(Date.now() / 1000).toString();
-    const signature = sign({ folder: this.folder, timestamp }, credentials.apiSecret);
+    const signature = sign(
+      { folder: this.folder, sign_url: 'true', timestamp, type: DELIVERY_TYPE },
+      credentials.apiSecret,
+    );
 
     const form = new FormData();
     form.append(
@@ -52,6 +112,8 @@ export class CloudinaryImageStorage extends ImageStoragePort {
     form.append('api_key', credentials.apiKey);
     form.append('timestamp', timestamp);
     form.append('folder', this.folder);
+    form.append('type', DELIVERY_TYPE);
+    form.append('sign_url', 'true');
     form.append('signature', signature);
 
     const payload = await this.request('/image/upload', { method: 'POST', body: form });
@@ -67,13 +129,17 @@ export class CloudinaryImageStorage extends ImageStoragePort {
   }
 
   async remove(publicId: string): Promise<void> {
-    const credentials = this.credentials();
+    const credentials = this.requireCredentials();
     const timestamp = Math.floor(Date.now() / 1000).toString();
-    const signature = sign({ public_id: publicId, timestamp }, credentials.apiSecret);
+    const signature = sign(
+      { public_id: publicId, timestamp, type: DELIVERY_TYPE },
+      credentials.apiSecret,
+    );
 
     const body = new URLSearchParams({
       public_id: publicId,
       timestamp,
+      type: DELIVERY_TYPE,
       api_key: credentials.apiKey,
       signature,
     });
@@ -91,19 +157,20 @@ export class CloudinaryImageStorage extends ImageStoragePort {
     }
   }
 
-  private credentials(): { apiKey: string; apiSecret: string } {
-    if (!this.cloudName || !this.apiKey || !this.apiSecret) {
+  private requireCredentials(): CloudinaryCredentials {
+    if (!this.credentials) {
       throw new ServiceUnavailableError('Card image storage is not configured');
     }
 
-    return { apiKey: this.apiKey, apiSecret: this.apiSecret };
+    return this.credentials;
   }
 
   private async request(path: string, init: RequestInit): Promise<unknown> {
+    const { cloudName } = this.requireCredentials();
     let response: Response;
 
     try {
-      response = await fetch(`https://api.cloudinary.com/v1_1/${this.cloudName}${path}`, {
+      response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}${path}`, {
         ...init,
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
