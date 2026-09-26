@@ -11,6 +11,7 @@ export interface StoredRefreshToken {
 export abstract class RefreshTokenRepositoryPort {
   abstract create(token: StoredRefreshToken): Promise<void>;
   abstract findByHash(tokenHash: string): Promise<StoredRefreshToken | null>;
-  abstract revokeByHash(tokenHash: string, revokedAt: Date): Promise<void>;
+  /** Revokes the token only if it is still active; returns whether this call revoked it. */
+  abstract revokeByHash(tokenHash: string, revokedAt: Date): Promise<boolean>;
   abstract revokeFamily(familyId: string, revokedAt: Date): Promise<void>;
 }

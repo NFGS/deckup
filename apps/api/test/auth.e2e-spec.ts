@@ -152,6 +152,24 @@ describe('Auth (e2e)', () => {
       .expect(401);
   });
 
+  it('allows only one of two concurrent refreshes', async () => {
+    const registered = await request(server())
+      .post(`${API_PREFIX}/auth/register`)
+      .send(DEFAULT_ACCOUNT)
+      .expect(201);
+    const cookie = extractRefreshCookie(registered.headers);
+
+    const refresh = () =>
+      request(server())
+        .post(`${API_PREFIX}/auth/refresh`)
+        .set('Cookie', cookie)
+        .set('X-Requested-With', 'DeckUpWeb');
+
+    const [first, second] = await Promise.all([refresh(), refresh()]);
+
+    expect([first.status, second.status].sort()).toEqual([200, 401]);
+  });
+
   it('requires the CSRF header on cookie-based endpoints', async () => {
     const registered = await request(server())
       .post(`${API_PREFIX}/auth/register`)

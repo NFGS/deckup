@@ -44,7 +44,13 @@ export class RefreshSessionUseCase {
       throw new UnauthorizedError('Account no longer exists');
     }
 
-    await this.refreshTokens.revokeByHash(tokenHash, new Date());
+    const revoked = await this.refreshTokens.revokeByHash(tokenHash, new Date());
+
+    if (!revoked) {
+      this.logger.warn(`Concurrent refresh detected for user ${stored.userId}; revoking family`);
+      await this.refreshTokens.revokeFamily(stored.familyId, new Date());
+      throw new UnauthorizedError('Refresh token reuse detected; session revoked');
+    }
 
     return this.sessions.issue(user, { familyId: stored.familyId });
   }

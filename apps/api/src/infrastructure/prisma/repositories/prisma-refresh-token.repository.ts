@@ -28,11 +28,13 @@ export class PrismaRefreshTokenRepository extends RefreshTokenRepositoryPort {
     return this.prisma.refreshToken.findUnique({ where: { tokenHash } });
   }
 
-  async revokeByHash(tokenHash: string, revokedAt: Date): Promise<void> {
-    await this.prisma.refreshToken.updateMany({
+  async revokeByHash(tokenHash: string, revokedAt: Date): Promise<boolean> {
+    const result = await this.prisma.refreshToken.updateMany({
       where: { tokenHash, revokedAt: null },
       data: { revokedAt },
     });
+
+    return result.count > 0;
   }
 
   async revokeFamily(familyId: string, revokedAt: Date): Promise<void> {

@@ -13,12 +13,15 @@ export class InMemoryRefreshTokenRepository extends RefreshTokenRepositoryPort {
     return Promise.resolve(this.tokens.get(tokenHash) ?? null);
   }
 
-  revokeByHash(tokenHash: string, revokedAt: Date): Promise<void> {
+  revokeByHash(tokenHash: string, revokedAt: Date): Promise<boolean> {
     const token = this.tokens.get(tokenHash);
+
     if (token && !token.revokedAt) {
       this.tokens.set(tokenHash, { ...token, revokedAt });
+      return Promise.resolve(true);
     }
-    return Promise.resolve();
+
+    return Promise.resolve(false);
   }
 
   revokeFamily(familyId: string, revokedAt: Date): Promise<void> {
