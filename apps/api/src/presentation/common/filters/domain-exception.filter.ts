@@ -19,13 +19,25 @@ const TITLE_BY_STATUS: Record<number, string> = {
   401: 'Unauthorized',
   403: 'Forbidden',
   404: 'Not found',
+  405: 'Method not allowed',
+  406: 'Not acceptable',
+  408: 'Request timeout',
   409: 'Conflict',
   413: 'Payload too large',
+  415: 'Unsupported media type',
   422: 'Validation failed',
   429: 'Too many requests',
   500: 'Internal server error',
+  502: 'Bad gateway',
   503: 'Service unavailable',
+  504: 'Gateway timeout',
 };
+
+const GENERIC_SERVER_DETAIL = 'An unexpected error occurred';
+
+function safeDetail(status: number, detail: string): string {
+  return status >= 500 ? GENERIC_SERVER_DETAIL : detail;
+}
 
 interface ProblemPayload {
   type: string;
@@ -87,7 +99,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
           type: `https://deckup.app/problems/http-${status}`,
           title: TITLE_BY_STATUS[status] ?? 'Request failed',
           status,
-          detail,
+          detail: safeDetail(status, detail),
           instance,
         },
       };
@@ -102,7 +114,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
           type: `https://deckup.app/problems/http-${status}`,
           title: TITLE_BY_STATUS[status] ?? 'Request failed',
           status,
-          detail: exception.message,
+          detail: safeDetail(status, exception.message),
           instance,
         },
       };

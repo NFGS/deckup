@@ -22,6 +22,7 @@ describe('UploadCardImageUseCase', () => {
     useCase = new UploadCardImageUseCase(cards, images);
     card = Card.create({ deckId: 'deck-1', front: 'Question', back: 'Answer' });
     await cards.create(card);
+    cards.registerDeckOwner('deck-1', 'user-1');
   });
 
   it('stores a PNG and persists the delivery URL', async () => {

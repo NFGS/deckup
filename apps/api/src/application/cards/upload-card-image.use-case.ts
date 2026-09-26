@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CARD_IMAGE_MAX_BYTES } from '@deckup/shared';
 
 import type { Card } from '../../domain/entities/card.entity.js';
@@ -17,6 +17,8 @@ const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0
 
 @Injectable()
 export class UploadCardImageUseCase {
+  private readonly logger = new Logger(UploadCardImageUseCase.name);
+
   constructor(
     @Inject(CardRepository) private readonly cards: CardRepositoryPort,
     @Inject(ImageStoragePort) private readonly images: ImageStoragePort,
@@ -40,7 +42,13 @@ export class UploadCardImageUseCase {
     });
 
     if (card.imagePublicId) {
-      await this.images.remove(card.imagePublicId).catch(() => undefined);
+      await this.images.remove(card.imagePublicId).catch((error: unknown) => {
+        this.logger.warn(
+          `Could not delete the replaced image ${card.imagePublicId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      });
     }
 
     const updated = card.update({ imageUrl: stored.url, imagePublicId: stored.publicId });

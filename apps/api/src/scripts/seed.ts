@@ -13,6 +13,8 @@ import { Email } from '../domain/value-objects/email.vo.js';
 
 const DEMO_EMAIL = process.env.SEED_EMAIL ?? 'demo@deckup.local';
 const DEMO_PASSWORD = process.env.SEED_PASSWORD ?? 'deckup-demo-1';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const PRODUCTION_CONFIRMED = process.env.SEED_ALLOW_PRODUCTION === 'true';
 
 const DEMO_CARDS = [
   {
@@ -48,6 +50,12 @@ const DEMO_CARDS = [
 ];
 
 async function seed(): Promise<void> {
+  if (IS_PRODUCTION && (!process.env.SEED_PASSWORD || !PRODUCTION_CONFIRMED)) {
+    throw new Error(
+      'Refusing to seed a production database: set SEED_PASSWORD and SEED_ALLOW_PRODUCTION=true to confirm.',
+    );
+  }
+
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
@@ -86,10 +94,7 @@ async function seed(): Promise<void> {
       await createCard.execute(deck.id, user.id, { ...card, tags: ['demo'] });
     }
 
-    Logger.log(
-      `Seeded ${DEMO_CARDS.length} cards for ${DEMO_EMAIL} (password: ${DEMO_PASSWORD}).`,
-      'Seed',
-    );
+    Logger.log(`Seeded ${DEMO_CARDS.length} cards for ${DEMO_EMAIL}.`, 'Seed');
   } finally {
     await app.close();
   }

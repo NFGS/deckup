@@ -15,6 +15,8 @@ const SYSTEM_PROMPT = [
   'Write in the language of the notes and never invent facts that are not in them.',
 ].join(' ');
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 const providerResponseSchema = z.object({
   cards: z.array(
     z.object({
@@ -74,6 +76,7 @@ export class OpenAiCardGenerator extends CardGeneratorPort {
             },
           ],
         }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
     } catch {
       throw new ServiceUnavailableError('The AI provider could not be reached');
@@ -85,7 +88,15 @@ export class OpenAiCardGenerator extends CardGeneratorPort {
       );
     }
 
-    const content = extractContent(await response.json());
+    let payload: unknown;
+
+    try {
+      payload = await response.json();
+    } catch {
+      throw new ServiceUnavailableError('The AI provider returned malformed JSON');
+    }
+
+    const content = extractContent(payload);
 
     if (content === null) {
       throw new ServiceUnavailableError('The AI provider returned an unexpected payload');

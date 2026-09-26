@@ -14,6 +14,9 @@ import type {
 const REFRESH_TOKEN_BYTES = 48;
 const DEFAULT_ACCESS_TTL_SECONDS = 900;
 
+export const JWT_ISSUER = 'deckup-api';
+export const JWT_AUDIENCE = 'deckup-web';
+
 @Injectable()
 export class JwtTokenService extends TokenServicePort {
   constructor(private readonly jwtService: JwtService) {
@@ -33,7 +36,12 @@ export class JwtTokenService extends TokenServicePort {
   }
 
   async verifyAccessToken(token: string): Promise<AccessTokenPayload> {
-    const payload = await this.jwtService.verifyAsync<Record<string, unknown>>(token);
+    const payload = await this.jwtService.verifyAsync<Record<string, unknown>>(token, {
+      algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
+
     return accessTokenPayloadSchema.parse(payload);
   }
 

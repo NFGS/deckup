@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PasswordHasherPort } from '../../domain/ports/password-hasher.port.js';
 import { TokenServicePort } from '../../domain/ports/token-service.port.js';
 import { Argon2PasswordHasher } from './argon2-password-hasher.js';
-import { JwtTokenService } from './jwt-token.service.js';
+import { JWT_AUDIENCE, JWT_ISSUER, JwtTokenService } from './jwt-token.service.js';
 
 const DEFAULT_ACCESS_TTL_SECONDS = 900;
 
@@ -20,6 +20,8 @@ const DEFAULT_ACCESS_TTL_SECONDS = 900;
           expiresIn: Number(
             config.get<string>('JWT_ACCESS_TTL_SECONDS') ?? DEFAULT_ACCESS_TTL_SECONDS,
           ),
+          issuer: JWT_ISSUER,
+          audience: JWT_AUDIENCE,
         },
       }),
     }),

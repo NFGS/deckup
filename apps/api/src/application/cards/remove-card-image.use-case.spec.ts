@@ -23,6 +23,7 @@ describe('RemoveCardImageUseCase', () => {
       imagePublicId: 'deckup/cards/card',
     });
     await cards.create(card);
+    cards.registerDeckOwner('deck-1', 'user-1');
   });
 
   it('removes the asset and clears both references', async () => {

@@ -4,6 +4,7 @@ import { CsvWriterPort } from '../../domain/ports/csv-writer.port.js';
 
 const LINE_BREAK = '\r\n';
 const MUST_QUOTE = /[",\r\n]/;
+const FORMULA_PREFIX = /^[=+\-@\t\r]/;
 
 @Injectable()
 export class CsvWriterAdapter extends CsvWriterPort {
@@ -13,9 +14,11 @@ export class CsvWriterAdapter extends CsvWriterPort {
 }
 
 function escapeField(value: string): string {
-  if (MUST_QUOTE.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
+  const sanitized = FORMULA_PREFIX.test(value) ? `'${value}` : value;
+
+  if (MUST_QUOTE.test(sanitized)) {
+    return `"${sanitized.replace(/"/g, '""')}"`;
   }
 
-  return value;
+  return sanitized;
 }

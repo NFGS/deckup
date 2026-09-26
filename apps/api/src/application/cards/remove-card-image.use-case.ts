@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import type { Card } from '../../domain/entities/card.entity.js';
 import { NotFoundError } from '../../domain/errors/domain-errors.js';
@@ -8,6 +8,8 @@ import { ImageStoragePort } from '../../domain/ports/image-storage.port.js';
 
 @Injectable()
 export class RemoveCardImageUseCase {
+  private readonly logger = new Logger(RemoveCardImageUseCase.name);
+
   constructor(
     @Inject(CardRepository) private readonly cards: CardRepositoryPort,
     @Inject(ImageStoragePort) private readonly images: ImageStoragePort,
@@ -25,7 +27,13 @@ export class RemoveCardImageUseCase {
     }
 
     if (card.imagePublicId) {
-      await this.images.remove(card.imagePublicId).catch(() => undefined);
+      await this.images.remove(card.imagePublicId).catch((error: unknown) => {
+        this.logger.warn(
+          `Could not delete image ${card.imagePublicId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      });
     }
 
     const updated = card.update({ imageUrl: null, imagePublicId: null });
