@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint && eslint scripts e2e playwright.config.ts",
     "typecheck": "turbo run typecheck && tsc --noEmit -p tsconfig.json",
     "test": "turbo run test",
     "test:e2e": "pnpm build && playwright test",
@@ -36,7 +36,7 @@
     "lint-staged": "^17.5.1",
     "prettier": "^3.9.8",
     "turbo": "^2.11.2",
-    "typescript": "^6.0.3",
+    "typescript": "6.0.3",
     "typescript-eslint": "^8.70.0"
   }
 }
