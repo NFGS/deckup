@@ -83,7 +83,7 @@ student — see RF-01, the enabling requirement).
 **High-level done signal.** A deck created by a student is persisted and still visible after
 signing out and back in.
 
-**Traceability.** RF-02 · CU#03 · TC-01, TC-02
+**Traceability.** RF-02 · CU#03 · TC-D1, TC-D2
 
 ---
 
@@ -119,7 +119,7 @@ hold actual study content.
   _when_ they assign a subject and tags to a deck,
   _then_ the deck can be filtered by subject in the deck list.
 
-**Traceability.** RF-03, RF-04 · CU#04, CU#05 · TC-03 … TC-06
+**Traceability.** RF-03, RF-04 · CU#04, CU#05 · TC-D3 … TC-D8, TC-C1 … TC-C6
 
 ---
 
@@ -184,7 +184,7 @@ flashcard tools; enrichment and bulk import remove that friction.
 **Business rule.** BR-03.1 — A card must always have non-empty front and back text; images,
 hints and tags are optional.
 
-**Traceability.** RF-05, RF-06 · CU#06 (includes CU-I), CU#07 (includes CU-V) · TC-07 … TC-14
+**Traceability.** RF-05, RF-06 · CU#06 (includes CU-I), CU#07 (includes CU-V) · TC-C3, TC-C7 … TC-C11, TC-I1 … TC-I5, TC-I8, TC-I9
 
 ---
 
@@ -291,7 +291,7 @@ sustain the habit during the weeks before finals.
 - [ ] Analytics and study screens pass the accessibility checklist.
 
 **Traceability.** RF-08, RF-09, RF-10 · CU#08 (includes CU-Q and CU-S; extended by CU-R),
-CU#09 (includes CU-E) · TC-15 … TC-26
+CU#09 (includes CU-E) · TC-S1 … TC-S12, TC-N1 … TC-N5
 
 ---
 

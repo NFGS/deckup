@@ -19,18 +19,18 @@ configuration minimal.
 
 Adopt a three-level pyramid with explicit ownership:
 
-| Level           | Tool               | Scope                                                       | Target                          |
-| --------------- | ------------------ | ----------------------------------------------------------- | ------------------------------- |
-| **Unit**        | Vitest             | Domain services, value objects, use cases with fake ports   | ≥ 90 % of domain/application    |
-| **Integration** | Vitest + Supertest | API endpoints against a real PostgreSQL (Docker/CI service) | All Must/Should requirements    |
-| **End-to-end**  | Playwright         | Critical journeys: register → create deck → study → summary | 5–8 stable flows, run on `main` |
+| Level           | Tool               | Scope                                                       | Target                                             |
+| --------------- | ------------------ | ----------------------------------------------------------- | -------------------------------------------------- |
+| **Unit**        | Vitest             | Domain services, value objects, use cases with fake ports   | Domain thresholds: 80 % statements / 85 % branches |
+| **Integration** | Vitest + Supertest | API endpoints against a real PostgreSQL (Docker/CI service) | All Must/Should requirements                       |
+| **End-to-end**  | Playwright         | Critical journeys: register → create deck → study → summary | 5–8 stable flows, run on `main`                    |
 
 Rules:
 
 - **No mocking the database** in integration tests: they run against PostgreSQL 17, the
   same major version as production.
-- The FSRS library is replaced by a **deterministic fake scheduler** in unit tests; the
-  adapter itself is covered by integration tests.
+- The FSRS library is replaced by a **deterministic fake scheduler** in use-case tests;
+  the real `ts-fsrs` adapter has its own focused spec (`ts-fsrs.scheduler.spec.ts`).
 - Tests are **colocated** with the code (`*.spec.ts`, `*.test.ts(x)`); E2E lives in
   `e2e/` at the repository root.
 - Test cases are traced to requirements in

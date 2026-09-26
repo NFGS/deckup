@@ -40,8 +40,8 @@ tags:
     description: Study sessions, queues and review scheduling
   - name: Analytics
     description: Streaks, retention and workload forecast
-  - name: Phase 8
-    description: Optional scope — public decks and AI generation
+  - name: Community
+    description: Public deck catalogue and AI card generation
 
 security:
   - bearerAuth: []
@@ -125,7 +125,7 @@ paths:
         Requires the refresh cookie and the `X-Requested-With` header (CSRF guard).
         Reuse of a rotated token revokes the whole token family.
       tags: [Auth]
-      security: []
+      security: [{ refreshCookie: [] }]
       parameters:
         - $ref: '#/components/parameters/CsrfHeader'
       responses:
@@ -137,6 +137,8 @@ paths:
                 $ref: '#/components/schemas/AuthSession'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
 
   /auth/logout:
     post:
@@ -144,12 +146,14 @@ paths:
       summary: Revoke the current refresh token family
       description: Requires the refresh cookie and the `X-Requested-With` header (CSRF guard).
       tags: [Auth]
-      security: []
+      security: [{ refreshCookie: [] }]
       parameters:
         - $ref: '#/components/parameters/CsrfHeader'
       responses:
         '204':
           description: Session revoked; refresh cookie cleared
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
 
   /users/me:
     get:
@@ -639,8 +643,8 @@ paths:
   /decks/public:
     get:
       operationId: listPublicDecks
-      summary: Browse the public deck catalog (Phase 8)
-      tags: [Phase 8]
+      summary: Browse the public deck catalog (Community)
+      tags: [Community]
       parameters:
         - name: subject
           in: query
@@ -659,12 +663,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicDeckPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
   /decks/{deckId}/clone:
     post:
       operationId: cloneDeck
-      summary: Clone a public deck into the student's account (Phase 8)
-      tags: [Phase 8]
+      summary: Clone a public deck into the student's account (Community)
+      tags: [Community]
       parameters:
         - $ref: '#/components/parameters/DeckId'
       requestBody:
@@ -693,11 +699,11 @@ paths:
   /ai/card-suggestions:
     post:
       operationId: generateCardSuggestions
-      summary: Generate card suggestions from notes (Phase 8)
+      summary: Generate card suggestions from notes (Community)
       description: |
         Sends study notes to the configured LLM provider and returns draft cards for
         the student to review before saving (RF-12).
-      tags: [Phase 8]
+      tags: [Community]
       requestBody:
         required: true
         content:
@@ -893,7 +899,7 @@ components:
           maxLength: 80
         timezone:
           type: string
-          description: IANA timezone; defaults to UTC
+          description: IANA timezone (validated); defaults to UTC
           example: America/Bogota
 
     LoginRequest:
@@ -1068,6 +1074,8 @@ components:
           maxItems: 20
           items:
             type: string
+            minLength: 1
+            maxLength: 40
 
     DeckPage:
       type: object
@@ -1137,8 +1145,6 @@ components:
           type: array
           items:
             type: string
-        reviewState:
-          $ref: '#/components/schemas/ReviewState'
         createdAt:
           type: string
           format: date-time
@@ -1259,7 +1265,7 @@ components:
                 example: 42
               message:
                 type: string
-                example: 'Missing required column: back'
+                example: "The CSV file must contain a 'back' column"
         duplicateRows:
           type: array
           items:
@@ -1329,7 +1335,7 @@ components:
 
     QueueResponse:
       type: object
-      required: [sessionId, items, remaining]
+      required: [sessionId, items, limit, remaining]
       properties:
         sessionId:
           type: string
@@ -1338,8 +1344,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/QueueItem'
+        limit:
+          type: integer
+          description: Maximum number of items returned per request
+          example: 50
         remaining:
           type: integer
+          description: Total cards still due, which can exceed `items.length`
           example: 42
 
     SubmitReviewRequest:

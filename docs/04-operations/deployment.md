@@ -19,26 +19,30 @@
 
 ### API (Railway)
 
-| Variable                 | Example                                        | Notes                                    |
-| ------------------------ | ---------------------------------------------- | ---------------------------------------- |
-| `DATABASE_URL`           | `postgresql://user:pass@host/db?schema=public` | Neon pooled connection string            |
-| `JWT_ACCESS_SECRET`      | 32+ random characters                          | Rotating it invalidates sessions         |
-| `JWT_ACCESS_TTL_SECONDS` | `900`                                          | Access token lifetime                    |
-| `REFRESH_TOKEN_TTL_DAYS` | `30`                                           | Refresh token lifetime                   |
-| `COOKIE_SECURE`          | `true`                                         | Required in production                   |
-| `CORS_ORIGINS`           | `https://deckup.vercel.app`                    | Comma-separated allow-list               |
-| `PORT`                   | `3000`                                         | Railway injects it automatically         |
-| `APP_VERSION`            | `0.1.0`                                        | Reported by `/health`                    |
-| `IMAGE_STORAGE`          | `disabled` \| `cloudinary`                     | Card image uploads (RF-05)               |
-| `CLOUDINARY_CLOUD_NAME`  | `deckup`                                       | Required when `IMAGE_STORAGE=cloudinary` |
-| `CLOUDINARY_API_KEY`     | `1234567890`                                   | Required when `IMAGE_STORAGE=cloudinary` |
-| `CLOUDINARY_API_SECRET`  | `…`                                            | Required when `IMAGE_STORAGE=cloudinary` |
-| `CLOUDINARY_FOLDER`      | `deckup/cards`                                 | Optional asset folder                    |
-| `LLM_PROVIDER`           | `disabled` \| `openai`                         | Optional AI card generation              |
-| `LLM_API_KEY`            | `sk-…`                                         | Required when the provider is `openai`   |
-| `LLM_MODEL`              | `gpt-4o-mini`                                  | Model used for suggestions               |
-| `LLM_BASE_URL`           | `https://api.openai.com/v1`                    | Any OpenAI-compatible gateway            |
-| `LOG_LEVEL`              | `info`                                         | Fastify structured logger level          |
+| Variable                 | Example                                        | Notes                                                      |
+| ------------------------ | ---------------------------------------------- | ---------------------------------------------------------- |
+| `DATABASE_URL`           | `postgresql://user:pass@host/db?schema=public` | Neon pooled connection string                              |
+| `JWT_ACCESS_SECRET`      | 32+ random characters                          | Rotating it invalidates sessions                           |
+| `JWT_ACCESS_TTL_SECONDS` | `900`                                          | Access token lifetime                                      |
+| `REFRESH_TOKEN_TTL_DAYS` | `30`                                           | Refresh token lifetime                                     |
+| `COOKIE_SECURE`          | `true`                                         | Required in production                                     |
+| `CORS_ORIGINS`           | `https://deckup.vercel.app`                    | Comma-separated allow-list                                 |
+| `PORT`                   | `3000`                                         | Railway injects it automatically                           |
+| `APP_VERSION`            | `0.1.0`                                        | Reported by `/health`                                      |
+| `IMAGE_STORAGE`          | `disabled` \| `cloudinary`                     | Card image uploads (RF-05)                                 |
+| `CLOUDINARY_CLOUD_NAME`  | `deckup`                                       | Required when `IMAGE_STORAGE=cloudinary`                   |
+| `CLOUDINARY_API_KEY`     | `1234567890`                                   | Required when `IMAGE_STORAGE=cloudinary`                   |
+| `CLOUDINARY_API_SECRET`  | `…`                                            | Required when `IMAGE_STORAGE=cloudinary`                   |
+| `CLOUDINARY_FOLDER`      | `deckup/cards`                                 | Optional asset folder                                      |
+| `LLM_PROVIDER`           | `disabled` \| `openai`                         | Optional AI card generation                                |
+| `LLM_API_KEY`            | `sk-…`                                         | Required when the provider is `openai`                     |
+| `LLM_MODEL`              | `gpt-4o-mini`                                  | Model used for suggestions                                 |
+| `LLM_BASE_URL`           | `https://api.openai.com/v1`                    | Any OpenAI-compatible gateway                              |
+| `LOG_LEVEL`              | `info`                                         | Fastify structured logger level                            |
+| `TRUST_PROXY`            | `1` behind Railway                             | Trusted reverse-proxy hops; `false` by default             |
+| `CLOUDINARY_URL`         | `cloudinary://key:secret@cloud`                | Alternative to the three `CLOUDINARY_*` variables          |
+| `SEED_EMAIL`             | `demo@deckup.local`                            | Optional demo account email                                |
+| `SEED_PASSWORD`          | 12+ random characters                          | Required (with `SEED_ALLOW_PRODUCTION`) to seed production |
 
 Boot validation fails fast when a feature is enabled without its credentials.
 
@@ -75,6 +79,10 @@ pnpm --filter @deckup/api prisma:seed
 
 Creates `demo@deckup.local` (password `deckup-demo-1`, override with
 `SEED_EMAIL`/`SEED_PASSWORD`) with a Biology deck and five cards.
+
+The script refuses to run against a production database unless both
+`SEED_PASSWORD` and `SEED_ALLOW_PRODUCTION=true` are set, and it never prints the
+password.
 
 ## 4. Release process
 

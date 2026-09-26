@@ -89,14 +89,14 @@ flowchart TB
     subgraph domain["Domain layer"]
         D1[Entities<br/>User · Deck · Card · ReviewState]
         D2[Value objects<br/>Rating · Visibility · Difficulty]
-        D3[Domain services<br/>SchedulingService · StreakCalculator · RetentionCalculator]
+        D3[Domain services<br/>SchedulingService · StudyMetricsService]
     end
 
     subgraph infrastructure["Infrastructure layer"]
         I1[Prisma repositories]
         I2[FSRS adapter<br/>ts-fsrs]
         I3[Cloudinary adapter]
-        I4[LLM adapter<br/>Phase 8]
+        I4[LLM adapter<br/>OpenAI-compatible]
     end
 
     presentation --> application
@@ -113,7 +113,8 @@ flowchart TB
 | **Infrastructure** | Prisma repositories, `ts-fsrs`, Cloudinary and LLM adapters         | Domain + application (ports) |
 
 Key rule: scheduling mathematics (FSRS) and analytics rules live in the **domain** and are
-tested without a database, an HTTP server or the `ts-fsrs` library (through a port).
+tested without a database, an HTTP server or the `ts-fsrs` library (through a port); the
+`ts-fsrs` adapter has its own focused spec.
 
 ## 4. Web application structure
 
@@ -122,11 +123,13 @@ apps/web/src/
 ├── app/            # routing, providers, layout
 ├── features/       # feature-first modules
 │   ├── auth/       # sign in / register
-│   ├── decks/      # deck list, deck detail, card editor
-│   ├── study/      # study session (queue, flip, ratings, summary)
+│   ├── decks/      # deck list, deck detail, card editor, CSV import/export
+│   ├── study/      # study session (queue, flip, ratings, summary, offline queue)
 │   ├── analytics/  # streak, retention, forecast charts
-│   └── settings/   # profile, timezone, preferences
-├── components/     # shared UI primitives (shadcn/ui based)
+│   ├── explore/    # public catalogue and cloning
+│   ├── ai/         # AI card suggestions
+│   └── landing/    # public home page
+├── components/     # shared UI primitives (Tailwind CSS)
 ├── lib/            # api client, query keys, utilities
 └── test/           # setup and test utilities
 ```
@@ -170,7 +173,7 @@ flowchart LR
 | **Production** | Vercel (CDN)    | Railway (Docker image) | Neon (PostgreSQL 17) |
 
 CI/CD: GitHub Actions runs the five quality gates on every push/PR and deploys `main`
-(see [`../04-operations/deployment.md`](../04-operations/deployment.md), Phase 7).
+(see [`../04-operations/deployment.md`](../04-operations/deployment.md)).
 
 ## 6. Cross-cutting concerns
 

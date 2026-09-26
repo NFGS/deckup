@@ -183,10 +183,10 @@ Diagram: [`../02-architecture/use-case-diagram.puml`](../02-architecture/use-cas
 | User story | Requirements        | Use cases     | Test cases | Coverage |
 | ---------- | ------------------- | ------------- | ---------- | -------- |
 | US-01      | RF-02               | CU#03         | 2          | 100 %    |
-| US-02      | RF-03, RF-04        | CU#04, CU#05  | 14         | 100 %    |
-| US-03      | RF-05, RF-06        | CU#06, CU#07  | 16         | 100 %    |
+| US-02      | RF-03, RF-04        | CU#04, CU#05  | 12         | 100 %    |
+| US-03      | RF-05, RF-06        | CU#06, CU#07  | 13         | 100 %    |
 | US-04      | RF-08, RF-09, RF-10 | CU#08, CU#09  | 17         | 100 %    |
-| Epic       | RF-01, RF-07        | CU#01 … CU#10 | 18         | 100 %    |
+| Epic       | RF-01, RF-07        | CU#01 … CU#10 | 11         | 100 %    |
 | Phase 8    | RF-11, RF-12        | CU#11, CU#12  | 4          | 100 %    |
 
 Every Must/Should requirement is covered by at least one test case; no orphan

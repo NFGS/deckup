@@ -99,9 +99,9 @@
 | Suite                       | Files | Tests |
 | --------------------------- | ----- | ----- |
 | Shared contracts (unit)     | 3     | 8     |
-| API (unit)                  | 19    | 110   |
-| Web (unit/component)        | 11    | 38    |
-| API integration (Supertest) | 11    | 66    |
+| API (unit)                  | 21    | 120   |
+| Web (unit/component)        | 11    | 43    |
+| API integration (Supertest) | 11    | 72    |
 | Browser E2E (Playwright)    | 3     | 8     |
 
 ## 8. Risks and mitigations
