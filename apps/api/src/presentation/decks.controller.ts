@@ -24,6 +24,7 @@ import type {
 import { CreateDeckUseCase } from '../application/decks/create-deck.use-case.js';
 import { DeleteDeckUseCase } from '../application/decks/delete-deck.use-case.js';
 import { GetDeckUseCase } from '../application/decks/get-deck.use-case.js';
+import { ListDeckSubjectsUseCase } from '../application/decks/list-deck-subjects.use-case.js';
 import { ListDecksUseCase } from '../application/decks/list-decks.use-case.js';
 import { UpdateDeckUseCase } from '../application/decks/update-deck.use-case.js';
 import { CurrentUser } from './common/decorators/current-user.decorator.js';
@@ -39,6 +40,7 @@ export class DecksController {
   constructor(
     private readonly createDeck: CreateDeckUseCase,
     private readonly listDecks: ListDecksUseCase,
+    private readonly listDeckSubjects: ListDeckSubjectsUseCase,
     private readonly getDeck: GetDeckUseCase,
     private readonly updateDeck: UpdateDeckUseCase,
     private readonly deleteDeck: DeleteDeckUseCase,
@@ -51,6 +53,11 @@ export class DecksController {
   ): Promise<Page<DeckResponse>> {
     const result = await this.listDecks.execute(user.sub, query);
     return toDeckPage(result.items, query.page, query.pageSize, result.total);
+  }
+
+  @Get('subjects')
+  async subjects(@CurrentUser() user: AccessTokenPayload): Promise<{ subjects: string[] }> {
+    return { subjects: await this.listDeckSubjects.execute(user.sub) };
   }
 
   @Post()

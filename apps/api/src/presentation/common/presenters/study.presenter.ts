@@ -36,6 +36,7 @@ export function toQueueResponse(result: StudyQueueResult): QueueResponse {
       dueAt: (state?.dueAt ?? card.createdAt).toISOString(),
       isNew: state?.isNew ?? true,
     })),
+    limit: result.limit,
     remaining: result.remaining,
   };
 }

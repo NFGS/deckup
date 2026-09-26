@@ -14,6 +14,7 @@ export const QUEUE_LIMIT = 50;
 export interface StudyQueueResult {
   sessionId: string;
   entries: StudyQueueEntry[];
+  limit: number;
   remaining: number;
 }
 
@@ -40,6 +41,6 @@ export class GetStudyQueueUseCase {
       this.queue.count(session.deckId, session.mode, now),
     ]);
 
-    return { sessionId: session.id, entries, remaining };
+    return { sessionId: session.id, entries, limit: QUEUE_LIMIT, remaining };
   }
 }

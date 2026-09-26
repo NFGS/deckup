@@ -10,14 +10,13 @@ import {
   Res,
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { IMPORT_MAX_BYTES } from '@deckup/shared';
 import type { AccessTokenPayload, ImportSummary } from '@deckup/shared';
 
 import { ExportDeckUseCase } from '../application/cards/export-deck.use-case.js';
 import { ImportCardsUseCase } from '../application/cards/import-cards.use-case.js';
 import { ValidationError } from '../domain/errors/domain-errors.js';
 import { CurrentUser } from './common/decorators/current-user.decorator.js';
-
-const MAX_FILE_BYTES = 1_048_576;
 
 @Controller('decks/:deckId')
 export class ImportsController {
@@ -41,7 +40,7 @@ export class ImportsController {
 
     const buffer = await file.toBuffer();
 
-    if (buffer.byteLength > MAX_FILE_BYTES) {
+    if (buffer.byteLength > IMPORT_MAX_BYTES) {
       throw new ValidationError('The CSV file must be at most 1 MB', { field: 'file' });
     }
 

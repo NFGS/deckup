@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+/** Maximum accepted size for a CSV import (also the default multipart limit). */
+export const IMPORT_MAX_BYTES = 1_048_576;
+
 export const importRowErrorSchema = z.object({
   row: z.number().int().positive(),
   message: z.string(),

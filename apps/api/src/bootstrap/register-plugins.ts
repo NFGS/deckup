@@ -2,8 +2,7 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import fastifyCookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
-
-export const MAX_UPLOAD_BYTES = 1_048_576;
+import { IMPORT_MAX_BYTES } from '@deckup/shared';
 
 /**
  * Registers the Fastify plugins shared by the real bootstrap and the test
@@ -12,7 +11,7 @@ export const MAX_UPLOAD_BYTES = 1_048_576;
 export async function registerPlugins(app: NestFastifyApplication): Promise<void> {
   await app.register(fastifyCookie);
   await app.register(helmet, { contentSecurityPolicy: false });
-  await app.register(multipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 } });
+  await app.register(multipart, { limits: { fileSize: IMPORT_MAX_BYTES, files: 1 } });
 
   app
     .getHttpAdapter()

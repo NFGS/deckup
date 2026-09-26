@@ -151,6 +151,21 @@ describe('Decks (e2e)', () => {
     expect(body.items[0]?.title).toBe('History — Final');
   });
 
+  it('lists the distinct subjects of the student only', async () => {
+    await createDeck({ subject: 'Biology' });
+    await createDeck({ title: 'Biology — Unit 4', subject: 'Biology' });
+    await createDeck({ title: 'History — Final', subject: 'History' });
+    await createDeck({ title: 'No subject' });
+    await createDeck({ title: 'Beto deck', subject: 'Maths' }, otherToken);
+
+    const response = await request(server())
+      .get(`${API_PREFIX}/decks/subjects`)
+      .set(auth(token))
+      .expect(200);
+
+    expect(response.body).toEqual({ subjects: ['Biology', 'History'] });
+  });
+
   it('soft deletes a deck and removes it from listings', async () => {
     const deck = await createDeck();
 

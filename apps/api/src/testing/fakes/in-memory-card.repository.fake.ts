@@ -7,6 +7,12 @@ import type { CardListResult } from '../../domain/ports/card.repository.js';
 export class InMemoryCardRepository extends CardRepositoryPort {
   readonly cards = new Map<string, Card>();
 
+  private readonly deckOwners = new Map<string, string>();
+
+  registerDeckOwner(deckId: string, ownerId: string): void {
+    this.deckOwners.set(deckId, ownerId);
+  }
+
   async create(card: Card): Promise<void> {
     this.cards.set(card.id, card);
     return Promise.resolve();
@@ -19,8 +25,14 @@ export class InMemoryCardRepository extends CardRepositoryPort {
     return Promise.resolve();
   }
 
-  async findByIdForOwner(id: string, _ownerId: string): Promise<Card | null> {
-    return Promise.resolve(this.cards.get(id) ?? null);
+  async findByIdForOwner(id: string, ownerId: string): Promise<Card | null> {
+    const card = this.cards.get(id);
+
+    if (!card || card.isDeleted) {
+      return Promise.resolve(null);
+    }
+
+    return Promise.resolve(this.deckOwners.get(card.deckId) === ownerId ? card : null);
   }
 
   async listByDeck(
@@ -57,8 +69,8 @@ export class InMemoryCardRepository extends CardRepositoryPort {
     return Promise.resolve();
   }
 
-  async softDelete(id: string, _ownerId: string, now: Date): Promise<void> {
-    const card = this.cards.get(id);
+  async softDelete(id: string, ownerId: string, now: Date): Promise<void> {
+    const card = await this.findByIdForOwner(id, ownerId);
 
     if (card) {
       this.cards.set(id, card.markDeleted(now));

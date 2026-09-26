@@ -28,13 +28,34 @@ export class InMemoryDeckRepository extends DeckRepositoryPort {
     return Promise.resolve({ deck, cardCount: 0, dueCount: 0 });
   }
 
+  async listSubjects(ownerId: string): Promise<string[]> {
+    const subjects = new Set<string>();
+
+    for (const deck of this.decks.values()) {
+      if (deck.ownerId === ownerId && !deck.isDeleted && deck.subject) {
+        subjects.add(deck.subject);
+      }
+    }
+
+    return Promise.resolve([...subjects].sort((left, right) => left.localeCompare(right)));
+  }
+
   async listByOwner(
     ownerId: string,
-    _filters: DeckListFilters,
+    filters: DeckListFilters,
     pagination: PaginationQuery,
   ): Promise<DeckListResult> {
+    const matches = (deck: Deck): boolean =>
+      deck.ownerId === ownerId &&
+      !deck.isDeleted &&
+      (filters.subject === undefined || deck.subject === filters.subject) &&
+      (filters.tag === undefined || deck.tags.includes(filters.tag)) &&
+      (filters.search === undefined ||
+        deck.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+        (deck.description?.toLowerCase().includes(filters.search.toLowerCase()) ?? false));
+
     const items = [...this.decks.values()]
-      .filter((deck) => deck.ownerId === ownerId && !deck.isDeleted)
+      .filter(matches)
       .map((deck) => ({ deck, cardCount: 0, dueCount: 0 }));
 
     return Promise.resolve({

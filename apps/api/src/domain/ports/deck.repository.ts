@@ -35,6 +35,8 @@ export interface PublicDeckListResult {
 export abstract class DeckRepositoryPort {
   abstract create(deck: Deck): Promise<void>;
   abstract findByIdForOwner(id: string, ownerId: string): Promise<DeckWithCounts | null>;
+  /** Distinct non-empty subjects across the owner's active decks. */
+  abstract listSubjects(ownerId: string): Promise<string[]>;
   abstract listByOwner(
     ownerId: string,
     filters: DeckListFilters,

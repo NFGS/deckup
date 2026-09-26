@@ -1,12 +1,19 @@
 import { z } from 'zod';
 
 import { userSchema } from './user.js';
+import { isValidTimeZone } from './utils.js';
 
 export const registerSchema = z.object({
   email: z.email(),
   password: z.string().min(10).max(72),
   displayName: z.string().trim().min(1).max(80),
-  timezone: z.string().trim().min(1).max(64).optional(),
+  timezone: z
+    .string()
+    .trim()
+    .min(1)
+    .max(64)
+    .refine(isValidTimeZone, { message: 'Use a valid IANA timezone like America/Bogota' })
+    .optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

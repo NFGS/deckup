@@ -51,7 +51,6 @@ export class CloneDeckUseCase {
             front: card.front,
             back: card.back,
             hint: card.hint,
-            imageUrl: card.imageUrl,
             difficulty: card.difficulty,
             tags: card.tags,
           }),

@@ -67,6 +67,17 @@ export class PrismaDeckRepository extends DeckRepositoryPort {
     return toDeckWithCounts(row, dueCount);
   }
 
+  async listSubjects(ownerId: string): Promise<string[]> {
+    const rows = await this.prisma.deck.findMany({
+      where: { ownerId, deletedAt: null, subject: { not: null } },
+      select: { subject: true },
+      distinct: ['subject'],
+      orderBy: { subject: 'asc' },
+    });
+
+    return rows.map((row) => row.subject).filter((subject): subject is string => subject !== null);
+  }
+
   async listByOwner(
     ownerId: string,
     filters: DeckListFilters,
