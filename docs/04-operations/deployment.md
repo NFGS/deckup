@@ -1,10 +1,10 @@
 # Deployment Guide — DeckUp
 
-| Field       | Value                                                                                                                           |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Version** | 1.1                                                                                                                             |
-| **Date**    | 2026-09-22                                                                                                                      |
-| **Related** | [`../02-architecture/adr/ADR-0007-deployment.md`](../02-architecture/adr/ADR-0007-deployment.md) · [`runbook.md`](./runbook.md) |
+| Field       | Value                                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Version** | 1.1                                                                                                                                                                                                                            |
+| **Date**    | 2026-09-22                                                                                                                                                                                                                     |
+| **Related** | [`../02-architecture/adr/ADR-0007-deployment.md`](../02-architecture/adr/ADR-0007-deployment.md) · [`runbook.md`](./runbook.md) · [`deployment-walkthrough.md`](./deployment-walkthrough.md) (beginner-friendly, step by step) |
 
 ---
 
