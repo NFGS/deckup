@@ -6,12 +6,21 @@ export interface ReviewRecording {
   state: ReviewState;
   log: ReviewLog;
   session: StudySession;
+  /** Version of the persisted state before this review; `0` when it does not exist yet. */
+  expectedVersion: number;
 }
+
+export type ReviewRecordingResult =
+  { status: 'recorded' } | { status: 'stale' } | { status: 'duplicate' };
 
 /**
  * Atomically persists everything produced by a review: the new scheduling
  * state, the immutable review log and the session counters (NFR-04.2).
+ *
+ * The write is guarded by an optimistic version check; a concurrent writer
+ * yields `stale` so the caller can recompute, and a repeated idempotency key
+ * yields `duplicate` so the caller can replay the stored result.
  */
 export abstract class ReviewRecorderPort {
-  abstract record(recording: ReviewRecording): Promise<void>;
+  abstract record(recording: ReviewRecording): Promise<ReviewRecordingResult>;
 }

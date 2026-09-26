@@ -57,7 +57,7 @@ export class TsFsrsScheduler extends SchedulerPort {
       difficulty: snapshot.difficulty,
       elapsed_days: 0,
       scheduled_days: snapshot.scheduledDays,
-      learning_steps: 0,
+      learning_steps: snapshot.learningSteps,
       reps: snapshot.reps,
       lapses: snapshot.lapses,
       state: FSRS_BY_STATE[snapshot.state],
@@ -73,6 +73,7 @@ export class TsFsrsScheduler extends SchedulerPort {
       reps: card.reps,
       lapses: card.lapses,
       scheduledDays: card.scheduled_days,
+      learningSteps: card.learning_steps,
       lastReviewAt: card.last_review ?? reviewedAt,
       dueAt: card.due,
     };

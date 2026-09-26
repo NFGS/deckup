@@ -130,8 +130,16 @@ describe('Analytics (e2e)', () => {
     const days = (forecast.body as { days: ForecastDay[] }).days;
 
     expect(days).toHaveLength(7);
-    expect(days[0]).toEqual({ date: todayKey(), dueCount: 2 });
-    expect(days.slice(1).every((day) => day.dueCount === 0)).toBe(true);
+    expect(days[0]?.date).toBe(todayKey());
+
+    // Both reviews are due within minutes, so they land on today or, when the
+    // suite runs right before UTC midnight, on the next day.
+    const scheduled = days.reduce((sum, day) => sum + day.dueCount, 0);
+    const nearTerm = (days[0]?.dueCount ?? 0) + (days[1]?.dueCount ?? 0);
+
+    expect(scheduled).toBe(2);
+    expect(nearTerm).toBe(2);
+    expect(days.slice(2).every((day) => day.dueCount === 0)).toBe(true);
   });
 
   it('honours the forecast window and validates it', async () => {

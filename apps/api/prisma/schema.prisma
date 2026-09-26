@@ -182,9 +182,11 @@ model ReviewState {
   reps             Int       @default(0)
   lapses           Int       @default(0)
   scheduledDays    Int       @default(0) @map("scheduled_days")
+  learningSteps    Int       @default(0) @map("learning_steps")
   lastReviewAt     DateTime? @map("last_review_at") @db.Timestamptz(3)
   dueAt            DateTime  @default(now()) @map("due_at") @db.Timestamptz(3)
   schedulerVersion String    @default("fsrs-6") @map("scheduler_version")
+  version          Int       @default(0)
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 

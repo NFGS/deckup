@@ -15,6 +15,7 @@ function snapshot(overrides: Partial<SchedulingSnapshot> = {}): SchedulingSnapsh
     reps: 0,
     lapses: 0,
     scheduledDays: 0,
+    learningSteps: 0,
     lastReviewAt: null,
     dueAt: NOW,
     ...overrides,
@@ -62,6 +63,54 @@ describe('TsFsrsScheduler', () => {
     const easy = scheduler.schedule({ snapshot: snapshot(), rating: 'EASY', now: NOW });
 
     expect(easy.dueAt.getTime()).toBeGreaterThan(good.dueAt.getTime());
+  });
+
+  it('graduates a learning card to review after the last learning step', () => {
+    const first = scheduler.schedule({ snapshot: snapshot(), rating: 'GOOD', now: NOW });
+    expect(first.state).toBe('LEARNING');
+    expect(first.learningSteps).toBeGreaterThan(0);
+
+    const second = scheduler.schedule({
+      snapshot: snapshot({
+        state: first.state,
+        stability: first.stability,
+        difficulty: first.difficulty,
+        reps: first.reps,
+        lapses: first.lapses,
+        scheduledDays: first.scheduledDays,
+        learningSteps: first.learningSteps,
+        lastReviewAt: first.lastReviewAt,
+        dueAt: first.dueAt,
+      }),
+      rating: 'GOOD',
+      now: first.dueAt,
+    });
+
+    expect(second.state).toBe('REVIEW');
+    expect(second.scheduledDays).toBeGreaterThanOrEqual(1);
+    expect(second.dueAt.getTime()).toBeGreaterThan(first.dueAt.getTime() + 12 * 60 * MINUTE_MS);
+  });
+
+  it('keeps the learning step on a repeated Again', () => {
+    const first = scheduler.schedule({ snapshot: snapshot(), rating: 'AGAIN', now: NOW });
+    const second = scheduler.schedule({
+      snapshot: snapshot({
+        state: first.state,
+        stability: first.stability,
+        difficulty: first.difficulty,
+        reps: first.reps,
+        lapses: first.lapses,
+        scheduledDays: first.scheduledDays,
+        learningSteps: first.learningSteps,
+        lastReviewAt: first.lastReviewAt,
+        dueAt: first.dueAt,
+      }),
+      rating: 'AGAIN',
+      now: first.dueAt,
+    });
+
+    expect(second.state).toBe('LEARNING');
+    expect(second.dueAt.getTime()).toBeGreaterThan(first.dueAt.getTime());
   });
 
   it('grows the interval when a review card is rated Good', () => {

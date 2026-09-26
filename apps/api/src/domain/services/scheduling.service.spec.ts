@@ -15,6 +15,7 @@ function snapshot(overrides: Partial<SchedulingSnapshot> = {}): SchedulingSnapsh
     reps: 0,
     lapses: 0,
     scheduledDays: 0,
+    learningSteps: 0,
     lastReviewAt: null,
     dueAt: NOW,
     ...overrides,

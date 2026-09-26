@@ -11,9 +11,11 @@ export interface ReviewStateProps {
   reps: number;
   lapses: number;
   scheduledDays: number;
+  learningSteps: number;
   lastReviewAt: Date | null;
   dueAt: Date;
   schedulerVersion: string;
+  version: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,9 +48,11 @@ export class ReviewState {
       reps: 0,
       lapses: 0,
       scheduledDays: 0,
+      learningSteps: 0,
       lastReviewAt: null,
       dueAt: now,
       schedulerVersion: input.schedulerVersion,
+      version: 0,
       createdAt: now,
       updatedAt: now,
     });
@@ -90,6 +94,10 @@ export class ReviewState {
     return this.props.scheduledDays;
   }
 
+  get learningSteps(): number {
+    return this.props.learningSteps;
+  }
+
   get lastReviewAt(): Date | null {
     return this.props.lastReviewAt;
   }
@@ -100,6 +108,10 @@ export class ReviewState {
 
   get schedulerVersion(): string {
     return this.props.schedulerVersion;
+  }
+
+  get version(): number {
+    return this.props.version;
   }
 
   get createdAt(): Date {
@@ -122,6 +134,7 @@ export class ReviewState {
       reps: this.props.reps,
       lapses: this.props.lapses,
       scheduledDays: this.props.scheduledDays,
+      learningSteps: this.props.learningSteps,
       lastReviewAt: this.props.lastReviewAt,
       dueAt: this.props.dueAt,
     };
@@ -136,8 +149,10 @@ export class ReviewState {
       reps: outcome.reps,
       lapses: outcome.lapses,
       scheduledDays: outcome.scheduledDays,
+      learningSteps: outcome.learningSteps,
       lastReviewAt: outcome.lastReviewAt,
       dueAt: outcome.dueAt,
+      version: this.props.version + 1,
       updatedAt: now,
     });
   }

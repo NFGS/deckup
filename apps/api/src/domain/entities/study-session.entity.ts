@@ -6,6 +6,10 @@ import { ConflictError } from '../errors/domain-errors.js';
 
 const SUCCESSFUL_RATINGS: readonly ReviewRating[] = ['GOOD', 'EASY'];
 
+export function isSuccessfulRating(rating: ReviewRating): boolean {
+  return SUCCESSFUL_RATINGS.includes(rating);
+}
+
 export interface StudySessionProps {
   id: string;
   userId: string;
@@ -99,7 +103,7 @@ export class StudySession {
     return new StudySession({
       ...this.props,
       cardsReviewed: this.props.cardsReviewed + 1,
-      correctCount: this.props.correctCount + (SUCCESSFUL_RATINGS.includes(rating) ? 1 : 0),
+      correctCount: this.props.correctCount + (isSuccessfulRating(rating) ? 1 : 0),
     });
   }
 

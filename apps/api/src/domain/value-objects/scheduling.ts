@@ -10,6 +10,7 @@ export interface SchedulingSnapshot {
   reps: number;
   lapses: number;
   scheduledDays: number;
+  learningSteps: number;
   lastReviewAt: Date | null;
   dueAt: Date;
 }
@@ -24,6 +25,7 @@ export interface SchedulingOutcome {
   reps: number;
   lapses: number;
   scheduledDays: number;
+  learningSteps: number;
   lastReviewAt: Date;
   dueAt: Date;
 }

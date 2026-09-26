@@ -36,6 +36,7 @@ describe('ReviewState', () => {
       reps: 0,
       lapses: 0,
       scheduledDays: 0,
+      learningSteps: 0,
       lastReviewAt: null,
       dueAt: NOW,
     });
@@ -54,6 +55,7 @@ describe('ReviewState', () => {
         reps: 1,
         lapses: 0,
         scheduledDays: 1,
+        learningSteps: 0,
         lastReviewAt: reviewedAt,
         dueAt,
       },
@@ -80,9 +82,11 @@ describe('ReviewState', () => {
       reps: 4,
       lapses: 1,
       scheduledDays: 2,
+      learningSteps: 1,
       lastReviewAt: NOW,
       dueAt: NOW,
       schedulerVersion: 'fsrs-6',
+      version: 3,
       createdAt: NOW,
       updatedAt: NOW,
     });
@@ -90,6 +94,7 @@ describe('ReviewState', () => {
     expect(state.state).toBe('RELEARNING');
     expect(state.reps).toBe(4);
     expect(state.lapses).toBe(1);
+    expect(state.version).toBe(3);
     expect(state.isNew).toBe(false);
     expect(state.toSnapshot()).toMatchObject({ stability: 3.2, difficulty: 6.1 });
   });

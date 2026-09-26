@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { CardState, ReviewRating, SubmitReview } from '@deckup/shared';
+import type { CardState, ReviewRating, StudyMode, SubmitReview } from '@deckup/shared';
 
 import { ReviewLog } from '../../domain/entities/review-log.entity.js';
 import { ReviewState } from '../../domain/entities/review-state.entity.js';
@@ -17,6 +17,8 @@ import type { StudyQueueRepositoryPort } from '../../domain/ports/study-queue.re
 import { StudySessionRepositoryPort as StudySessionRepository } from '../../domain/ports/study-session.repository.js';
 import type { StudySessionRepositoryPort } from '../../domain/ports/study-session.repository.js';
 import { SchedulingService } from '../../domain/services/scheduling.service.js';
+
+const MAX_RECORD_ATTEMPTS = 3;
 
 export interface ReviewOutcome {
   cardId: string;
@@ -57,62 +59,116 @@ export class SubmitReviewUseCase {
     const now = new Date();
 
     if (input.clientReviewId) {
-      const existing = await this.reviewLogs.findByClientReviewId(session.id, input.clientReviewId);
+      const replayed = await this.replay(
+        session.id,
+        input.clientReviewId,
+        card.id,
+        session.deckId,
+        session.mode,
+        now,
+      );
 
-      if (existing) {
-        const state = await this.reviewStates.findByCardId(card.id);
+      if (replayed) {
+        return replayed;
+      }
+    }
+
+    for (let attempt = 1; attempt <= MAX_RECORD_ATTEMPTS; attempt += 1) {
+      const current =
+        (await this.reviewStates.findByCardId(card.id)) ??
+        ReviewState.createNew({
+          cardId: card.id,
+          userId,
+          schedulerVersion: this.scheduling.schedulerVersion,
+          now,
+        });
+
+      const outcome = this.scheduling.applyRating(current.toSnapshot(), input.rating, now);
+      const nextState = current.applyOutcome(outcome, now);
+
+      const log = ReviewLog.create({
+        cardId: card.id,
+        userId,
+        sessionId: session.id,
+        clientReviewId: input.clientReviewId ?? null,
+        rating: input.rating,
+        reviewedAt: now,
+        elapsedMs: input.elapsedMs ?? null,
+        scheduledDays: outcome.scheduledDays,
+        previousDueAt: current.dueAt,
+        nextDueAt: outcome.dueAt,
+        stabilityAfter: outcome.stability,
+        difficultyAfter: outcome.difficulty,
+      });
+
+      const updatedSession = session.recordReview(input.rating);
+
+      const result = await this.recorder.record({
+        state: nextState,
+        log,
+        session: updatedSession,
+        expectedVersion: current.version,
+      });
+
+      if (result.status === 'duplicate' && input.clientReviewId) {
+        const replayed = await this.replay(
+          session.id,
+          input.clientReviewId,
+          card.id,
+          session.deckId,
+          session.mode,
+          now,
+        );
+
+        if (replayed) {
+          return replayed;
+        }
+      }
+
+      if (result.status === 'recorded') {
         const remaining = await this.queue.count(session.deckId, session.mode, now);
 
         return {
           cardId: card.id,
-          rating: existing.rating,
-          nextDueAt: existing.nextDueAt,
-          scheduledDays: existing.scheduledDays,
-          state: state?.state ?? 'NEW',
+          rating: input.rating,
+          nextDueAt: outcome.dueAt,
+          scheduledDays: outcome.scheduledDays,
+          state: outcome.state,
           remaining,
         };
       }
     }
 
-    const current =
-      (await this.reviewStates.findByCardId(card.id)) ??
-      ReviewState.createNew({
-        cardId: card.id,
-        userId,
-        schedulerVersion: this.scheduling.schedulerVersion,
-        now,
-      });
+    throw new ConflictError('The card was updated concurrently; please try again');
+  }
 
-    const outcome = this.scheduling.applyRating(current.toSnapshot(), input.rating, now);
-    const nextState = current.applyOutcome(outcome, now);
+  private async replay(
+    sessionId: string,
+    clientReviewId: string,
+    cardId: string,
+    deckId: string,
+    mode: StudyMode,
+    now: Date,
+  ): Promise<ReviewOutcome | null> {
+    const existing = await this.reviewLogs.findByClientReviewId(sessionId, clientReviewId);
 
-    const log = ReviewLog.create({
-      cardId: card.id,
-      userId,
-      sessionId: session.id,
-      clientReviewId: input.clientReviewId ?? null,
-      rating: input.rating,
-      reviewedAt: now,
-      elapsedMs: input.elapsedMs ?? null,
-      scheduledDays: outcome.scheduledDays,
-      previousDueAt: current.dueAt,
-      nextDueAt: outcome.dueAt,
-      stabilityAfter: outcome.stability,
-      difficultyAfter: outcome.difficulty,
-    });
+    if (!existing) {
+      return null;
+    }
 
-    const updatedSession = session.recordReview(input.rating);
+    if (existing.cardId !== cardId) {
+      throw new ConflictError('This review id was already used for another card');
+    }
 
-    await this.recorder.record({ state: nextState, log, session: updatedSession });
-
-    const remaining = await this.queue.count(session.deckId, session.mode, now);
+    const state = await this.reviewStates.findByCardId(cardId);
+    const remaining = await this.queue.count(deckId, mode, now);
 
     return {
-      cardId: card.id,
-      rating: input.rating,
-      nextDueAt: outcome.dueAt,
-      scheduledDays: outcome.scheduledDays,
-      state: outcome.state,
+      cardId,
+      rating: existing.rating,
+      nextDueAt: existing.nextDueAt,
+      scheduledDays: existing.scheduledDays,
+      state: state?.state ?? 'NEW',
       remaining,
     };
   }

@@ -292,4 +292,86 @@ describe('Study (e2e)', () => {
 
     expect(summary.body).toMatchObject({ cardsReviewed: 1, correctCount: 1 });
   });
+
+  it('graduates a card to review after consecutive Good ratings', async () => {
+    const session = await startSession();
+
+    const first = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+      .set(auth(token))
+      .send({ cardId: cardIds[0], rating: 'GOOD' })
+      .expect(200);
+
+    expect((first.body as ReviewBody).state).toBe('LEARNING');
+
+    const second = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+      .set(auth(token))
+      .send({ cardId: cardIds[0], rating: 'GOOD' })
+      .expect(200);
+
+    const secondBody = second.body as ReviewBody;
+    expect(secondBody.state).toBe('REVIEW');
+    expect(secondBody.scheduledDays).toBeGreaterThanOrEqual(1);
+  });
+
+  it('applies concurrent replays of the same review exactly once', async () => {
+    const session = await startSession();
+    const clientReviewId = '22222222-3333-4444-8555-666666666666';
+    const review = () =>
+      request(server())
+        .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+        .set(auth(token))
+        .send({ cardId: cardIds[0], rating: 'GOOD', clientReviewId });
+
+    const [first, second] = await Promise.all([review(), review()]);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    expect((first.body as ReviewBody).nextDueAt).toBe((second.body as ReviewBody).nextDueAt);
+
+    const summary = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/complete`)
+      .set(auth(token))
+      .expect(200);
+
+    expect(summary.body).toMatchObject({ cardsReviewed: 1, correctCount: 1 });
+  });
+
+  it('rejects reusing a review id for a different card', async () => {
+    const session = await startSession();
+    const clientReviewId = '33333333-4444-4555-8666-777777777777';
+
+    await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+      .set(auth(token))
+      .send({ cardId: cardIds[0], rating: 'GOOD', clientReviewId })
+      .expect(200);
+
+    await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+      .set(auth(token))
+      .send({ cardId: cardIds[1], rating: 'GOOD', clientReviewId })
+      .expect(409);
+  });
+
+  it('serializes concurrent reviews of the same card', async () => {
+    const session = await startSession();
+    const review = (rating: string) =>
+      request(server())
+        .post(`${API_PREFIX}/study-sessions/${session.id}/reviews`)
+        .set(auth(token))
+        .send({ cardId: cardIds[0], rating });
+
+    const responses = await Promise.all([review('GOOD'), review('GOOD')]);
+
+    expect(responses.map((response) => response.status)).toEqual([200, 200]);
+
+    const summary = await request(server())
+      .post(`${API_PREFIX}/study-sessions/${session.id}/complete`)
+      .set(auth(token))
+      .expect(200);
+
+    expect(summary.body).toMatchObject({ cardsReviewed: 2, correctCount: 2 });
+  });
 });
