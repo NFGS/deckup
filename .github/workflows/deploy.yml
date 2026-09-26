@@ -7,8 +7,11 @@ on:
     types: [completed]
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
-  group: deploy-${{ github.event.workflow_run.head_branch || github.ref }}
+  group: deploy-main
   cancel-in-progress: false
 
 jobs:
@@ -16,6 +19,7 @@ jobs:
     name: Web (Vercel)
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -51,6 +55,7 @@ jobs:
     name: API (Railway)
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -58,6 +63,12 @@ jobs:
       - name: Check credentials
         if: env.RAILWAY_TOKEN == ''
         run: echo "RAILWAY_TOKEN is not configured — skipping the API deployment."
+
+      - name: Require the database secret
+        if: env.RAILWAY_TOKEN != '' && env.DATABASE_URL == ''
+        run: |
+          echo "::error::DATABASE_URL is required to apply migrations before deploying the API."
+          exit 1
 
       - uses: actions/checkout@v4
         if: env.RAILWAY_TOKEN != ''
@@ -78,7 +89,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply database migrations
-        if: env.RAILWAY_TOKEN != '' && env.DATABASE_URL != ''
+        if: env.RAILWAY_TOKEN != ''
         working-directory: apps/api
         run: pnpm exec prisma migrate deploy
 

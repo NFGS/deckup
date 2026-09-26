@@ -15,23 +15,23 @@ RUN pnpm install --frozen-lockfile
 COPY packages ./packages
 COPY apps/api ./apps/api
 RUN pnpm --filter @deckup/shared build && pnpm --filter @deckup/api build
+RUN pnpm --filter @deckup/api deploy --legacy --prod /opt/deckup
 
 FROM node:22-alpine AS runtime
-RUN corepack enable
-WORKDIR /repo
+WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY --from=builder /repo/node_modules ./node_modules
-COPY --from=builder /repo/package.json /repo/pnpm-workspace.yaml /repo/pnpm-lock.yaml ./
-COPY --from=builder /repo/packages/shared ./packages/shared
-COPY --from=builder /repo/packages/config ./packages/config
-COPY --from=builder /repo/apps/api/node_modules ./apps/api/node_modules
-COPY --from=builder /repo/apps/api/dist ./apps/api/dist
-COPY --from=builder /repo/apps/api/prisma ./apps/api/prisma
-COPY --from=builder /repo/apps/api/prisma7.config.ts /repo/apps/api/package.json ./apps/api/
+COPY --from=builder /opt/deckup/node_modules ./node_modules
+COPY --from=builder /opt/deckup/dist ./dist
+COPY --from=builder /opt/deckup/prisma ./prisma
+COPY --from=builder /opt/deckup/prisma7.config.ts ./prisma7.config.ts
+COPY --from=builder /opt/deckup/package.json ./package.json
 
 USER node
 EXPOSE 3000
 
-CMD ["node", "apps/api/dist/main.js"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/api/v1/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+
+CMD ["node", "dist/main.js"]

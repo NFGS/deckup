@@ -9,4 +9,10 @@
 **/.env
 **/.env.*
 !**/.env.example
-REQUIREMENTS.pdf
+*.pdf
+docs
+e2e
+scripts
+apps/web
+apps/api/test
+apps/api/Dockerfile
