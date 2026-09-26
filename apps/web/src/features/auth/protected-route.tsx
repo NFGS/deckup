@@ -16,7 +16,9 @@ export function ProtectedRoute() {
   }
 
   if (status === 'anonymous') {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    const from = `${location.pathname}${location.search}${location.hash}`;
+
+    return <Navigate to="/login" replace state={{ from }} />;
   }
 
   return <Outlet />;

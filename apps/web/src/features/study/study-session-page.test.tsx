@@ -4,11 +4,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { jsonResponse, requestUrl } from '../../test/http';
 import { renderWithProviders } from '../../test/render';
-import { clearQueue, readQueue } from '../../lib/offline-queue';
+import { clearAllQueues, readQueue } from '../../lib/offline-queue';
 import { StudySessionPage } from './study-session-page';
 
 const DECK_ID = '22222222-2222-4222-8222-222222222222';
 const SESSION_ID = '33333333-3333-4333-8333-333333333333';
+const USER_ID = '11111111-1111-4111-8111-111111111111';
+
+const USER = {
+  id: USER_ID,
+  email: 'ana@example.com',
+  displayName: 'Ana',
+  timezone: 'America/Bogota',
+  createdAt: '2026-09-01T10:00:00.000Z',
+};
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -36,11 +45,16 @@ const QUEUE = {
       isNew: true,
     },
   ],
+  limit: 50,
   remaining: 2,
 };
 
+function mockAuthenticated(): Response {
+  return jsonResponse({ accessToken: 'access-token', expiresIn: 900, user: USER });
+}
+
 beforeEach(() => {
-  clearQueue();
+  clearAllQueues();
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
 
@@ -48,7 +62,11 @@ beforeEach(() => {
     const url = requestUrl(input);
 
     if (url.includes('/auth/refresh')) {
-      return Promise.resolve(jsonResponse({ title: 'Unauthorized', status: 401 }, 401));
+      return Promise.resolve(mockAuthenticated());
+    }
+
+    if (url.endsWith('/users/me')) {
+      return Promise.resolve(jsonResponse(USER));
     }
 
     if (url.endsWith('/study-sessions') || url.includes('/study-sessions?')) {
@@ -100,7 +118,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  clearQueue();
+  clearAllQueues();
   vi.unstubAllGlobals();
 });
 
@@ -161,7 +179,11 @@ describe('StudySessionPage', () => {
       const url = requestUrl(input);
 
       if (url.includes('/auth/refresh')) {
-        return Promise.resolve(jsonResponse({ title: 'Unauthorized', status: 401 }, 401));
+        return Promise.resolve(mockAuthenticated());
+      }
+
+      if (url.endsWith('/users/me')) {
+        return Promise.resolve(jsonResponse(USER));
       }
 
       if (url.endsWith('/study-sessions') || url.includes('/study-sessions?')) {
@@ -180,7 +202,9 @@ describe('StudySessionPage', () => {
       }
 
       if (url.includes('/queue')) {
-        return Promise.resolve(jsonResponse({ sessionId: SESSION_ID, items: [], remaining: 0 }));
+        return Promise.resolve(
+          jsonResponse({ sessionId: SESSION_ID, items: [], limit: 50, remaining: 0 }),
+        );
       }
 
       return Promise.resolve(jsonResponse({ title: 'Not found', status: 404 }, 404));
@@ -198,7 +222,11 @@ describe('StudySessionPage', () => {
       const url = requestUrl(input);
 
       if (url.includes('/auth/refresh')) {
-        return Promise.resolve(jsonResponse({ title: 'Unauthorized', status: 401 }, 401));
+        return Promise.resolve(mockAuthenticated());
+      }
+
+      if (url.endsWith('/users/me')) {
+        return Promise.resolve(jsonResponse(USER));
       }
 
       if (url.includes('/reviews')) {
@@ -234,9 +262,14 @@ describe('StudySessionPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /show answer/i }));
     await userEvent.click(screen.getByRole('button', { name: /good/i }));
 
-    expect(await screen.findByText(/saved on this device/i)).toBeInTheDocument();
     expect(await screen.findByText('What is osmosis?')).toBeInTheDocument();
-    expect(readQueue()).toHaveLength(1);
-    expect(readQueue()[0]?.clientReviewId).toBeTruthy();
+    expect(readQueue(USER_ID)).toHaveLength(1);
+    expect(readQueue(USER_ID)[0]?.clientReviewId).toBeTruthy();
+
+    await userEvent.click(screen.getByRole('button', { name: /show answer/i }));
+    await userEvent.click(screen.getByRole('button', { name: /again/i }));
+
+    expect(await screen.findByText(/saved on this device/i)).toBeInTheDocument();
+    expect(readQueue(USER_ID)).toHaveLength(2);
   });
 });

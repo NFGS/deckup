@@ -6,6 +6,8 @@ export type AuthStatus = 'loading' | 'authenticated' | 'anonymous';
 export interface AuthContextValue {
   status: AuthStatus;
   user: User | null;
+  /** True when the session ended on its own (expired or revoked). */
+  sessionExpired: boolean;
   signIn: (input: LoginInput) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   signOut: () => Promise<void>;

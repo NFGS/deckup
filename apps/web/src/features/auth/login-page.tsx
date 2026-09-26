@@ -12,7 +12,7 @@ import { ApiError } from '../../lib/api-client';
 import { useAuth } from './auth-context';
 
 export function LoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, sessionExpired } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [formError, setFormError] = useState<string | null>(null);
@@ -46,6 +46,15 @@ export function LoginPage() {
       </header>
 
       <form onSubmit={(event) => void onSubmit(event)} className="flex flex-col gap-4" noValidate>
+        {sessionExpired ? (
+          <p
+            role="status"
+            className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
+          >
+            Your session expired. Sign in again to continue where you left off.
+          </p>
+        ) : null}
+
         <FormError message={formError ?? undefined} />
 
         <Field label="Email" htmlFor="email" error={errors.email?.message}>

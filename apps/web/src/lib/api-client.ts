@@ -37,10 +37,6 @@ export function setAccessToken(token: string | null): void {
   accessToken = token;
 }
 
-export function getAccessToken(): string | null {
-  return accessToken;
-}
-
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
   unauthorizedHandler = handler;
 }
@@ -118,7 +114,21 @@ export async function apiDownload(path: string): Promise<DownloadedFile> {
 }
 
 function filenameFrom(header: string | null): string | null {
-  const match = header?.match(/filename="([^"]+)"/);
+  if (!header) {
+    return null;
+  }
+
+  const encoded = header.match(/filename\*=UTF-8''([^;]+)/i);
+
+  if (encoded?.[1]) {
+    try {
+      return decodeURIComponent(encoded[1]);
+    } catch {
+      return encoded[1];
+    }
+  }
+
+  const match = header.match(/filename="([^"]+)"/);
   return match?.[1] ?? null;
 }
 
@@ -174,7 +184,11 @@ export async function clearSession(): Promise<void> {
   }
 }
 
-async function purgeApiCaches(): Promise<void> {
+/**
+ * Drops every cached API response. Call it on logout and whenever the session
+ * is lost, so a shared device never serves another student's data from cache.
+ */
+export async function purgeApiCaches(): Promise<void> {
   if (typeof caches === 'undefined') {
     return;
   }
@@ -208,7 +222,7 @@ async function send(path: string, options: RequestOptions<unknown>): Promise<Res
 }
 
 async function handleResponse<T>(response: Response, options: RequestOptions<T>): Promise<T> {
-  if (response.status === 401) {
+  if (response.status === 401 && !options.skipAuthRefresh) {
     setAccessToken(null);
     unauthorizedHandler?.();
   }

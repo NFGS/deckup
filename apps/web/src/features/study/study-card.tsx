@@ -9,21 +9,26 @@ const RATINGS: { rating: ReviewRating; label: string; key: string; className: st
     rating: 'AGAIN',
     label: 'Again',
     key: '1',
-    className: 'bg-rose-600 text-white hover:bg-rose-500',
+    className: 'bg-rose-700 text-white hover:bg-rose-600',
   },
   {
     rating: 'HARD',
     label: 'Hard',
     key: '2',
-    className: 'bg-amber-600 text-white hover:bg-amber-500',
+    className: 'bg-amber-700 text-white hover:bg-amber-600',
   },
   {
     rating: 'GOOD',
     label: 'Good',
     key: '3',
-    className: 'bg-emerald-600 text-white hover:bg-emerald-500',
+    className: 'bg-emerald-700 text-white hover:bg-emerald-600',
   },
-  { rating: 'EASY', label: 'Easy', key: '4', className: 'bg-sky-600 text-white hover:bg-sky-500' },
+  {
+    rating: 'EASY',
+    label: 'Easy',
+    key: '4',
+    className: 'bg-sky-700 text-white hover:bg-sky-600',
+  },
 ];
 
 export interface StudyCardProps {
@@ -91,7 +96,7 @@ export function StudyCard({
               )}
             >
               {entry.label}
-              <span className="text-xs opacity-75">key {entry.key}</span>
+              <span className="text-xs">key {entry.key}</span>
             </button>
           ))}
         </div>

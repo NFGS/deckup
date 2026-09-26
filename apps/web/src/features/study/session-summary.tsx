@@ -1,7 +1,7 @@
 import type { SessionSummary } from '@deckup/shared';
-import { Link } from 'react-router';
 
 import { Button } from '../../components/ui/button';
+import { LinkButton } from '../../components/ui/link-button';
 import { Card, CardDescription, CardTitle } from '../../components/ui/surfaces';
 
 export interface SessionSummaryViewProps {
@@ -29,9 +29,9 @@ export function SessionSummaryView({ summary, deckId, onRestart }: SessionSummar
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button onClick={onRestart}>Study again</Button>
-        <Link to={`/decks/${deckId}`}>
-          <Button variant="secondary">Back to deck</Button>
-        </Link>
+        <LinkButton to={`/decks/${deckId}`} variant="secondary">
+          Back to deck
+        </LinkButton>
       </div>
     </Card>
   );

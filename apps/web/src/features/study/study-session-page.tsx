@@ -1,17 +1,17 @@
 import type { ReviewRating, SessionSummary, StudyMode } from '@deckup/shared';
-import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
 import { Button } from '../../components/ui/button';
 import { FormError } from '../../components/ui/field';
+import { LinkButton } from '../../components/ui/link-button';
 import { EmptyState, Spinner } from '../../components/ui/surfaces';
 import { ApiError } from '../../lib/api-client';
-import { enqueueReview, flushQueue, readQueue } from '../../lib/offline-queue';
-import { submitReview as sendReview } from './api';
+import { createClientReviewId } from '../../lib/offline-queue';
 import {
   useAbandonStudySession,
   useCompleteStudySession,
+  useOfflineQueue,
   useStartStudySession,
   useStudyQueue,
   useSubmitReview,
@@ -36,9 +36,7 @@ export function StudySessionPage() {
   const [revealed, setRevealed] = useState(false);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [queuedReviews, setQueuedReviews] = useState(() => readQueue().length);
-
-  const queryClient = useQueryClient();
+  const { pending: queuedReviews, enqueue, sync } = useOfflineQueue();
 
   const startSession = useStartStudySession();
   const startSessionAsync = startSession.mutateAsync;
@@ -79,35 +77,6 @@ export function StudySessionPage() {
   const current = items[index];
   const isFinished = sessionId !== null && !queue.isPending && current === undefined;
 
-  useEffect(() => {
-    const syncQueuedReviews = async () => {
-      const sent = await flushQueue(async (review) => {
-        await sendReview(review.sessionId, {
-          cardId: review.cardId,
-          rating: review.rating,
-          clientReviewId: review.clientReviewId,
-        });
-      });
-
-      setQueuedReviews(readQueue().length);
-
-      if (sent > 0) {
-        void queryClient.invalidateQueries({ queryKey: ['decks'] });
-      }
-    };
-
-    const handleOnline = () => {
-      void syncQueuedReviews();
-    };
-
-    if (navigator.onLine && readQueue().length > 0) {
-      void syncQueuedReviews();
-    }
-
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
-  }, [queryClient]);
-
   const handleRate = useCallback(
     async (rating: ReviewRating) => {
       if (!current) {
@@ -116,7 +85,7 @@ export function StudySessionPage() {
 
       setError(null);
 
-      const clientReviewId = crypto.randomUUID();
+      const clientReviewId = createClientReviewId();
 
       try {
         await submitReviewAsync({ cardId: current.cardId, rating, clientReviewId });
@@ -124,8 +93,7 @@ export function StudySessionPage() {
         setIndex((value) => value + 1);
       } catch (caught) {
         if (!(caught instanceof ApiError) && sessionId) {
-          enqueueReview({ sessionId, cardId: current.cardId, rating, clientReviewId });
-          setQueuedReviews(readQueue().length);
+          enqueue({ sessionId, cardId: current.cardId, rating, clientReviewId });
           setRevealed(false);
           setIndex((value) => value + 1);
           return;
@@ -134,7 +102,7 @@ export function StudySessionPage() {
         setError(caught instanceof ApiError ? caught.message : 'Unable to save your answer');
       }
     },
-    [current, sessionId, submitReviewAsync],
+    [current, sessionId, submitReviewAsync, enqueue],
   );
 
   const handleAbandon = useCallback(async () => {
@@ -160,11 +128,18 @@ export function StudySessionPage() {
     setError(null);
 
     try {
+      const result = await sync();
+
+      if (result && result.pending > 0) {
+        setError('Sync your saved reviews before finishing the session.');
+        return;
+      }
+
       setSummary(await completeSessionAsync(sessionId));
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : 'Unable to finish the session');
     }
-  }, [sessionId, completeSessionAsync]);
+  }, [sessionId, completeSessionAsync, sync]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -210,6 +185,8 @@ export function StudySessionPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <h1 className="sr-only">Study session</h1>
+
       <Link to={`/decks/${deckId}`} className="text-sm text-slate-400 hover:text-slate-200">
         ← Back to deck
       </Link>
@@ -228,17 +205,6 @@ export function StudySessionPage() {
       ) : null}
 
       {sessionId !== null ? <FormError message={error ?? undefined} /> : null}
-
-      {queuedReviews > 0 ? (
-        <p
-          role="status"
-          className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
-        >
-          {queuedReviews === 1
-            ? '1 review is saved on this device and will sync when you are back online.'
-            : `${queuedReviews} reviews are saved on this device and will sync when you are back online.`}
-        </p>
-      ) : null}
 
       {hasStartError ? (
         <EmptyState
@@ -289,16 +255,20 @@ export function StudySessionPage() {
             title="This deck has no cards yet"
             description="Add cards before starting a study session."
             action={
-              <Link to={`/decks/${deckId}`}>
-                <Button variant="secondary">Back to deck</Button>
-              </Link>
+              <LinkButton to={`/decks/${deckId}`} variant="secondary">
+                Back to deck
+              </LinkButton>
             }
           />
         )
       ) : isFinished ? (
         <EmptyState
           title="Queue finished"
-          description="Finish the session to see your summary and update your analytics."
+          description={
+            queuedReviews > 0
+              ? `${queuedReviews === 1 ? '1 review is' : `${queuedReviews} reviews are`} saved on this device; we will sync before finishing.`
+              : 'Finish the session to see your summary and update your analytics.'
+          }
           action={
             <Button onClick={() => void handleComplete()} disabled={completeSession.isPending}>
               {completeSession.isPending ? 'Finishing…' : 'Finish session'}

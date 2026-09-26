@@ -2,11 +2,14 @@ import { Link, Outlet, useNavigate } from 'react-router';
 
 import { Button } from '../components/ui/button';
 import { LogOutIcon } from '../components/ui/icons';
+import { LinkButton } from '../components/ui/link-button';
 import { useAuth } from '../features/auth/auth-context';
+import { useOfflineQueue } from '../features/study/hooks';
 
 export function AppLayout() {
   const { status, user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { pending: pendingReviews, sync } = useOfflineQueue();
 
   const handleSignOut = async () => {
     await signOut();
@@ -51,14 +54,29 @@ export function AppLayout() {
                 <Link to="/login" className="text-sm text-slate-300 hover:text-white">
                   Sign in
                 </Link>
-                <Link to="/register">
-                  <Button size="sm">Create account</Button>
-                </Link>
+                <LinkButton to="/register" size="sm">
+                  Create account
+                </LinkButton>
               </>
             ) : null}
           </nav>
         </div>
       </header>
+
+      {status === 'authenticated' && pendingReviews > 0 ? (
+        <div role="status" className="border-b border-amber-500/40 bg-amber-500/10">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-6 py-2 text-sm text-amber-200">
+            <span>
+              {pendingReviews === 1
+                ? '1 review is saved on this device and will sync when you are back online.'
+                : `${pendingReviews} reviews are saved on this device and will sync when you are back online.`}
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => void sync()}>
+              Sync now
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
         <Outlet />
