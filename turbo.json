@@ -7,7 +7,8 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", "src/generated/**"],
-      "env": ["VITE_API_URL", "APP_VERSION"]
+      "env": ["VITE_API_URL", "APP_VERSION"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local"]
     },
     "dev": {
       "dependsOn": ["^build"],

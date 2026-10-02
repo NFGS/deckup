@@ -100,6 +100,13 @@ Run `pnpm --filter @deckup/api prisma:seed` to create a demo student
 The first browser E2E run needs the Playwright browsers:
 `pnpm exec playwright install chromium`.
 
+If another local service already owns port 3000, point both the API and the
+web build at an alternate port (matching `VITE_API_URL` in `apps/web/.env.local`):
+
+```bash
+E2E_API_PORT=3100 pnpm test:e2e
+```
+
 ## Documentation
 
 See [`docs/`](./docs) and [`SPEC.md`](./SPEC.md). The current remediation

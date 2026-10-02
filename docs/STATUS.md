@@ -73,8 +73,9 @@ commit has no history to preserve).
   so a stale web bundle (pointing at :3000) was replayed from cache.
 - Verified workaround: rebuild forced (`turbo run build --filter=@deckup/web
 --force`) and run `E2E_API_PORT=3100` → 8/8 green.
-- Permanent fix planned: make the Playwright health probe validate the DeckUp
-  payload and add `.env.local` to the build task inputs.
+- **Fixed (2026-10-02)**: the API web server never reuses an existing listener
+  (`reuseExistingServer: false`), Turbo now hashes `.env.local` as a build
+  input, and the README documents `E2E_API_PORT`. Re-verified 8/8.
 
 ### 4.3 P1 — Pending continuation work
 
@@ -98,14 +99,14 @@ commit has no history to preserve).
 
 ## 5. Continuation plan
 
-| Phase | Goal                                                               | Status      |
-| ----- | ------------------------------------------------------------------ | ----------- |
-| 1     | Secure the work: commit pending files, publish `main`, verify CI   | In progress |
-| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Pending     |
-| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Pending     |
-| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Pending     |
-| 5     | Account management UI and accessibility/tech-debt cleanup          | Pending     |
-| 6     | Academic evidence: SENA evidence pack / general system report      | Pending     |
+| Phase | Goal                                                               | Status                        |
+| ----- | ------------------------------------------------------------------ | ----------------------------- |
+| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Blocked — no push credentials |
+| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)             |
+| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Pending                       |
+| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Pending                       |
+| 5     | Account management UI and accessibility/tech-debt cleanup          | Pending                       |
+| 6     | Academic evidence: SENA evidence pack / general system report      | Pending                       |
 
 ## 6. How to verify locally
 

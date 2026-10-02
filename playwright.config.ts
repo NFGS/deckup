@@ -31,7 +31,9 @@ export default defineConfig({
           command:
             'pnpm --filter @deckup/api exec prisma migrate deploy && pnpm --filter @deckup/api start:prod',
           url: apiHealthUrl,
-          reuseExistingServer: !process.env.CI,
+          // Never reuse whatever is listening on the port: an unrelated service
+          // answering 200 on /api/v1/health would silently hijack the suite.
+          reuseExistingServer: false,
           timeout: 120_000,
           env: {
             PORT: API_PORT,
