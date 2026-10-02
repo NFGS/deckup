@@ -1,11 +1,12 @@
 # DeckUp — Remediation Plan (post-review)
 
-| Field  | Value                                                                |
-| ------ | -------------------------------------------------------------------- |
-| Date   | 2026-09-22                                                           |
-| Source | Exhaustive review (lint/typecheck/unit/API e2e 72/72/Playwright 8/8) |
-| Scope  | Phases 1–5                                                           |
-| Status | **Completed** — all phases executed, verified and committed          |
+| Field  | Value                                                                     |
+| ------ | ------------------------------------------------------------------------- |
+| Date   | 2026-09-22                                                                |
+| Source | Exhaustive review (lint/typecheck/unit/API e2e 72/72/Playwright 8/8)      |
+| Scope  | Phases 1–5                                                                |
+| Status | **Completed** — phases 1–5 executed and committed on 2026-09-22           |
+| Next   | Continuation backlog in [`docs/STATUS.md`](./docs/STATUS.md) (2026-10-02) |
 
 ## Decisions
 
@@ -103,3 +104,16 @@ pnpm build && pnpm test:e2e
 ```
 
 Plus: fresh-clone smoke (delete `dist`/generated, run quickstart) and deploy dry-runs when credentials exist.
+
+## Continuation (2026-10-02)
+
+A full review after a context handover confirmed all five quality gates pass
+(lint, typecheck, 171 unit tests, 72 API e2e, 8 browser e2e). The current state,
+evidence and prioritized backlog live in [`docs/STATUS.md`](./docs/STATUS.md):
+
+1. **Secure the work** — commit pending files and publish `main` to GitHub.
+2. **Permanent quality fix** — Playwright health probe, Turbo cache inputs, `v0.1.0` tag.
+3. **Production** — Neon, Railway, Vercel and GitHub secrets per `docs/04-operations/deployment-walkthrough.md`.
+4. **Documentation** — Notion re-sync and alignment of `SPEC.md`/`STATUS.md`.
+5. **Product** — account management UI, accessibility and minor debt.
+6. **Academics** — SENA evidence pack / general system report.
