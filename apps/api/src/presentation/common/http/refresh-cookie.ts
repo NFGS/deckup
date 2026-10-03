@@ -21,7 +21,9 @@ export function setRefreshCookie(
     path: REFRESH_COOKIE_PATH,
     httpOnly: true,
     secure: options.secure,
-    sameSite: 'lax',
+    // The web app and the API live on different sites in production, so the
+    // refresh cookie must be sent on cross-site requests (None requires Secure).
+    sameSite: options.secure ? 'none' : 'lax',
     maxAge: options.ttlDays * SECONDS_PER_DAY,
   });
 }
