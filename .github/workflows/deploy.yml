@@ -45,7 +45,6 @@ jobs:
 
       - name: Deploy to Vercel
         if: env.VERCEL_TOKEN != ''
-        working-directory: apps/web
         run: |
           pnpm dlx vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
           pnpm dlx vercel@latest build --prod --token "$VERCEL_TOKEN"
