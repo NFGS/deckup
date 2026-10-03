@@ -92,8 +92,8 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 1. **Production deployment** — **done (2026-10-03)**: Neon migrated, API on
    Railway, web on Vercel, `VITE_API_URL` wired, CORS verified and smoke test
    green. Only the CI job that redeploys the API is skipped until a Railway
-   **project token** is stored as the `RAILWAY_TOKEN` secret (the API itself is
-   already deployed).
+   **account token** is stored as the `RAILWAY_API_TOKEN` secret (the API itself
+   is already deployed).
 2. **Notion sync** — **done (2026-10-03)**: 10 documents published to the new
    workspace page (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with

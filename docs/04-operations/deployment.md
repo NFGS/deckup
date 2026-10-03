@@ -66,7 +66,7 @@ Boot validation fails fast when a feature is enabled without its credentials.
    workspace dependencies with Turbo and applies the SPA rewrite), and define
    `VITE_API_URL`.
 4. **GitHub** — add the deployment secrets so the `Deploy` workflow can run:
-   `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `RAILWAY_TOKEN` and
+   `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `RAILWAY_API_TOKEN` and
    `DATABASE_URL` (used for the release migration). Optionally set the
    `RAILWAY_SERVICE` repository variable. The workflow skips a platform
    gracefully when its token is missing.

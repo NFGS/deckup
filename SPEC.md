@@ -89,7 +89,7 @@ pnpm test:e2e    # Playwright smoke (web)
 Deploys run through `.github/workflows/deploy.yml` after a green CI on `main`
 (or manually with `workflow_dispatch`). The web job uses `VERCEL_TOKEN`,
 `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`; the API job applies migrations with
-`DATABASE_URL` and redeploys with `RAILWAY_TOKEN` (Railway project token).
+`DATABASE_URL` and redeploys with `RAILWAY_API_TOKEN` (Railway account token).
 
 ## 9. Skills
 

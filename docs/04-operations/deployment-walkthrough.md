@@ -168,7 +168,7 @@ credentials:
 | Secret              | Where to get it                                    |
 | ------------------- | -------------------------------------------------- |
 | `DATABASE_URL`      | Neon **direct** string (migrations)                |
-| `RAILWAY_TOKEN`     | Railway → Account Settings → Tokens → Create       |
+| `RAILWAY_API_TOKEN` | Railway → Account Settings → Tokens → Create       |
 | `VERCEL_TOKEN`      | Vercel → Account Settings → Tokens → Create        |
 | `VERCEL_ORG_ID`     | Vercel → Team/Account Settings → General → Team ID |
 | `VERCEL_PROJECT_ID` | Vercel → Project → Settings → General → Project ID |
@@ -182,7 +182,7 @@ credentials:
    - build and promote the web app on Vercel.
 
 > Without secrets the workflow prints a friendly skip message; nothing breaks.
-> If `RAILWAY_TOKEN` exists but `DATABASE_URL` does not, it fails on purpose:
+> If `RAILWAY_API_TOKEN` exists but `DATABASE_URL` does not, it fails on purpose:
 > deploying an API without migrating its database would corrupt data.
 
 ---
