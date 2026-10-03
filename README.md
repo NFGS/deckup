@@ -107,6 +107,8 @@ web build at an alternate port (matching `VITE_API_URL` in `apps/web/.env.local`
 E2E_API_PORT=3100 pnpm test:e2e
 ```
 
+If port 5173 is taken as well, add `E2E_WEB_PORT=5273` to the same command.
+
 ## Documentation
 
 See [`docs/`](./docs) and [`SPEC.md`](./SPEC.md). The current remediation

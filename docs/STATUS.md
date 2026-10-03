@@ -37,6 +37,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Production smoke   | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                              |
 | Production flow    | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                              |
 | Railway autodeploy | Push `3582662` → deployment `d64e141b` (trigger `f2be2d99`)                    | **SUCCESS** — pre-deploy applied 5 migrations                    |
+| Fresh clone        | `git clone` → `pnpm install --frozen-lockfile` → all gates                     | **OK** — 174 unit · 72 API e2e · 8 browser e2e                   |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
