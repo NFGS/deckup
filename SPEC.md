@@ -87,9 +87,10 @@ pnpm test:e2e    # Playwright smoke (web)
 | Database      | Neon PostgreSQL 17 (`neondb`), migrations applied via the direct connection |
 
 Deploys run through `.github/workflows/deploy.yml` after a green CI on `main`
-(or manually with `workflow_dispatch`). The web job uses `VERCEL_TOKEN`,
-`VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`; the API job applies migrations with
-`DATABASE_URL` and redeploys with `RAILWAY_API_TOKEN` (Railway account token).
+(or manually with `workflow_dispatch`). The workflow publishes the web app with
+`VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`. Railway deploys the API
+from GitHub on every push to `main` and runs `prisma migrate deploy` as a
+pre-deploy command (the `prisma` CLI ships in the production image).
 
 ## 9. Skills
 

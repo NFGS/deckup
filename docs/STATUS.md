@@ -91,9 +91,9 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 
 1. **Production deployment** — **done (2026-10-03)**: Neon migrated, API on
    Railway, web on Vercel, `VITE_API_URL` wired, CORS verified and smoke test
-   green. Only the CI job that redeploys the API is skipped until a Railway
-   **account token** is stored as the `RAILWAY_API_TOKEN` secret (the API itself
-   is already deployed).
+   green. Railway deploys the API from GitHub on every push to `main` and runs
+   `prisma migrate deploy` as a pre-deploy command; the Deploy workflow only
+   publishes the web app.
 2. **Notion sync** — **done (2026-10-03)**: 10 documents published to the new
    workspace page (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with
@@ -132,14 +132,14 @@ keeps the session → card → study session → review → summary → analytic
 
 ## 5. Continuation plan
 
-| Phase | Goal                                                               | Status                                         |
-| ----- | ------------------------------------------------------------------ | ---------------------------------------------- |
-| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Done (2026-10-03) — CI green                   |
-| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                              |
-| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Done (2026-10-03) — API redeploy token pending |
-| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Done (2026-10-03) — 10 pages published         |
-| 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending            |
-| 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots)   |
+| Phase | Goal                                                               | Status                                              |
+| ----- | ------------------------------------------------------------------ | --------------------------------------------------- |
+| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Done (2026-10-03) — CI green                        |
+| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                                   |
+| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Done (2026-10-03) — Railway autodeploys from GitHub |
+| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Done (2026-10-03) — 10 pages published              |
+| 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending                 |
+| 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots)        |
 
 ## 6. How to verify locally
 

@@ -167,23 +167,20 @@ credentials:
 
 | Secret              | Where to get it                                    |
 | ------------------- | -------------------------------------------------- |
-| `DATABASE_URL`      | Neon **direct** string (migrations)                |
-| `RAILWAY_API_TOKEN` | Railway → Account Settings → Tokens → Create       |
 | `VERCEL_TOKEN`      | Vercel → Account Settings → Tokens → Create        |
 | `VERCEL_ORG_ID`     | Vercel → Team/Account Settings → General → Team ID |
 | `VERCEL_PROJECT_ID` | Vercel → Project → Settings → General → Project ID |
 
-3. **Variables** (not secret): `RAILWAY_SERVICE` = your Railway service name
-   (defaults to `deckup-api`).
-4. Trigger a release: **Actions → Deploy → Run workflow** (or push any commit
-   to `main`). It will:
-   - apply the Prisma migrations with `prisma migrate deploy`;
-   - deploy the API container on Railway;
-   - build and promote the web app on Vercel.
+3. Trigger a release: **Actions → Deploy → Run workflow** (or push any commit
+   to `main`). It builds and promotes the web app on Vercel.
 
-> Without secrets the workflow prints a friendly skip message; nothing breaks.
-> If `RAILWAY_API_TOKEN` exists but `DATABASE_URL` does not, it fails on purpose:
-> deploying an API without migrating its database would corrupt data.
+The API deploys itself: connect the repository in Railway (service →
+**Settings → Source → Connect Repo**, branch `main`). Railway builds
+`apps/api/Dockerfile` on every push and runs `prisma migrate deploy` as a
+pre-deploy command, so the database is migrated before the new container starts.
+
+> Without the Vercel secrets the workflow prints a friendly skip message;
+> nothing breaks.
 
 ---
 
