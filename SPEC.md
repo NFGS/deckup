@@ -94,10 +94,16 @@ pre-deploy command (the `prisma` CLI ships in the production image).
 
 ## 9. Skills
 
-| Skill                          | When                                                          |
-| ------------------------------ | ------------------------------------------------------------- |
-| `clean-architecture`           | Any API code (domain/application/infrastructure/presentation) |
-| `swebok-doc-expert`            | Requirements, ADRs, test plans                                |
-| `uml-use-case-diagram-builder` | Use-case diagrams                                             |
-| `psp-continuous-improvement`   | Estimates and error logs                                      |
-| `humanizer`                    | Polishing prose                                               |
+| Skill                          | When                                                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `clean-architecture`           | Any API code (domain/application/infrastructure/presentation)                                         |
+| `swebok-doc-expert`            | Requirements, ADRs, test plans                                                                        |
+| `uml-use-case-diagram-builder` | Use-case diagrams                                                                                     |
+| `psp-continuous-improvement`   | Estimates and error logs                                                                              |
+| `humanizer`                    | Polishing prose                                                                                       |
+| `archify`                      | Architecture, workflow, sequence, data-flow and lifecycle diagrams (interactive HTML, PNG/SVG export) |
+| `open-design`                  | Decks, prototypes, brand design systems and document styling (150+ design systems, 110+ templates)    |
+
+Both diagram/design skills are installed globally (`~/.config/opencode/skills/`) and
+per project (`.opencode/skills/`, gitignored). The Open Design catalogue lives at
+`~/.open-design-skill/repo` (sparse checkout of `nexu-io/open-design`).

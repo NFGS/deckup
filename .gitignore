@@ -43,3 +43,6 @@ apps/api/prisma/*.db
 # Misc
 *.local
 *.dump
+
+# Local agent skills (installed per machine, not part of the product)
+.opencode/skills/
