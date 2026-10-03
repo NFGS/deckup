@@ -35,6 +35,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Production web   | `curl https://deckup.vercel.app`                                               | **200** (Vercel)                                                 |
 | Production API   | `curl .../api/v1/health`                                                       | **200** `{"status":"ok","version":"0.1.0"}`                      |
 | Production smoke | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                              |
+| Production flow  | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                              |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
@@ -101,6 +102,25 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 4. **Academic evidence** — **done (2026-10-02)**: general system report at
    [`05-academic/informe-general-sistema.md`](./05-academic/informe-general-sistema.md)
    with the class diagram and 12 screenshots in `05-academic/evidencias/`.
+
+### 4.5 Production bugs found and fixed (2026-10-03)
+
+The first end-to-end verification against production exposed three defects that
+local tests could not catch:
+
+1. **Inconsistent deck listing** — `$transaction([findMany, count])` through the
+   Neon pooler returned `total > 0` with an empty `items` array. Replaced with
+   `Promise.all` (`ab883f0`).
+2. **Stale cached responses** — without `Cache-Control`, Chrome heuristically
+   cached `GET /decks` and served the old list after a mutation. The API now
+   sends `cache-control: no-store` on every response (`74f7b9c`).
+3. **Session lost on reload** — the refresh cookie used `SameSite=Lax`, which
+   browsers do not send on cross-site requests (Vercel web ↔ Railway API). It is
+   now `SameSite=None` when `COOKIE_SECURE=true` (`74f7b9c`).
+
+Verified in production: register → deck visible right after creation → reload
+keeps the session → card → study session → review → summary → analytics
+(streak 1, retention 100%).
 
 ### 4.4 P2 — Minor debt
 
