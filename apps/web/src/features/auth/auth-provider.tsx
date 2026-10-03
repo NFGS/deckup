@@ -1,11 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { LoginInput, RegisterInput, User } from '@deckup/shared';
+import type { LoginInput, RegisterInput, UpdateUser, User } from '@deckup/shared';
 
 import { purgeApiCaches, setUnauthorizedHandler } from '../../lib/api-client';
 import { clearAllQueues } from '../../lib/offline-queue';
-import { registerAccount, restoreSession, signIn, signOut } from './api';
+import { registerAccount, restoreSession, signIn, signOut, updateProfile } from './api';
 import { AuthContext } from './auth-context';
 import type { AuthContextValue, AuthStatus } from './auth-context';
 
@@ -79,6 +79,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated');
   }, []);
 
+  const handleUpdateProfile = useCallback(async (input: UpdateUser) => {
+    const updated = await updateProfile(input);
+    setUser(updated);
+  }, []);
+
   const handleSignOut = useCallback(async () => {
     clearAllQueues();
     await signOut();
@@ -102,8 +107,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn: handleSignIn,
       register: handleRegister,
       signOut: handleSignOut,
+      updateProfile: handleUpdateProfile,
     }),
-    [status, user, sessionExpired, handleSignIn, handleRegister, handleSignOut],
+    [
+      status,
+      user,
+      sessionExpired,
+      handleSignIn,
+      handleRegister,
+      handleSignOut,
+      handleUpdateProfile,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

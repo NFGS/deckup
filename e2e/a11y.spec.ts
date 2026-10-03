@@ -58,4 +58,8 @@ test('authenticated screens and dialogs have no serious accessibility violations
   await page.getByRole('link', { name: 'Analytics' }).click();
   await expect(page.getByRole('heading', { name: 'Study analytics' })).toBeVisible();
   await expectNoBlockingViolations(page, '/analytics');
+
+  await page.getByRole('link', { name: 'Account' }).click();
+  await expect(page.getByRole('heading', { name: 'Account settings' })).toBeVisible();
+  await expectNoBlockingViolations(page, '/account');
 });

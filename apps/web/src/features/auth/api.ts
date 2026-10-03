@@ -1,5 +1,5 @@
 import { authSessionSchema, loginSchema, registerSchema, userSchema } from '@deckup/shared';
-import type { AuthSession, LoginInput, RegisterInput, User } from '@deckup/shared';
+import type { AuthSession, LoginInput, RegisterInput, UpdateUser, User } from '@deckup/shared';
 
 import { apiRequest, clearSession, refreshAccessToken, setAccessToken } from '../../lib/api-client';
 
@@ -33,6 +33,14 @@ export async function signOut(): Promise<void> {
 
 export async function fetchCurrentUser(): Promise<User> {
   return apiRequest('/users/me', { schema: userSchema });
+}
+
+export async function updateProfile(input: UpdateUser): Promise<User> {
+  return apiRequest('/users/me', {
+    method: 'PATCH',
+    body: input,
+    schema: userSchema,
+  });
 }
 
 /**

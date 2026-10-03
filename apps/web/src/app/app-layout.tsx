@@ -7,7 +7,7 @@ import { useAuth } from '../features/auth/auth-context';
 import { useOfflineQueue } from '../features/study/hooks';
 
 export function AppLayout() {
-  const { status, user, signOut } = useAuth();
+  const { status, signOut } = useAuth();
   const navigate = useNavigate();
   const { pending: pendingReviews, sync } = useOfflineQueue();
 
@@ -43,7 +43,9 @@ export function AppLayout() {
                 <Link to="/analytics" className="text-sm text-slate-300 hover:text-white">
                   Analytics
                 </Link>
-                <span className="hidden text-sm text-slate-400 sm:inline">{user?.displayName}</span>
+                <Link to="/account" className="text-sm text-slate-300 hover:text-white">
+                  Account
+                </Link>
                 <Button variant="ghost" size="sm" onClick={() => void handleSignOut()}>
                   <LogOutIcon className="h-4 w-4" />
                   Sign out

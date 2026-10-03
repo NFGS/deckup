@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 
+import { AccountPage } from '../features/account/account-page';
 import { LoginPage } from '../features/auth/login-page';
 import { ProtectedRoute } from '../features/auth/protected-route';
 import { RegisterPage } from '../features/auth/register-page';
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'account', element: <AccountPage /> },
           { path: 'explore', element: <ExplorePage /> },
           { path: 'decks/:deckId', element: <DeckDetailPage /> },
           {
