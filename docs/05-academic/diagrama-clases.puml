@@ -1,0 +1,221 @@
+@startuml DeckUp — Class Diagram
+title DeckUp — Diagrama de clases (Clean Architecture, Epic 03 — Education)
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "Domain — Entities" {
+  class User {
+    +id: string
+    +email: Email
+    +passwordHash: string
+    +displayName: string
+    +timezone: string
+    +createdAt: Date
+    +updatedAt: Date
+    +withProfile(displayName: string, timezone: string): User
+  }
+
+  class Deck {
+    +id: string
+    +ownerId: string
+    +title: string
+    +description: string | null
+    +subject: string | null
+    +color: string | null
+    +visibility: DeckVisibility
+    +tags: string[]
+    +createdAt: Date
+    +updatedAt: Date
+    +deletedAt: Date | null
+    +markDeleted(now: Date): Deck
+  }
+
+  class Card {
+    +id: string
+    +deckId: string
+    +front: string
+    +back: string
+    +hint: string | null
+    +imageUrl: string | null
+    +imagePublicId: string | null
+    +difficulty: CardDifficulty | null
+    +tags: string[]
+    +createdAt: Date
+    +updatedAt: Date
+    +deletedAt: Date | null
+    +markDeleted(now: Date): Card
+  }
+
+  class ReviewState {
+    +cardId: string
+    +userId: string
+    +stability: number
+    +difficulty: number
+    +state: CardState
+    +reps: number
+    +lapses: number
+    +scheduledDays: number
+    +learningSteps: number
+    +lastReviewAt: Date | null
+    +dueAt: Date
+    +schedulerVersion: string
+    +version: number
+    +applyOutcome(outcome: SchedulingOutcome): ReviewState
+  }
+
+  class StudySession {
+    +id: string
+    +userId: string
+    +deckId: string
+    +mode: SessionMode
+    +status: SessionStatus
+    +startedAt: Date
+    +endedAt: Date | null
+    +cardsReviewed: number
+    +correctCount: number
+    +recordReview(rating: ReviewRating): void
+    +complete(now: Date): StudySession
+    +abandon(now: Date): StudySession
+    +accuracy(): number
+  }
+
+  class ReviewLog {
+    +id: string
+    +cardId: string
+    +userId: string
+    +sessionId: string | null
+    +clientReviewId: string
+    +rating: ReviewRating
+    +reviewedAt: Date
+    +elapsedMs: number | null
+    +scheduledDays: number
+    +previousDueAt: Date
+    +nextDueAt: Date
+    +stabilityAfter: number
+    +difficultyAfter: number
+  }
+
+  class Email <<Value Object>> {
+    +value: string
+    +isValid(): boolean
+  }
+}
+
+package "Domain — Services" {
+  class SchedulingService {
+    +schedule(input: SchedulingInput): SchedulingOutcome
+  }
+
+  class StudyMetricsService {
+    +streak(reviewDays: Date[], today: Date, timezone: string): number
+    +retention(logs: ReviewLog[], windowDays: number): number
+    +forecast(states: ReviewState[], days: number, timezone: string): ForecastDay[]
+  }
+}
+
+package "Domain — Ports (interfaces)" {
+  interface SchedulerPort {
+    +schedule(input: SchedulingInput): SchedulingOutcome
+  }
+  interface CardRepository {
+    +findById(id: string): Promise<Card | null>
+    +save(card: Card): Promise<Card>
+  }
+  interface DeckRepository {
+    +findById(id: string): Promise<Deck | null>
+    +save(deck: Deck): Promise<Deck>
+  }
+  interface ImageStoragePort {
+    +upload(input: ImageUpload, ownerId: string): Promise<StoredImage>
+    +remove(publicId: string): Promise<void>
+  }
+  interface CardGeneratorPort {
+    +generate(input: CardGenerationInput): Promise<CardSuggestion[]>
+  }
+  note right of CardGeneratorPort
+    El dominio define 17 puertos en total
+    (repositorios, scheduler, seguridad,
+    CSV, imágenes, IA y analítica).
+  end note
+}
+
+package "Application — Use Cases" {
+  class RegisterUserUseCase
+  class CreateDeckUseCase
+  class CreateCardUseCase
+  class UploadCardImageUseCase
+  class ImportCardsUseCase
+  class StartStudySessionUseCase
+  class SubmitReviewUseCase
+  class GetAnalyticsOverviewUseCase
+  class GenerateCardsUseCase
+  note right of RegisterUserUseCase
+    31 casos de uso en total, uno por
+    operación de negocio (SRP).
+  end note
+}
+
+package "Infrastructure — Adapters" {
+  class PrismaCardRepository
+  class PrismaDeckRepository
+  class CloudinaryImageStorage
+  class TsFsrsScheduler
+  class OpenAiCardGenerator
+  class Argon2PasswordHasher
+  class JwtTokenService
+}
+
+package "Presentation — Controllers" {
+  class AuthController
+  class DecksController
+  class CardsController
+  class StudyController
+  class AnalyticsController
+}
+
+' --- Relationships: entities ---
+User "1" --> "0..*" Deck : owns >
+Deck "1" *-- "0..*" Card : contains >
+Card "1" --> "1" ReviewState : schedules >
+User "1" --> "0..*" ReviewState : reviews >
+User "1" --> "0..*" StudySession : studies >
+Deck "1" --> "0..*" StudySession : studied in >
+StudySession "1" --> "0..*" ReviewLog : records >
+Card "1" --> "0..*" ReviewLog : logged in >
+User "1" --> "0..*" ReviewLog : produces >
+User "1" --> "1" Email : identifies by >
+
+' --- Relationships: services and ports ---
+SchedulingService ..> SchedulerPort : uses >
+StudyMetricsService ..> ReviewLog : aggregates >
+StudyMetricsService ..> ReviewState : aggregates >
+
+' --- Relationships: use cases ---
+RegisterUserUseCase ..> User : creates >
+CreateDeckUseCase ..> Deck : creates >
+CreateCardUseCase ..> Card : creates >
+UploadCardImageUseCase ..> ImageStoragePort : uses >
+ImportCardsUseCase ..> Card : creates >
+StartStudySessionUseCase ..> StudySession : creates >
+SubmitReviewUseCase ..> SchedulingService : uses >
+SubmitReviewUseCase ..> ReviewState : updates >
+GetAnalyticsOverviewUseCase ..> StudyMetricsService : uses >
+GenerateCardsUseCase ..> CardGeneratorPort : uses >
+
+' --- Relationships: adapters implement ports ---
+PrismaCardRepository ..|> CardRepository
+PrismaDeckRepository ..|> DeckRepository
+CloudinaryImageStorage ..|> ImageStoragePort
+TsFsrsScheduler ..|> SchedulerPort
+OpenAiCardGenerator ..|> CardGeneratorPort
+
+' --- Relationships: controllers depend on use cases ---
+AuthController ..> RegisterUserUseCase : invokes >
+DecksController ..> CreateDeckUseCase : invokes >
+CardsController ..> CreateCardUseCase : invokes >
+CardsController ..> UploadCardImageUseCase : invokes >
+StudyController ..> SubmitReviewUseCase : invokes >
+AnalyticsController ..> GetAnalyticsOverviewUseCase : invokes >
+
+@enduml

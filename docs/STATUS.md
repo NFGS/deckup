@@ -1,12 +1,12 @@
 # Project Status — DeckUp
 
-| Field        | Value                                                                       |
-| ------------ | --------------------------------------------------------------------------- |
-| **Date**     | 2026-10-02                                                                  |
-| **Version**  | 0.1.0 (untagged)                                                            |
-| **HEAD**     | `88c29de docs: add a beginner-friendly deployment walkthrough` (2026-09-26) |
-| **Snapshot** | Full repository review after a context handover                             |
-| **Related**  | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                     |
+| Field        | Value                                                                        |
+| ------------ | ---------------------------------------------------------------------------- |
+| **Date**     | 2026-10-02                                                                   |
+| **Version**  | 0.1.0 (tagged)                                                               |
+| **HEAD**     | `40ca5ae feat(web): add account settings for name and timezone` (2026-10-02) |
+| **Snapshot** | Full repository review after a context handover                              |
+| **Related**  | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                      |
 
 This document is the **single source of truth for the current state of the
 project** and for the continuation backlog. Read it together with `SPEC.md`
@@ -18,14 +18,16 @@ project** and for the continuation backlog. Read it together with `SPEC.md`
 
 All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
-| Gate            | Command                                                                        | Result                                    |
-| --------------- | ------------------------------------------------------------------------------ | ----------------------------------------- |
-| Lint            | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                        |
-| Typecheck       | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                      |
-| Unit tests      | `pnpm exec turbo run test --force`                                             | **171/171** (shared 8 · API 120 · web 43) |
-| API integration | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17           |
-| Build           | `pnpm build`                                                                   | Pass                                      |
-| Browser E2E     | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)           |
+| Gate             | Command                                                                        | Result                                    |
+| ---------------- | ------------------------------------------------------------------------------ | ----------------------------------------- |
+| Lint             | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                        |
+| Typecheck        | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                      |
+| Unit tests       | `pnpm exec turbo run test --force`                                             | **174/174** (shared 8 · API 120 · web 46) |
+| API integration  | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17           |
+| Build            | `pnpm build`                                                                   | Pass                                      |
+| Browser E2E      | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)           |
+| Production image | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)      |
+| Notion dry-run   | `pnpm sync:notion --dry-run`                                                   | 10 documents, 1005 blocks, nothing sent   |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
@@ -79,34 +81,35 @@ commit has no history to preserve).
 
 ### 4.3 P1 — Pending continuation work
 
-1. **Production deployment** — walkthrough ready; no evidence of platform
-   secrets being configured.
-2. **Notion sync** — last sync 2026-09-22, older than the 2026-09-25/26 changes;
-   `NOTION_TOKEN` / `NOTION_PAGE_ID` are not available in the environment.
-3. **Account management UI** — `PATCH /users/me` exists in the API; the web app
-   has no profile/settings screen (RF-01 scope).
-4. **Academic evidence** — SENA formative evidence / general system report.
+1. **Production deployment** — the production image was built and verified
+   locally (`200` on `/api/v1/health`); the platform step (Neon, Railway,
+   Vercel, GitHub secrets) still needs the owner's accounts.
+2. **Notion sync** — dry-run verified (10 documents, 1005 blocks); the real
+   sync needs `NOTION_TOKEN` (the page ID is documented in `SPEC.md` §7).
+3. **Account management UI** — **done (2026-10-02)**: `/account` page with
+   display name and IANA timezone, wired to `PATCH /users/me`, covered by unit
+   tests and an authenticated axe scan.
+4. **Academic evidence** — general system report created at
+   [`05-academic/informe-general-sistema.md`](./05-academic/informe-general-sistema.md)
+   with the class diagram; screenshots still pending.
 
 ### 4.4 P2 — Minor debt
 
-- `docker-compose.yml` local-only change pending commit (loopback binding).
 - Web tests emit React `act()` warnings.
 - Recharts forecast has no textual alternative for screen readers.
 - `apps/web/public/icons.svg` is unreferenced.
 - Fastify deprecation `FSTDEP024` (`requestIdLogLabel` → `logController`).
-- No SemVer tag exists yet (`v0.1.0` proposed).
-- `PLAN.md` header says "Completed" without reflecting the 2026-09-25/26 batch.
 
 ## 5. Continuation plan
 
-| Phase | Goal                                                               | Status                        |
-| ----- | ------------------------------------------------------------------ | ----------------------------- |
-| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Blocked — no push credentials |
-| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)             |
-| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Pending                       |
-| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Pending                       |
-| 5     | Account management UI and accessibility/tech-debt cleanup          | Pending                       |
-| 6     | Academic evidence: SENA evidence pack / general system report      | Pending                       |
+| Phase | Goal                                                               | Status                                           |
+| ----- | ------------------------------------------------------------------ | ------------------------------------------------ |
+| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Blocked — `gh auth login` pending                |
+| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                                |
+| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Image verified; platform step pending            |
+| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Dry-run verified; token pending                  |
+| 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending              |
+| 6     | Academic evidence: SENA evidence pack / general system report      | Report + class diagram done; screenshots pending |
 
 ## 6. How to verify locally
 
@@ -115,4 +118,5 @@ pnpm install
 pnpm lint && pnpm typecheck && pnpm test
 docker compose up -d db && pnpm --filter @deckup/api test:e2e
 pnpm build && E2E_API_PORT=3100 pnpm exec playwright test   # local port-conflict workaround
+docker build -f apps/api/Dockerfile -t deckup-api:verification .   # production image
 ```
