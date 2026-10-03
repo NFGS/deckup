@@ -43,7 +43,9 @@ describe('GenerateCardsModal', () => {
   it('generates suggestions and adds the selected ones', async () => {
     const onAddCards = vi.fn().mockResolvedValue(undefined);
 
-    renderWithProviders(<GenerateCardsModal open onClose={vi.fn()} onAddCards={onAddCards} />);
+    await renderWithProviders(
+      <GenerateCardsModal open onClose={vi.fn()} onAddCards={onAddCards} />,
+    );
 
     await userEvent.type(screen.getByLabelText('Study notes'), NOTES);
     await userEvent.click(screen.getByRole('button', { name: /generate suggestions/i }));
@@ -63,7 +65,9 @@ describe('GenerateCardsModal', () => {
   it('lets the student deselect suggestions', async () => {
     const onAddCards = vi.fn().mockResolvedValue(undefined);
 
-    renderWithProviders(<GenerateCardsModal open onClose={vi.fn()} onAddCards={onAddCards} />);
+    await renderWithProviders(
+      <GenerateCardsModal open onClose={vi.fn()} onAddCards={onAddCards} />,
+    );
 
     await userEvent.type(screen.getByLabelText('Study notes'), NOTES);
     await userEvent.click(screen.getByRole('button', { name: /generate suggestions/i }));
@@ -78,8 +82,8 @@ describe('GenerateCardsModal', () => {
     ]);
   });
 
-  it('keeps the generate button disabled until the notes are long enough', () => {
-    renderWithProviders(<GenerateCardsModal open onClose={vi.fn()} onAddCards={vi.fn()} />);
+  it('keeps the generate button disabled until the notes are long enough', async () => {
+    await renderWithProviders(<GenerateCardsModal open onClose={vi.fn()} onAddCards={vi.fn()} />);
 
     expect(screen.getByRole('button', { name: /generate suggestions/i })).toBeDisabled();
   });
@@ -104,7 +108,7 @@ describe('GenerateCardsModal', () => {
       );
     });
 
-    renderWithProviders(<GenerateCardsModal open onClose={vi.fn()} onAddCards={vi.fn()} />);
+    await renderWithProviders(<GenerateCardsModal open onClose={vi.fn()} onAddCards={vi.fn()} />);
 
     await userEvent.type(screen.getByLabelText('Study notes'), NOTES);
     await userEvent.click(screen.getByRole('button', { name: /generate suggestions/i }));

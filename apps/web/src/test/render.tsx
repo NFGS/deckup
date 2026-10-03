@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router';
@@ -12,10 +12,10 @@ export interface RenderOptions {
   path?: string;
 }
 
-export function renderWithProviders(
+export async function renderWithProviders(
   ui: ReactElement,
   { route = '/', path }: RenderOptions = {},
-): RenderResult {
+): Promise<RenderResult> {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -23,19 +23,27 @@ export function renderWithProviders(
     },
   });
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <MemoryRouter initialEntries={[route]}>
-          {path ? (
-            <Routes>
-              <Route path={path} element={ui} />
-            </Routes>
-          ) : (
-            ui
-          )}
-        </MemoryRouter>
-      </AuthProvider>
-    </QueryClientProvider>,
-  );
+  let result: RenderResult | undefined;
+
+  await act(async () => {
+    result = render(
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <MemoryRouter initialEntries={[route]}>
+            {path ? (
+              <Routes>
+                <Route path={path} element={ui} />
+              </Routes>
+            ) : (
+              ui
+            )}
+          </MemoryRouter>
+        </AuthProvider>
+      </QueryClientProvider>,
+    );
+
+    await Promise.resolve();
+  });
+
+  return result as RenderResult;
 }

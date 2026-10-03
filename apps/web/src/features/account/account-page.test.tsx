@@ -61,7 +61,7 @@ afterEach(() => {
 
 describe('AccountPage', () => {
   it('prefills the profile with the signed-in student', async () => {
-    renderWithProviders(<AccountPage />, { route: '/account' });
+    await renderWithProviders(<AccountPage />, { route: '/account' });
 
     expect(await screen.findByLabelText('Display name')).toHaveValue('Ana');
     expect(screen.getByLabelText('Timezone')).toHaveValue('America/Bogota');
@@ -69,7 +69,7 @@ describe('AccountPage', () => {
   });
 
   it('saves the profile and confirms the update', async () => {
-    renderWithProviders(<AccountPage />, { route: '/account' });
+    await renderWithProviders(<AccountPage />, { route: '/account' });
 
     const displayName = await screen.findByLabelText('Display name');
     await userEvent.clear(displayName);
@@ -104,7 +104,7 @@ describe('AccountPage', () => {
       422,
     );
 
-    renderWithProviders(<AccountPage />, { route: '/account' });
+    await renderWithProviders(<AccountPage />, { route: '/account' });
 
     await screen.findByLabelText('Display name');
     await userEvent.click(screen.getByRole('button', { name: /save changes/i }));

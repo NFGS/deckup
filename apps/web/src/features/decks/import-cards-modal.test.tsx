@@ -40,7 +40,7 @@ afterEach(() => {
 
 describe('ImportCardsModal', () => {
   it('uploads the file and shows the import summary', async () => {
-    renderWithProviders(<ImportCardsModal deckId={DECK_ID} open onClose={vi.fn()} />);
+    await renderWithProviders(<ImportCardsModal deckId={DECK_ID} open onClose={vi.fn()} />);
 
     const file = new File(['front,back\nQ1,A1'], 'cards.csv', { type: 'text/csv' });
 
@@ -58,7 +58,7 @@ describe('ImportCardsModal', () => {
   });
 
   it('requires a file before importing', async () => {
-    renderWithProviders(<ImportCardsModal deckId={DECK_ID} open onClose={vi.fn()} />);
+    await renderWithProviders(<ImportCardsModal deckId={DECK_ID} open onClose={vi.fn()} />);
 
     await userEvent.click(screen.getByRole('button', { name: /^import$/i }));
 
@@ -85,7 +85,7 @@ describe('ImportCardsModal', () => {
       );
     });
 
-    renderWithProviders(<ImportCardsModal deckId={DECK_ID} open onClose={vi.fn()} />);
+    await renderWithProviders(<ImportCardsModal deckId={DECK_ID} open onClose={vi.fn()} />);
 
     const file = new File(['front\nQ1'], 'cards.csv', { type: 'text/csv' });
     await userEvent.upload(screen.getByLabelText('CSV file'), file);

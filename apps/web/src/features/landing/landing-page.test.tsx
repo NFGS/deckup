@@ -22,8 +22,8 @@ afterEach(() => {
 });
 
 describe('LandingPage', () => {
-  it('renders the product name and core features', () => {
-    renderWithProviders(<LandingPage />);
+  it('renders the product name and core features', async () => {
+    await renderWithProviders(<LandingPage />);
 
     expect(screen.getByRole('heading', { level: 1, name: 'DeckUp' })).toBeInTheDocument();
     expect(screen.getByText('Custom decks')).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe('LandingPage', () => {
   });
 
   it('offers sign-in and registration for anonymous visitors', async () => {
-    renderWithProviders(<LandingPage />);
+    await renderWithProviders(<LandingPage />);
 
     expect(await screen.findByRole('link', { name: /get started/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument();

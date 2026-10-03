@@ -56,7 +56,7 @@ afterEach(() => {
 
 describe('AnalyticsPage', () => {
   it('renders the study metrics', async () => {
-    renderWithProviders(<AnalyticsPage />, { route: '/analytics' });
+    await renderWithProviders(<AnalyticsPage />, { route: '/analytics' });
 
     expect(await screen.findByText('12 days')).toBeInTheDocument();
     expect(screen.getByText('24')).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('AnalyticsPage', () => {
   });
 
   it('renders the workload forecast section', async () => {
-    renderWithProviders(<AnalyticsPage />, { route: '/analytics' });
+    await renderWithProviders(<AnalyticsPage />, { route: '/analytics' });
 
     expect(await screen.findByText('Next 7 days')).toBeInTheDocument();
     expect(screen.getByText(/cards expected to come due/i)).toBeInTheDocument();
@@ -83,7 +83,7 @@ describe('AnalyticsPage', () => {
       return Promise.resolve(jsonResponse({ title: 'Server error', status: 500 }, 500));
     });
 
-    renderWithProviders(<AnalyticsPage />, { route: '/analytics' });
+    await renderWithProviders(<AnalyticsPage />, { route: '/analytics' });
 
     expect(await screen.findByText(/could not load your analytics/i)).toBeInTheDocument();
   });

@@ -53,7 +53,7 @@ afterEach(() => {
 
 describe('ExplorePage', () => {
   it('lists public decks with their author', async () => {
-    renderWithProviders(<ExplorePage />, { route: '/explore' });
+    await renderWithProviders(<ExplorePage />, { route: '/explore' });
 
     expect(await screen.findByText('Public Biology')).toBeInTheDocument();
     expect(screen.getByText(/by Ana · Biology/i)).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe('ExplorePage', () => {
   });
 
   it('clones a deck from the catalogue', async () => {
-    renderWithProviders(<ExplorePage />, { route: '/explore' });
+    await renderWithProviders(<ExplorePage />, { route: '/explore' });
 
     await screen.findByText('Public Biology');
     await userEvent.click(screen.getByRole('button', { name: /clone deck/i }));
@@ -84,7 +84,7 @@ describe('ExplorePage', () => {
       return Promise.resolve(jsonResponse({ items: [], page: 1, pageSize: 24, total: 0 }));
     });
 
-    renderWithProviders(<ExplorePage />, { route: '/explore' });
+    await renderWithProviders(<ExplorePage />, { route: '/explore' });
 
     expect(await screen.findByText('No public decks yet')).toBeInTheDocument();
   });

@@ -47,8 +47,8 @@ afterEach(() => {
 });
 
 describe('LoginPage', () => {
-  it('renders the sign-in form', () => {
-    renderWithProviders(<LoginPage />, { route: '/login' });
+  it('renders the sign-in form', async () => {
+    await renderWithProviders(<LoginPage />, { route: '/login' });
 
     expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
@@ -56,7 +56,7 @@ describe('LoginPage', () => {
   });
 
   it('shows validation errors when submitting empty fields', async () => {
-    renderWithProviders(<LoginPage />, { route: '/login' });
+    await renderWithProviders(<LoginPage />, { route: '/login' });
 
     await userEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
 
@@ -67,7 +67,7 @@ describe('LoginPage', () => {
   });
 
   it('posts the credentials to the API', async () => {
-    renderWithProviders(<LoginPage />, { route: '/login' });
+    await renderWithProviders(<LoginPage />, { route: '/login' });
 
     await userEvent.type(screen.getByLabelText('Email'), 'ana@example.com');
     await userEvent.type(screen.getByLabelText('Password'), 'super-secret-1');

@@ -122,8 +122,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function renderStudyPage() {
-  return renderWithProviders(<StudySessionPage />, {
+async function renderStudyPage() {
+  return await renderWithProviders(<StudySessionPage />, {
     route: `/decks/${DECK_ID}/study`,
     path: '/decks/:deckId/study',
   });
@@ -131,7 +131,7 @@ function renderStudyPage() {
 
 describe('StudySessionPage', () => {
   it('walks through the queue and shows the session summary', async () => {
-    renderStudyPage();
+    await renderStudyPage();
 
     expect(await screen.findByText('What is mitosis?')).toBeInTheDocument();
     expect(screen.getByText('Hint: Think about the nucleus')).toBeInTheDocument();
@@ -153,7 +153,7 @@ describe('StudySessionPage', () => {
   });
 
   it('renders the card image when the card has one', async () => {
-    renderStudyPage();
+    await renderStudyPage();
 
     expect(await screen.findByText('What is mitosis?')).toBeInTheDocument();
 
@@ -163,7 +163,7 @@ describe('StudySessionPage', () => {
   });
 
   it('supports the keyboard shortcuts for flipping and rating', async () => {
-    renderStudyPage();
+    await renderStudyPage();
 
     expect(await screen.findByText('What is mitosis?')).toBeInTheDocument();
 
@@ -210,7 +210,7 @@ describe('StudySessionPage', () => {
       return Promise.resolve(jsonResponse({ title: 'Not found', status: 404 }, 404));
     });
 
-    renderStudyPage();
+    await renderStudyPage();
 
     expect(await screen.findByText('Nothing is due right now')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /review ahead/i })).toBeInTheDocument();
@@ -255,7 +255,7 @@ describe('StudySessionPage', () => {
       return Promise.resolve(jsonResponse({ title: 'Not found', status: 404 }, 404));
     });
 
-    renderStudyPage();
+    await renderStudyPage();
 
     expect(await screen.findByText('What is mitosis?')).toBeInTheDocument();
 

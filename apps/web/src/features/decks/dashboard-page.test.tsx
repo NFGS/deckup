@@ -74,7 +74,7 @@ afterEach(() => {
 
 describe('DashboardPage', () => {
   it('shows the streak and filters decks by subject', async () => {
-    renderWithProviders(<DashboardPage />);
+    await renderWithProviders(<DashboardPage />);
 
     expect(await screen.findByText('Biology deck')).toBeInTheDocument();
     expect(screen.getByText('History deck')).toBeInTheDocument();

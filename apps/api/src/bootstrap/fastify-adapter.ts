@@ -1,4 +1,5 @@
 import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { LogController } from 'fastify';
 
 export interface FastifyAdapterOptions {
   logger?: boolean | { level: string };
@@ -23,7 +24,7 @@ export function createFastifyAdapter(options: FastifyAdapterOptions = {}): Fasti
   return new FastifyAdapter({
     trustProxy: trustProxyOption,
     requestIdHeader: 'x-request-id',
-    requestIdLogLabel: 'requestId',
+    logController: new LogController({ requestIdLogLabel: 'requestId' }),
     ...rest,
   });
 }
