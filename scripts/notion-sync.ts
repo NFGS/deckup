@@ -43,6 +43,11 @@ const DOCUMENTS: DocumentSpec[] = [
   { title: 'DeckUp — Deployment Guide', path: 'docs/04-operations/deployment.md' },
   { title: 'DeckUp — Runbook', path: 'docs/04-operations/runbook.md' },
   { title: 'DeckUp — Security Notes', path: 'docs/04-operations/security.md' },
+  {
+    title: 'DeckUp — Informe General del Sistema',
+    path: 'docs/05-academic/informe-general-sistema.md',
+  },
+  { title: 'DeckUp — Project Status', path: 'docs/STATUS.md' },
 ];
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, '..');

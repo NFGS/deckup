@@ -124,10 +124,11 @@ keeps the session → card → study session → review → summary → analytic
 
 ### 4.4 P2 — Minor debt
 
-- Web tests emit React `act()` warnings.
-- Recharts forecast has no textual alternative for screen readers.
-- `apps/web/public/icons.svg` is unreferenced.
-- Fastify deprecation `FSTDEP024` (`requestIdLogLabel` → `logController`).
+- Railway deprecates `railway.json` (Config as Code) in favour of
+  `.railway/railway.ts` (IaC) on 2026-12-01. The automatic
+  `railway config migrate` proposes a wrong service name
+  (`Epic_03_Education`) and drops `dockerfilePath`, so it needs a manual
+  review before applying.
 
 ## 5. Continuation plan
 
