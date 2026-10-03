@@ -18,17 +18,19 @@ project** and for the continuation backlog. Read it together with `SPEC.md`
 
 All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
-| Gate             | Command                                                                        | Result                                      |
-| ---------------- | ------------------------------------------------------------------------------ | ------------------------------------------- |
-| Lint             | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                          |
-| Typecheck        | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                        |
-| Unit tests       | `pnpm exec turbo run test --force`                                             | **174/174** (shared 8 · API 120 · web 46)   |
-| API integration  | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17             |
-| Build            | `pnpm build`                                                                   | Pass                                        |
-| Browser E2E      | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)             |
-| Production image | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)        |
-| Notion sync      | `pnpm sync:notion`                                                             | 10 documents published (2026-10-03)         |
-| CI (GitHub)      | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e |
+| Gate             | Command                                                                        | Result                                                           |
+| ---------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Lint             | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                                               |
+| Typecheck        | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                                             |
+| Unit tests       | `pnpm exec turbo run test --force`                                             | **174/174** (shared 8 · API 120 · web 46)                        |
+| API integration  | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17                                  |
+| Build            | `pnpm build`                                                                   | Pass                                                             |
+| Browser E2E      | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)                                  |
+| Production image | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                             |
+| Notion sync      | `pnpm sync:notion`                                                             | 10 documents published (2026-10-03)                              |
+| CI (GitHub)      | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
+| Neon migrations  | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
+| Vercel project   | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
@@ -82,9 +84,9 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 
 ### 4.3 P1 — Pending continuation work
 
-1. **Production deployment** — the production image was built and verified
-   locally (`200` on `/api/v1/health`); the platform step (Neon, Railway,
-   Vercel, GitHub secrets) still needs the owner's accounts.
+1. **Production deployment** — in progress (2026-10-03): Neon migrated (5/5),
+   Vercel project configured and secrets loaded; the Railway service is pending
+   a valid CLI session, then `VITE_API_URL` and the first production deploy.
 2. **Notion sync** — **done (2026-10-03)**: 10 documents published to the new
    workspace page (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with
@@ -107,7 +109,7 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 | ----- | ------------------------------------------------------------------ | -------------------------------------------- |
 | 1     | Secure the work: commit pending files, publish `main`, verify CI   | Done (2026-10-03) — CI green                 |
 | 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                            |
-| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Image verified; platform step pending        |
+| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Neon + Vercel done; Railway pending          |
 | 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Done (2026-10-03) — 10 pages published       |
 | 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending          |
 | 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots) |
