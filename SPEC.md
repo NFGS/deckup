@@ -70,10 +70,9 @@ pnpm test:e2e    # Playwright smoke (web)
 
 ## 7. Notion
 
-- Workspace root page: **Ningendo Bee Projects** (global agent registry).
-- DeckUp root page ID: **`3e3aee9c-1744-8107-aeeb-ea3c3a6db64b`**
-  (`https://app.notion.com/p/DeckUp-3e3aee9c17448107aeebea3c3a6db64b`).
-- Documentation sync: `NOTION_TOKEN=… NOTION_PAGE_ID=3e3aee9c-1744-8107-aeeb-ea3c3a6db64b pnpm sync:notion`
+- DeckUp root page ID: **`3ee7d55f-d95e-8079-8ee8-f9dc00042699`**
+  (`https://app.notion.com/p/3ee7d55fd95e80798ee8f9dc00042699`).
+- Documentation sync: `NOTION_TOKEN=… NOTION_PAGE_ID=3ee7d55f-d95e-8079-8ee8-f9dc00042699 pnpm sync:notion`
   (dry run: add `--dry-run`). Last sync: **2026-09-22** — 10 documents published as child
   pages (user stories, traceability, glossary, architecture, data model, test plan,
   test cases, deployment, runbook, security). Re-runs archive the previous version of

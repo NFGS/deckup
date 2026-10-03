@@ -8,8 +8,8 @@ Automation scripts for the DeckUp monorepo.
 
 ## Notion sync
 
-- Root page: **DeckUp** inside _Ningendo Bee Projects_ — ID
-  `3e3aee9c-1744-8107-aeeb-ea3c3a6db64b` (see SPEC.md §7).
+- Root page: **DeckUp** — ID `3ee7d55f-d95e-8079-8ee8-f9dc00042699`
+  (<https://app.notion.com/p/3ee7d55fd95e80798ee8f9dc00042699>, see SPEC.md §7).
 - Create an internal integration token with _insert content_ permission on that
   page and expose it as `NOTION_TOKEN`.
 - The script converts markdown to Notion blocks (headings, paragraphs, lists,
