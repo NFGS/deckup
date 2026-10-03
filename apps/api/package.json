@@ -12,7 +12,7 @@
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main.js",
-    "lint": "eslint src test vitest.config.ts vitest.config.e2e.ts prisma7.config.ts",
+    "lint": "prisma generate && eslint src test vitest.config.ts vitest.config.e2e.ts prisma7.config.ts",
     "typecheck": "pnpm --filter @deckup/shared build && prisma generate && tsc --noEmit",
     "pretest": "pnpm --filter @deckup/shared build && prisma generate",
     "test": "vitest run",
