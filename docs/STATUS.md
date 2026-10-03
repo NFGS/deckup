@@ -1,12 +1,12 @@
 # Project Status — DeckUp
 
-| Field        | Value                                                                        |
-| ------------ | ---------------------------------------------------------------------------- |
-| **Date**     | 2026-10-02                                                                   |
-| **Version**  | 0.1.0 (tagged)                                                               |
-| **HEAD**     | `40ca5ae feat(web): add account settings for name and timezone` (2026-10-02) |
-| **Snapshot** | Full repository review after a context handover                              |
-| **Related**  | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                      |
+| Field        | Value                                                                      |
+| ------------ | -------------------------------------------------------------------------- |
+| **Date**     | 2026-10-03                                                                 |
+| **Version**  | 0.1.0 (tagged and published)                                               |
+| **HEAD**     | `2c07b3b fix(api): generate the Prisma client before linting` (2026-10-03) |
+| **Snapshot** | Full repository review after a context handover                            |
+| **Related**  | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                    |
 
 This document is the **single source of truth for the current state of the
 project** and for the continuation backlog. Read it together with `SPEC.md`
@@ -18,16 +18,17 @@ project** and for the continuation backlog. Read it together with `SPEC.md`
 
 All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
-| Gate             | Command                                                                        | Result                                    |
-| ---------------- | ------------------------------------------------------------------------------ | ----------------------------------------- |
-| Lint             | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                        |
-| Typecheck        | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                      |
-| Unit tests       | `pnpm exec turbo run test --force`                                             | **174/174** (shared 8 · API 120 · web 46) |
-| API integration  | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17           |
-| Build            | `pnpm build`                                                                   | Pass                                      |
-| Browser E2E      | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)           |
-| Production image | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)      |
-| Notion dry-run   | `pnpm sync:notion --dry-run`                                                   | 10 documents, 1005 blocks, nothing sent   |
+| Gate             | Command                                                                        | Result                                      |
+| ---------------- | ------------------------------------------------------------------------------ | ------------------------------------------- |
+| Lint             | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                          |
+| Typecheck        | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                        |
+| Unit tests       | `pnpm exec turbo run test --force`                                             | **174/174** (shared 8 · API 120 · web 46)   |
+| API integration  | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17             |
+| Build            | `pnpm build`                                                                   | Pass                                        |
+| Browser E2E      | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)             |
+| Production image | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)        |
+| Notion sync      | `pnpm sync:notion`                                                             | 10 documents published (2026-10-03)         |
+| CI (GitHub)      | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
@@ -59,12 +60,12 @@ with cloning, AI card generation, accessibility (WCAG 2.1 AA scans).
 
 ## 4. Findings
 
-### 4.1 P0 — Remote backup missing
+### 4.1 P0 — Remote backup (resolved 2026-10-03)
 
-`origin/main` points to `781bf3e "Initial commit"` with **no common ancestor**
-with the local history, which is **68 commits ahead**. The full project exists
-only on this machine. Publishing requires a force push (the remote initial
-commit has no history to preserve).
+`main` was published to `origin` (force-with-lease over the unrelated
+"Initial commit") together with the `v0.1.0` tag. The first real CI run exposed
+a latent failure — the API lint needed the generated Prisma client, which is
+gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 
 ### 4.2 P0 — Browser E2E fails on this machine (diagnosed, worked around)
 
@@ -84,8 +85,8 @@ commit has no history to preserve).
 1. **Production deployment** — the production image was built and verified
    locally (`200` on `/api/v1/health`); the platform step (Neon, Railway,
    Vercel, GitHub secrets) still needs the owner's accounts.
-2. **Notion sync** — dry-run verified (10 documents, 1005 blocks); the real
-   sync needs `NOTION_TOKEN` (the page ID is documented in `SPEC.md` §7).
+2. **Notion sync** — **done (2026-10-03)**: 10 documents published to the new
+   workspace page (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with
    display name and IANA timezone, wired to `PATCH /users/me`, covered by unit
    tests and an authenticated axe scan.
@@ -104,10 +105,10 @@ commit has no history to preserve).
 
 | Phase | Goal                                                               | Status                                       |
 | ----- | ------------------------------------------------------------------ | -------------------------------------------- |
-| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Blocked — `gh auth login` pending            |
+| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Done (2026-10-03) — CI green                 |
 | 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                            |
 | 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Image verified; platform step pending        |
-| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Dry-run verified; token pending              |
+| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Done (2026-10-03) — 10 pages published       |
 | 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending          |
 | 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots) |
 
