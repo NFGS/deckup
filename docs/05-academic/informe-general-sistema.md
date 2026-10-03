@@ -217,6 +217,72 @@ El prototipo es una aplicación completa y verificable, no un maquetín:
   [`../01-requirements/traceability-matrix.md`](../01-requirements/traceability-matrix.md).
 - **Estado:** todos los requisitos figuran como _Implemented_ con evidencia automatizada.
 
+## 16. Evidencias visuales del sistema en ejecución
+
+Capturas tomadas del sistema real en ejecución local (`localhost:5173`), con datos
+sembrados a través de la API. Todas comparten el mismo viewport (1360×880) para
+mantener la consistencia del documento.
+
+### 16.1 Acceso
+
+![Página de bienvenida](./evidencias/01-landing.png)
+
+_Figura 1. Página de bienvenida: propuesta de valor y características principales._
+
+![Inicio de sesión](./evidencias/02-login.png)
+
+_Figura 2. Formulario de inicio de sesión con validación accesible._
+
+### 16.2 Gestión de mazos y tarjetas
+
+![Tablero del estudiante](./evidencias/03-dashboard.png)
+
+_Figura 3. Tablero del estudiante: mazos por asignatura, racha y vencimientos._
+
+![Detalle del mazo](./evidencias/04-deck-detail.png)
+
+_Figura 4. Detalle del mazo con tarjetas, dificultad, pistas y etiquetas._
+
+![Nueva tarjeta](./evidencias/05-card-dialog.png)
+
+_Figura 5. Diálogo de creación de tarjeta con imagen, dificultad y etiquetas._
+
+![Importación CSV](./evidencias/06-import-modal.png)
+
+_Figura 6. Importación CSV con resumen por fila y reporte de errores._
+
+### 16.3 Estudio con FSRS
+
+![Pregunta de estudio](./evidencias/07-study-question.png)
+
+_Figura 7. Sesión de estudio: pregunta con pista y contador de tarjetas restantes._
+
+![Respuesta revelada](./evidencias/08-study-answer.png)
+
+_Figura 8. Respuesta revelada con las cuatro calificaciones FSRS._
+
+![Resumen de sesión](./evidencias/09-session-summary.png)
+
+_Figura 9. Resumen de sesión: tarjetas repasadas, aciertos y precisión._
+
+### 16.4 Analítica y comunidad
+
+![Analítica de estudio](./evidencias/10-analytics.png)
+
+_Figura 10. Analítica: racha, retención a 30 días y pronóstico a 7 días._
+
+![Catálogo público](./evidencias/11-explore.png)
+
+_Figura 11. Catálogo público con búsqueda y clonado de mazos._
+
+### 16.5 Cuenta
+
+![Configuración de cuenta](./evidencias/12-account.png)
+
+_Figura 12. Configuración de cuenta: nombre, zona horaria y datos de la sesión._
+
+Nota. Capturas del sistema en ejecución (localhost:5173).
+
 ---
 
 ## Anexo A — Correspondencia con plantillas SENA
@@ -235,7 +301,7 @@ El prototipo es una aplicación completa y verificable, no un maquetín:
 - [x] Parte 3 completa (prototipado, historias, fases, prototipo funcional, refinamiento).
 - [x] Totales consistentes con la matriz del proyecto (12 RF · 8 RNF · 18 CU · 4 HU · 66 TC).
 - [x] Referencias a los artefactos y documentos fuente.
-- [ ] Capturas de evidencia anexadas (pendiente de la sesión de capturas).
+- [x] Capturas de evidencia anexadas (12 figuras en `evidencias/`).
 - [ ] URLs de producción anexadas (pendiente de ejecutar el despliegue).
 
 ## Anexo C — Glosario de siglas

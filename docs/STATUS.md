@@ -35,13 +35,13 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
 ## 2. Scope delivered
 
-| Area                       | Summary                                                                                                                           |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| API (`apps/api`)           | NestJS 12 + Fastify, Clean Architecture. 6 entities, 3 domain services, 17 ports, **31 use cases**, 10 controllers, 5 migrations. |
-| Web (`apps/web`)           | React 19 + Vite 8 + Tailwind 4 + TanStack Query 5 + React Router 8. Feature-first; PWA with offline review queue.                 |
-| Shared (`packages/shared`) | Zod 4 runtime contracts as the single source of truth.                                                                            |
-| Documentation (`docs/`)    | 22 documents: user story refinement, traceability matrix, 8 MADR ADRs, data model, OpenAPI, test plan/cases, runbook, security.   |
-| Delivery artefacts         | `DeckUp - User Story and Refinement - Nelson Fabián Gallego Sánchez.pdf` (2026-09-25); `deployment-walkthrough.md`.               |
+| Area                       | Summary                                                                                                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API (`apps/api`)           | NestJS 12 + Fastify, Clean Architecture. 6 entities, 3 domain services, 17 ports, **31 use cases**, 10 controllers, 5 migrations.                              |
+| Web (`apps/web`)           | React 19 + Vite 8 + Tailwind 4 + TanStack Query 5 + React Router 8. Feature-first; PWA with offline review queue.                                              |
+| Shared (`packages/shared`) | Zod 4 runtime contracts as the single source of truth.                                                                                                         |
+| Documentation (`docs/`)    | 25 documents: user story refinement, traceability matrix, 8 MADR ADRs, data model, OpenAPI, test plan/cases, runbook, security, SENA report and class diagram. |
+| Delivery artefacts         | `DeckUp - User Story and Refinement - Nelson Fabián Gallego Sánchez.pdf` (2026-09-25); `deployment-walkthrough.md`.                                            |
 
 Functional coverage: authentication, deck/card CRUD, images, CSV import/export,
 FSRS study engine with idempotent offline replay, analytics, public catalogue
@@ -89,9 +89,9 @@ commit has no history to preserve).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with
    display name and IANA timezone, wired to `PATCH /users/me`, covered by unit
    tests and an authenticated axe scan.
-4. **Academic evidence** — general system report created at
+4. **Academic evidence** — **done (2026-10-02)**: general system report at
    [`05-academic/informe-general-sistema.md`](./05-academic/informe-general-sistema.md)
-   with the class diagram; screenshots still pending.
+   with the class diagram and 12 screenshots in `05-academic/evidencias/`.
 
 ### 4.4 P2 — Minor debt
 
@@ -102,14 +102,14 @@ commit has no history to preserve).
 
 ## 5. Continuation plan
 
-| Phase | Goal                                                               | Status                                           |
-| ----- | ------------------------------------------------------------------ | ------------------------------------------------ |
-| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Blocked — `gh auth login` pending                |
-| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                                |
-| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Image verified; platform step pending            |
-| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Dry-run verified; token pending                  |
-| 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending              |
-| 6     | Academic evidence: SENA evidence pack / general system report      | Report + class diagram done; screenshots pending |
+| Phase | Goal                                                               | Status                                       |
+| ----- | ------------------------------------------------------------------ | -------------------------------------------- |
+| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Blocked — `gh auth login` pending            |
+| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                            |
+| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Image verified; platform step pending        |
+| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Dry-run verified; token pending              |
+| 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending          |
+| 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots) |
 
 ## 6. How to verify locally
 
