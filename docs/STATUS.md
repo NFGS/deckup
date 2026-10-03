@@ -19,23 +19,24 @@ project** and for the continuation backlog. Read it together with `SPEC.md`
 
 All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
-| Gate             | Command                                                                        | Result                                                           |
-| ---------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| Lint             | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                                               |
-| Typecheck        | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                                             |
-| Unit tests       | `pnpm exec turbo run test --force`                                             | **174/174** (shared 8 · API 120 · web 46)                        |
-| API integration  | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17                                  |
-| Build            | `pnpm build`                                                                   | Pass                                                             |
-| Browser E2E      | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)                                  |
-| Production image | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                             |
-| Notion sync      | `pnpm sync:notion`                                                             | 10 documents published (2026-10-03)                              |
-| CI (GitHub)      | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
-| Neon migrations  | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
-| Vercel project   | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
-| Production web   | `curl https://deckup.vercel.app`                                               | **200** (Vercel)                                                 |
-| Production API   | `curl .../api/v1/health`                                                       | **200** `{"status":"ok","version":"0.1.0"}`                      |
-| Production smoke | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                              |
-| Production flow  | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                              |
+| Gate               | Command                                                                        | Result                                                           |
+| ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Lint               | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                                               |
+| Typecheck          | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                                             |
+| Unit tests         | `pnpm exec turbo run test --force`                                             | **174/174** (shared 8 · API 120 · web 46)                        |
+| API integration    | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17                                  |
+| Build              | `pnpm build`                                                                   | Pass                                                             |
+| Browser E2E        | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)                                  |
+| Production image   | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                             |
+| Notion sync        | `pnpm sync:notion`                                                             | 10 documents published (2026-10-03)                              |
+| CI (GitHub)        | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
+| Neon migrations    | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
+| Vercel project     | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
+| Production web     | `curl https://deckup.vercel.app`                                               | **200** (Vercel)                                                 |
+| Production API     | `curl .../api/v1/health`                                                       | **200** `{"status":"ok","version":"0.1.0"}`                      |
+| Production smoke   | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                              |
+| Production flow    | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                              |
+| Railway autodeploy | GitHub trigger `f2be2d99` on `main` (repo `NFGS/deckup`)                       | Build from GitHub + pre-deploy migrations                        |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
