@@ -91,7 +91,10 @@ export class PrismaDeckRepository extends DeckRepositoryPort {
       ...(filters.search ? { title: { contains: filters.search, mode: 'insensitive' } } : {}),
     };
 
-    const [rows, total] = await this.prisma.$transaction([
+    // Promise.all instead of $transaction: the Neon pooler can route the two
+    // statements of a batch transaction to connections with different
+    // snapshots, which returned `total > 0` with an empty `items` array.
+    const [rows, total] = await Promise.all([
       this.prisma.deck.findMany({
         where,
         include: DECK_INCLUDE,
@@ -124,7 +127,7 @@ export class PrismaDeckRepository extends DeckRepositoryPort {
       ...(filters.search ? { title: { contains: filters.search, mode: 'insensitive' } } : {}),
     };
 
-    const [rows, total] = await this.prisma.$transaction([
+    const [rows, total] = await Promise.all([
       this.prisma.deck.findMany({
         where,
         include: PUBLIC_DECK_INCLUDE,
