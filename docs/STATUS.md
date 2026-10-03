@@ -1,12 +1,13 @@
 # Project Status — DeckUp
 
-| Field        | Value                                                                      |
-| ------------ | -------------------------------------------------------------------------- |
-| **Date**     | 2026-10-03                                                                 |
-| **Version**  | 0.1.0 (tagged and published)                                               |
-| **HEAD**     | `2c07b3b fix(api): generate the Prisma client before linting` (2026-10-03) |
-| **Snapshot** | Full repository review after a context handover                            |
-| **Related**  | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                    |
+| Field          | Value                                                                                |
+| -------------- | ------------------------------------------------------------------------------------ |
+| **Date**       | 2026-10-03                                                                           |
+| **Version**    | 0.1.0 (tagged, published and deployed)                                               |
+| **HEAD**       | `e4a22df ci: run the Vercel CLI from the repository root` (2026-10-03)               |
+| **Production** | Web <https://deckup.vercel.app> · API <https://deckup-api-production.up.railway.app> |
+| **Snapshot**   | Full repository review after a context handover                                      |
+| **Related**    | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                              |
 
 This document is the **single source of truth for the current state of the
 project** and for the continuation backlog. Read it together with `SPEC.md`
@@ -31,6 +32,9 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | CI (GitHub)      | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
 | Neon migrations  | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
 | Vercel project   | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
+| Production web   | `curl https://deckup.vercel.app`                                               | **200** (Vercel)                                                 |
+| Production API   | `curl .../api/v1/health`                                                       | **200** `{"status":"ok","version":"0.1.0"}`                      |
+| Production smoke | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                              |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
@@ -84,9 +88,11 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 
 ### 4.3 P1 — Pending continuation work
 
-1. **Production deployment** — in progress (2026-10-03): Neon migrated (5/5),
-   Vercel project configured and secrets loaded; the Railway service is pending
-   a valid CLI session, then `VITE_API_URL` and the first production deploy.
+1. **Production deployment** — **done (2026-10-03)**: Neon migrated, API on
+   Railway, web on Vercel, `VITE_API_URL` wired, CORS verified and smoke test
+   green. Only the CI job that redeploys the API is skipped until a Railway
+   **project token** is stored as the `RAILWAY_TOKEN` secret (the API itself is
+   already deployed).
 2. **Notion sync** — **done (2026-10-03)**: 10 documents published to the new
    workspace page (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with
@@ -105,14 +111,14 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
 
 ## 5. Continuation plan
 
-| Phase | Goal                                                               | Status                                       |
-| ----- | ------------------------------------------------------------------ | -------------------------------------------- |
-| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Done (2026-10-03) — CI green                 |
-| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                            |
-| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Neon + Vercel done; Railway pending          |
-| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Done (2026-10-03) — 10 pages published       |
-| 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending          |
-| 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots) |
+| Phase | Goal                                                               | Status                                         |
+| ----- | ------------------------------------------------------------------ | ---------------------------------------------- |
+| 1     | Secure the work: commit pending files, publish `main`, verify CI   | Done (2026-10-03) — CI green                   |
+| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                | Done (2026-10-02)                              |
+| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)   | Done (2026-10-03) — API redeploy token pending |
+| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Done (2026-10-03) — 10 pages published         |
+| 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending            |
+| 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots)   |
 
 ## 6. How to verify locally
 

@@ -206,6 +206,9 @@ El prototipo es una aplicación completa y verificable, no un maquetín:
 - Plan y casos de prueba: [`../03-testing/test-plan.md`](../03-testing/test-plan.md) y
   [`../03-testing/test-cases.md`](../03-testing/test-cases.md).
 - Operación y despliegue: [`../04-operations/deployment-walkthrough.md`](../04-operations/deployment-walkthrough.md).
+- **Producción:** web en <https://deckup.vercel.app> · API en
+  <https://deckup-api-production.up.railway.app> (health verificado y smoke test
+  de navegador en verde).
 
 ## 15. Refinamiento y trazabilidad
 
@@ -302,7 +305,8 @@ Nota. Capturas del sistema en ejecución (localhost:5173).
 - [x] Totales consistentes con la matriz del proyecto (12 RF · 8 RNF · 18 CU · 4 HU · 66 TC).
 - [x] Referencias a los artefactos y documentos fuente.
 - [x] Capturas de evidencia anexadas (12 figuras en `evidencias/`).
-- [ ] URLs de producción anexadas (pendiente de ejecutar el despliegue).
+- [x] URLs de producción anexadas: web <https://deckup.vercel.app> · API
+      <https://deckup-api-production.up.railway.app> (health verificado).
 
 ## Anexo C — Glosario de siglas
 

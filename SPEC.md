@@ -78,7 +78,20 @@ pnpm test:e2e    # Playwright smoke (web)
   test cases, deployment, runbook, security). Re-runs archive the previous version of
   each page before publishing.
 
-## 8. Skills
+## 8. Production environment
+
+| Component     | URL / detail                                                                |
+| ------------- | --------------------------------------------------------------------------- |
+| Web (Vercel)  | <https://deckup.vercel.app> — project `deckup`, root directory `apps/web`   |
+| API (Railway) | <https://deckup-api-production.up.railway.app> — service `deckup-api`       |
+| Database      | Neon PostgreSQL 17 (`neondb`), migrations applied via the direct connection |
+
+Deploys run through `.github/workflows/deploy.yml` after a green CI on `main`
+(or manually with `workflow_dispatch`). The web job uses `VERCEL_TOKEN`,
+`VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`; the API job applies migrations with
+`DATABASE_URL` and redeploys with `RAILWAY_TOKEN` (Railway project token).
+
+## 9. Skills
 
 | Skill                          | When                                                          |
 | ------------------------------ | ------------------------------------------------------------- |
