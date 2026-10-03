@@ -36,7 +36,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Production API     | `curl .../api/v1/health`                                                       | **200** `{"status":"ok","version":"0.1.0"}`                      |
 | Production smoke   | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                              |
 | Production flow    | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                              |
-| Railway autodeploy | GitHub trigger `f2be2d99` on `main` (repo `NFGS/deckup`)                       | Build from GitHub + pre-deploy migrations                        |
+| Railway autodeploy | Push `3582662` → deployment `d64e141b` (trigger `f2be2d99`)                    | **SUCCESS** — pre-deploy applied 5 migrations                    |
 
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
