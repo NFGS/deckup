@@ -137,11 +137,12 @@ keeps the session → card → study session → review → summary → analytic
 
 ### 4.4 P2 — Minor debt
 
-- Railway deprecates `railway.json` (Config as Code) in favour of
-  `.railway/railway.ts` (IaC) on 2026-12-01. The automatic
-  `railway config migrate` proposes a wrong service name
-  (`Epic_03_Education`) and drops `dockerfilePath`, so it needs a manual
-  review before applying. Tracked in the accepted-debt register:
+- **Resolved (2026-10-04)**: Railway's Config-as-Code deprecation was addressed
+  ahead of the 2026-12-01 deadline. The service is now managed by
+  Infrastructure as Code (`.railway/railway.ts`, partial `deckup-api`) and the
+  deprecated `railway.json` was removed. `railway config plan` reports the
+  configuration as up to date; the Dockerfile build, pre-deploy migration and
+  healthcheck are preserved. See
   [`04-operations/platform-notes.md`](./04-operations/platform-notes.md) §6.
 
 ## 5. Continuation plan

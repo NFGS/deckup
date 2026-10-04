@@ -106,12 +106,12 @@ The platform stays exactly as it is today; these practices keep it healthy:
 
 ## 6. Accepted debt (known, no action planned)
 
-| Item                                            | Note                                                                                                                             |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Railway `railway.json` deprecation (2026-12-01) | Revisit `.railway/railway.ts` only if Railway forces the migration; the current file works today                                 |
-| `RAILWAY_TOKEN` secret absent                   | The API deploys through Railway's own GitHub integration; the CI deploy job for the API is skipped by design                     |
-| Prisma 8 upgrade                                | Transitive advisories live in the Prisma CLI toolchain; upgrade only when Prisma 8 is stable ([`security.md`](./security.md) §3) |
-| Error tracking (Sentry or similar)              | Structured logs plus `/health` are the current observability; a future step, not planned now                                     |
+| Item                               | Note                                                                                                                                            |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Railway IaC migration              | **Done (2026-10-04)**: `.railway/railway.ts` (partial `deckup-api`) manages the service; `railway.json` removed. `railway config plan` is clean |
+| `RAILWAY_TOKEN` secret absent      | The API deploys through Railway's own GitHub integration; the CI deploy job for the API is skipped by design                                    |
+| Prisma 8 upgrade                   | Transitive advisories live in the Prisma CLI toolchain; upgrade only when Prisma 8 is stable ([`security.md`](./security.md) §3)                |
+| Error tracking (Sentry or similar) | Structured logs plus `/health` are the current observability; a future step, not planned now                                                    |
 
 ## 7. References
 

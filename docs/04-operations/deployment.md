@@ -66,8 +66,10 @@ Boot validation fails fast when a feature is enabled without its credentials.
 1. **Database (Neon)** — create a PostgreSQL 17 project, copy the pooled
    connection string into Railway as `DATABASE_URL`.
 2. **API (Railway)** — create a service from the GitHub repository. The
-   committed [`railway.json`](../../railway.json) points the build at
-   `apps/api/Dockerfile` and sets the health check to `/api/v1/health`.
+   committed [`.railway/railway.ts`](../../.railway/railway.ts) (Infrastructure
+   as Code) points the build at `apps/api/Dockerfile`, runs
+   `prisma migrate deploy` as a pre-deploy command and sets the health check to
+   `/api/v1/health`.
 3. **Web (Vercel)** — import the repository, set **Root Directory** to
    `apps/web` (the committed `vercel.json` handles install, builds the
    workspace dependencies with Turbo and applies the SPA rewrite), and define

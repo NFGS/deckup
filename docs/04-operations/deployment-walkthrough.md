@@ -108,9 +108,9 @@ Keep them private. You will paste them in Railway and GitHub.
 
 1. Sign in to <https://railway.app> with GitHub → **New Project** →
    **Deploy from GitHub repo** → pick `deckup`.
-2. Railway reads [`railway.json`](../../railway.json) and builds
-   `apps/api/Dockerfile` automatically. The health check is
-   `/api/v1/health`.
+2. Railway reads [`.railway/railway.ts`](../../.railway/railway.ts)
+   (Infrastructure as Code) and builds `apps/api/Dockerfile` automatically. The
+   health check is `/api/v1/health`.
 3. Open the service → **Variables** → add:
 
 | Variable            | Value                                                                |

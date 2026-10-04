@@ -242,34 +242,34 @@
       }
     },
     "docs/04-operations/deployment.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-04T18:12:20.849Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Deployment Guide.md",
-          "hash": "sha256-056d7662608ab52b0246b667fecebc26e82055d5e345abe5333c684f77a43e4e",
-          "sourceHash": "sha256-f84b13e0817d01eacadaf0a336d4b8649d9070807c8697f850551ffe777438dd"
+          "hash": "sha256-9b5a07c93632100d9565378ddb7e524926520ce27e7eebf9ed87bdd48053952a",
+          "sourceHash": "sha256-767e2c8274bebf39c1676e6fe74288aa54dd971cae8ae7150d1b3bcd0e40df59"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8181-b0fd-f7f4a61f3134",
-          "lastEditedTime": "2026-10-04T16:37:00.000Z",
+          "lastEditedTime": "2026-10-04T18:13:00.000Z",
           "blockCount": 58,
-          "sourceHash": "sha256-f84b13e0817d01eacadaf0a336d4b8649d9070807c8697f850551ffe777438dd"
+          "sourceHash": "sha256-767e2c8274bebf39c1676e6fe74288aa54dd971cae8ae7150d1b3bcd0e40df59"
         }
       }
     },
     "docs/04-operations/platform-notes.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-04T18:12:20.849Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Platform Notes.md",
-          "hash": "sha256-406c024ab7955e346102dde31cd2d7b28590da96bf7e743a89095e6e3661e140",
-          "sourceHash": "sha256-c785716dd24c94b526b61f1358506eebb21286d8c91cc3a47f5e3bb213c5cae5"
+          "hash": "sha256-7325168afde336388c1c9b2f2dd4793ffe111e597dc02b008c114c2f2718929b",
+          "sourceHash": "sha256-4f8f796796bddc76b82c8a3913fe47f874f9dede8f14bc653562fa2b0a76cca5"
         },
         "notion": {
           "id": "3ef7d55f-d95e-81f2-938e-c0dfa2edb88e",
-          "lastEditedTime": "2026-10-04T16:37:00.000Z",
+          "lastEditedTime": "2026-10-04T18:13:00.000Z",
           "blockCount": 50,
-          "sourceHash": "sha256-c785716dd24c94b526b61f1358506eebb21286d8c91cc3a47f5e3bb213c5cae5"
+          "sourceHash": "sha256-4f8f796796bddc76b82c8a3913fe47f874f9dede8f14bc653562fa2b0a76cca5"
         }
       }
     },
@@ -322,18 +322,18 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-04T17:50:45.656Z",
+      "syncedAt": "2026-10-04T18:12:20.849Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Project Status.md",
-          "hash": "sha256-2468a26b2278a6e01637ec265cfd5222fdb7bc96701a3f9e800672000e62e608",
-          "sourceHash": "sha256-1b55be135dff0c27dba1be9169b1b1423328da9df2407c00048b34e977189b9c"
+          "hash": "sha256-f46090ee3066194af8f720e735efc038e3011936a4a7d17c0da3d99fb11af5b1",
+          "sourceHash": "sha256-3ea5ad8aefc79840ec79bda4fd80c138fefd3d04e0b90d12501e7407ce10fa59"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",
-          "lastEditedTime": "2026-10-04T16:39:00.000Z",
+          "lastEditedTime": "2026-10-04T18:14:00.000Z",
           "blockCount": 51,
-          "sourceHash": "sha256-1b55be135dff0c27dba1be9169b1b1423328da9df2407c00048b34e977189b9c"
+          "sourceHash": "sha256-3ea5ad8aefc79840ec79bda4fd80c138fefd3d04e0b90d12501e7407ce10fa59"
         }
       }
     }
