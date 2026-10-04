@@ -71,12 +71,12 @@ pnpm test:e2e    # Playwright smoke (web)
 ## 7. Notion
 
 - DeckUp root page ID: **`3ee7d55f-d95e-8079-8ee8-f9dc00042699`**
-  (`https://app.notion.com/p/3ee7d55fd95e80798ee8f9dc00042699`).
+  (`https://app.notion.com/p/DeckUp-3ee7d55fd95e80798ee8f9dc00042699`).
 - Documentation sync: `NOTION_TOKEN=… NOTION_PAGE_ID=3ee7d55f-d95e-8079-8ee8-f9dc00042699 pnpm sync:notion`
-  (dry run: add `--dry-run`). Last sync: **2026-09-22** — 10 documents published as child
-  pages (user stories, traceability, glossary, architecture, data model, test plan,
-  test cases, deployment, runbook, security). Re-runs archive the previous version of
-  each page before publishing.
+  (dry run: add `--dry-run`; single page: add `--only "<substring>"`). Last sync:
+  **2026-10-04** — 13 documents published as child pages with rich blocks (native
+  tables, Mermaid diagrams, GitHub-style callouts, to-dos and evidence images uploaded
+  to Cloudinary). Re-runs archive the previous version of each page before publishing.
 
 ## 8. Production environment
 
@@ -94,16 +94,16 @@ pre-deploy command (the `prisma` CLI ships in the production image).
 
 ## 9. Skills
 
-| Skill                          | When                                                                                                  |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `clean-architecture`           | Any API code (domain/application/infrastructure/presentation)                                         |
-| `swebok-doc-expert`            | Requirements, ADRs, test plans                                                                        |
-| `uml-use-case-diagram-builder` | Use-case diagrams                                                                                     |
-| `psp-continuous-improvement`   | Estimates and error logs                                                                              |
-| `humanizer`                    | Polishing prose                                                                                       |
-| `archify`                      | Architecture, workflow, sequence, data-flow and lifecycle diagrams (interactive HTML, PNG/SVG export) |
-| `open-design`                  | Decks, prototypes, brand design systems and document styling (150+ design systems, 110+ templates)    |
+| Skill                 | When                                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------- |
+| `clean-architecture`  | Any API code (domain/application/infrastructure/presentation)                                         |
+| `archify`             | Architecture, workflow, sequence, data-flow and lifecycle diagrams (interactive HTML, PNG/SVG export) |
+| `open-design`         | Decks, prototypes, brand design systems and document styling (150+ design systems, 110+ templates)    |
+| `screenshot-capture`  | Clean screenshots of the running app for evidence and documentation figures                           |
+| `pwa-expert`          | Service workers, manifest, icons, cache strategies and offline behaviour                              |
+| `traceability-engine` | Keeping requirements ↔ use cases ↔ user stories ↔ tests in sync                                       |
+| `sena-*`              | SENA ADSO templates: requirements, use cases, user stories, UML class diagrams and reports            |
 
-Both diagram/design skills are installed globally (`~/.config/opencode/skills/`) and
-per project (`.opencode/skills/`, gitignored). The Open Design catalogue lives at
-`~/.open-design-skill/repo` (sparse checkout of `nexu-io/open-design`).
+Skills are installed once, globally (`~/.config/opencode/skills/`); the project keeps
+no local copies (single source of truth, audited 2026-10-04). The Open Design
+catalogue lives at `~/.open-design-skill/repo` (clone of `nexu-io/open-design`).

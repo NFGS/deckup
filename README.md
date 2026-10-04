@@ -114,6 +114,15 @@ If port 5173 is taken as well, add `E2E_WEB_PORT=5273` to the same command.
 See [`docs/`](./docs) and [`SPEC.md`](./SPEC.md). The current remediation
 backlog lives in [`PLAN.md`](./PLAN.md).
 
+The same documentation is published to the Notion workspace (root page
+**DeckUp**) with native tables, Mermaid diagrams, callouts and evidence images:
+
+```bash
+NOTION_TOKEN=… NOTION_PAGE_ID=3ee7d55f-d95e-8079-8ee8-f9dc00042699 pnpm sync:notion
+pnpm sync:notion --dry-run            # preview block counts
+pnpm sync:notion --only "Runbook"     # refresh a single page
+```
+
 ## License
 
 Academic project — Tecnólogo en Análisis y Desarrollo de Software / Ingeniería de Sistemas.

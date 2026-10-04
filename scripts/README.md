@@ -23,8 +23,9 @@ Automation scripts for the DeckUp monorepo.
   from its rows.
 - **Idempotent**: before publishing, child pages with the same title are
   archived, so re-runs refresh the documentation instead of duplicating it.
-- Last sync: 2026-10-04 — 12 documents with rich blocks (78 native tables, 5
-  Mermaid diagrams, 15 callouts, 12 evidence images).
+- Last sync: 2026-10-04 — 13 documents with rich blocks (83 native tables, 2
+  Mermaid diagrams, 16 callouts, 16 images: 12 evidence screenshots + 4 Archify
+  diagrams).
 - `--dry-run` prints the block counts without calling the API:
 
   ```bash
