@@ -18,6 +18,8 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
+import { collectAllDocuments, type DocumentSpec } from './lib/documents.ts';
+import { readManifest, sha256, writeManifest } from './lib/sync-manifest.ts';
 
 const NOTION_API = 'https://api.notion.com/v1';
 const NOTION_VERSION = '2022-06-28';
@@ -40,44 +42,6 @@ interface RichTextItem {
     code?: boolean;
   };
 }
-
-interface DocumentSpec {
-  title: string;
-  path: string;
-  icon: string;
-}
-
-const DOCUMENTS: DocumentSpec[] = [
-  {
-    title: 'DeckUp — User Story Refinement',
-    path: 'docs/01-requirements/user-story-refinement.md',
-    icon: '📝',
-  },
-  {
-    title: 'DeckUp — Traceability Matrix',
-    path: 'docs/01-requirements/traceability-matrix.md',
-    icon: '🔗',
-  },
-  { title: 'DeckUp — Glossary', path: 'docs/01-requirements/glossary.md', icon: '📖' },
-  {
-    title: 'DeckUp — Architecture Overview',
-    path: 'docs/02-architecture/overview.md',
-    icon: '🏛️',
-  },
-  { title: 'DeckUp — Data Model', path: 'docs/02-architecture/data-model.md', icon: '🗄️' },
-  { title: 'DeckUp — Test Plan', path: 'docs/03-testing/test-plan.md', icon: '🧪' },
-  { title: 'DeckUp — Test Cases', path: 'docs/03-testing/test-cases.md', icon: '✅' },
-  { title: 'DeckUp — Deployment Guide', path: 'docs/04-operations/deployment.md', icon: '🚀' },
-  { title: 'DeckUp — Platform Notes', path: 'docs/04-operations/platform-notes.md', icon: '🧭' },
-  { title: 'DeckUp — Runbook', path: 'docs/04-operations/runbook.md', icon: '🛠️' },
-  { title: 'DeckUp — Security Notes', path: 'docs/04-operations/security.md', icon: '🔒' },
-  {
-    title: 'DeckUp — Informe General del Sistema',
-    path: 'docs/05-academic/informe-general-sistema.md',
-    icon: '🎓',
-  },
-  { title: 'DeckUp — Project Status', path: 'docs/STATUS.md', icon: '📊' },
-];
 
 const CALLOUT_STYLES: Record<string, { emoji: string; color: string }> = {
   NOTE: { emoji: '📘', color: 'blue_background' },
@@ -722,13 +686,19 @@ async function archivePage(token: string, pageId: string): Promise<void> {
   });
 }
 
+interface PublishedPage {
+  id: string;
+  lastEditedTime: string;
+  blockCount: number;
+}
+
 async function publishDocument(
   token: string,
   parentPageId: string,
   document: DocumentSpec,
   existingPages: Map<string, string>,
   cloudinaryUrl: string | undefined,
-): Promise<string> {
+): Promise<PublishedPage> {
   const markdown = await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8');
   const resolveImage = createImageResolver(
     cloudinaryUrl,
@@ -737,19 +707,19 @@ async function publishDocument(
   const blocks = await markdownToBlocks(markdown, resolveImage);
   const chunks = chunkBlocks(blocks, BLOCKS_PER_REQUEST);
 
-  const previousPageId = existingPages.get(document.title);
+  const previousPageId = existingPages.get(document.notionTitle);
 
   if (previousPageId) {
     await archivePage(token, previousPageId);
-    console.log(`Archived previous "${document.title}" (${previousPageId})`);
+    console.log(`Archived previous "${document.notionTitle}" (${previousPageId})`);
   }
 
   const page = await notionRequest('/pages', token, {
     method: 'POST',
     body: JSON.stringify({
       parent: { page_id: parentPageId },
-      icon: { type: 'emoji', emoji: document.icon },
-      properties: { title: [{ type: 'text', text: { content: document.title } }] },
+      icon: { type: 'emoji', emoji: document.notionIcon },
+      properties: { title: [{ type: 'text', text: { content: document.notionTitle } }] },
       children: chunks[0] ?? [],
     }),
   });
@@ -763,16 +733,22 @@ async function publishDocument(
     });
   }
 
-  return pageId;
+  return {
+    id: pageId,
+    lastEditedTime: typeof page.last_edited_time === 'string' ? page.last_edited_time : '',
+    blockCount: blocks.length,
+  };
 }
 
 async function main(): Promise<void> {
   const dryRun = process.argv.includes('--dry-run');
+  const force = process.argv.includes('--force');
   const onlyIndex = process.argv.indexOf('--only');
   const onlyFilter = onlyIndex >= 0 ? (process.argv[onlyIndex + 1] ?? '') : undefined;
+  const allDocuments = await collectAllDocuments(REPOSITORY_ROOT);
   const documents = onlyFilter
-    ? DOCUMENTS.filter((document) => document.title.includes(onlyFilter))
-    : DOCUMENTS;
+    ? allDocuments.filter((document) => document.notionTitle.includes(onlyFilter))
+    : allDocuments;
   const token = process.env.NOTION_TOKEN;
   const parentPageId = process.env.NOTION_PAGE_ID;
   const cloudinaryUrl = process.env.CLOUDINARY_URL;
@@ -800,11 +776,11 @@ async function main(): Promise<void> {
       const images = blocks.filter((block) => block.type === 'image').length;
 
       console.log(
-        `${document.title}: ${blocks.length} blocks · ${tables} tables · ${mermaid} mermaid · ` +
+        `${document.notionTitle}: ${blocks.length} blocks · ${tables} tables · ${mermaid} mermaid · ` +
           `${callouts} callouts · ${toDos} to-dos · ${images} images (${basename(document.path)})`,
       );
     }
-    console.log('\nDry run finished — nothing was sent to Notion.');
+    console.log(`\nDry run finished — ${documents.length} documents, nothing was sent to Notion.`);
     return;
   }
 
@@ -815,17 +791,48 @@ async function main(): Promise<void> {
   }
 
   const existingPages = await listChildPages(token, parentPageId);
+  const manifest = await readManifest(REPOSITORY_ROOT);
+  const synced = new Date().toISOString();
+  let published = 0;
+  let skipped = 0;
 
   for (const document of documents) {
-    const pageId = await publishDocument(
-      token,
-      parentPageId,
-      document,
-      existingPages,
-      cloudinaryUrl,
-    );
-    console.log(`Published "${document.title}" → ${pageId}`);
+    const sourceHash = sha256(await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8'));
+    const previous = manifest.documents[document.path];
+    const unchanged =
+      !force &&
+      previous?.sourceHash === sourceHash &&
+      previous?.targets.notion?.blockCount !== undefined;
+
+    if (unchanged) {
+      skipped += 1;
+      console.log(`unchanged: "${document.notionTitle}"`);
+      continue;
+    }
+
+    const page = await publishDocument(token, parentPageId, document, existingPages, cloudinaryUrl);
+
+    manifest.documents[document.path] = {
+      sourceHash,
+      syncedAt: synced,
+      targets: {
+        ...(previous?.targets ?? {}),
+        notion: {
+          id: page.id,
+          lastEditedTime: page.lastEditedTime,
+          blockCount: page.blockCount,
+        },
+      },
+    };
+
+    published += 1;
+    console.log(`Published "${document.notionTitle}" → ${page.id}`);
   }
+
+  await writeManifest(REPOSITORY_ROOT, manifest);
+  console.log(
+    `\nPublished ${published} (${skipped} unchanged) — manifest has ${documents.length} entries.`,
+  );
 }
 
 await main();

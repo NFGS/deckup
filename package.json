@@ -17,6 +17,9 @@
     "test:e2e": "pnpm build && playwright test",
     "sync:notion": "node --experimental-strip-types scripts/notion-sync.ts",
     "sync:obsidian": "node --experimental-strip-types scripts/obsidian-sync.ts",
+    "sync:all": "node --experimental-strip-types scripts/sync-all.ts",
+    "sync:check": "node --experimental-strip-types scripts/sync-check.ts",
+    "sync:watch": "node --experimental-strip-types scripts/sync-watch.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

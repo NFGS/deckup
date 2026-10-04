@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# A commit touched docs/: nudge the author, or auto-sync with DECKUP_AUTO_SYNC=1.
+node scripts/hooks/docs-sync-hook.mjs post-commit || true

@@ -119,12 +119,17 @@ The same documentation is published to the Notion workspace (root page
 and mirrored to the Obsidian vault (**Ningendo Bee** → `DeckUp/`):
 
 ```bash
-pnpm sync:notion                      # Notion workspace
-pnpm sync:obsidian                    # Obsidian vault (Ningendo Bee)
-pnpm sync:notion --dry-run            # preview block counts
-pnpm sync:notion --only "Runbook"     # refresh a single page
-pnpm sync:obsidian --dry-run          # preview vault notes
+pnpm sync:all                  # Notion + Obsidian (the command behind every trigger)
+pnpm sync:check                # offline drift report (repository + vault)
+pnpm sync:check --remote       # also flag pages edited by hand in Notion
+pnpm sync:watch                # re-sync on every save under docs/
+pnpm sync:notion --dry-run     # preview block counts
 ```
+
+The repository `docs/` is the single source of truth. Every write is recorded in
+`.sync-manifest.json`, so the sync is incremental and drift is detectable in any
+direction. Hooks (`post-commit`, `post-merge`, `pre-push`) and the `Docs sync`
+workflow keep GitHub, Notion and Obsidian aligned automatically.
 
 ## License
 

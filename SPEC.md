@@ -108,15 +108,31 @@ Skills are installed once, globally (`~/.config/opencode/skills/`); the project 
 no local copies (single source of truth, audited 2026-10-04). The Open Design
 catalogue lives at `~/.open-design-skill/repo` (clone of `nexu-io/open-design`).
 
-## 10. Obsidian vault
+## 10. Documentation mirrors
 
-- Vault: **Ningendo Bee** — `~/Documents/Obsidian Vaults/Ningendo Bee`
-  (override with `OBSIDIAN_VAULT_PATH`).
-- Mirror sync: `pnpm sync:obsidian` — publishes the 13 documents to
-  `DeckUp/Documentación` and the 8 MADR ADRs to `DeckUp/Decisiones Técnicas`
-  with YAML frontmatter, and copies the evidence screenshots to
-  `DeckUp/Recursos/evidencias` (embedded as wiki-links).
-- The curated map of content lives at `DeckUp/README.md` (links to the app, the
-  API, the repository and the Notion workspace); the vault-wide `Home.md`
-  connects all projects. Both are maintained manually.
-- Last sync: **2026-10-04** — 21 notes + 12 evidence images.
+The repository `docs/` is the single source of truth. It is mirrored to Notion
+and to the Obsidian vault, and every write is recorded in `.sync-manifest.json`
+(a content hash per document and target) so the sync is **incremental,
+idempotent and verifiable**.
+
+| Environment    | Role            | Updated by                        |
+| -------------- | --------------- | --------------------------------- |
+| Repository     | source of truth | the editor                        |
+| GitHub         | transport + CI  | `git push`                        |
+| Notion         | mirror          | `pnpm sync:notion` (CI on push)   |
+| Obsidian vault | mirror          | `pnpm sync:obsidian` (local only) |
+
+- `pnpm sync:all` propagates to both mirrors; `pnpm sync:check` reports drift
+  (`--remote` also counts Notion blocks); `pnpm sync:watch` re-syncs on every
+  save under `docs/`.
+- Triggers: `post-commit` (reminder, or auto-sync with `DECKUP_AUTO_SYNC=1`),
+  `post-merge` (re-sync after a pull that touched `docs/`), `pre-push`
+  (`sync:check`, blocking only with `DECKUP_SYNC_STRICT=1`) and the
+  `docs-sync.yml` workflow (repository → Notion + manifest commit on push).
+- Notion is a **read-only mirror**: hand edits are detected by block count and
+  reconciled from the repository, which always wins.
+- Notion root page: **DeckUp** (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
+- Obsidian vault: **Ningendo Bee** (`~/Documents/Obsidian Vaults/Ningendo Bee`,
+  override with `OBSIDIAN_VAULT_PATH`); the curated map of content lives at
+  `DeckUp/README.md` and the vault-wide `Home.md` connects all projects.
+- Last sync: **2026-10-04** — 21 documents (13 documents + 8 ADRs) on both mirrors.

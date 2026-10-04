@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Warn when the documentation mirrors are out of sync before pushing.
+node scripts/hooks/docs-sync-hook.mjs pre-push || true

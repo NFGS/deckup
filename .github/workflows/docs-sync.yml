@@ -1,0 +1,74 @@
+name: Docs sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'scripts/lib/**'
+      - 'scripts/notion-sync.ts'
+      - '.sync-manifest.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-sync-main
+  cancel-in-progress: false
+
+jobs:
+  notion:
+    name: Repository → Notion mirror
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
+      CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+    steps:
+      - name: Check credentials
+        if: env.NOTION_TOKEN == ''
+        run: echo "NOTION_TOKEN is not configured — skipping the Notion sync."
+
+      - name: Checkout
+        if: env.NOTION_TOKEN != ''
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        if: env.NOTION_TOKEN != ''
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: env.NOTION_TOKEN != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        if: env.NOTION_TOKEN != ''
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish documentation to Notion
+        if: env.NOTION_TOKEN != ''
+        run: pnpm sync:notion
+
+      - name: Verify the mirrors are in sync
+        if: env.NOTION_TOKEN != ''
+        run: pnpm sync:check
+
+      - name: Commit the refreshed manifest
+        if: env.NOTION_TOKEN != ''
+        run: |
+          if git diff --quiet -- .sync-manifest.json; then
+            echo "Manifest unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .sync-manifest.json
+          git commit -m "chore(sync): refresh Notion mirror [skip ci]"
+          git push

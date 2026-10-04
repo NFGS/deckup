@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# A pull/merge brought documentation changes: re-sync the mirrors.
+node scripts/hooks/docs-sync-hook.mjs post-merge || true
