@@ -115,12 +115,15 @@ See [`docs/`](./docs) and [`SPEC.md`](./SPEC.md). The current remediation
 backlog lives in [`PLAN.md`](./PLAN.md).
 
 The same documentation is published to the Notion workspace (root page
-**DeckUp**) with native tables, Mermaid diagrams, callouts and evidence images:
+**DeckUp**) with native tables, Mermaid diagrams, callouts and evidence images,
+and mirrored to the Obsidian vault (**Ningendo Bee** → `DeckUp/`):
 
 ```bash
-NOTION_TOKEN=… NOTION_PAGE_ID=3ee7d55f-d95e-8079-8ee8-f9dc00042699 pnpm sync:notion
+pnpm sync:notion                      # Notion workspace
+pnpm sync:obsidian                    # Obsidian vault (Ningendo Bee)
 pnpm sync:notion --dry-run            # preview block counts
 pnpm sync:notion --only "Runbook"     # refresh a single page
+pnpm sync:obsidian --dry-run          # preview vault notes
 ```
 
 ## License

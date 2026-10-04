@@ -2,9 +2,10 @@
 
 Automation scripts for the DeckUp monorepo.
 
-| Script           | Purpose                                                                                                           | Command                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `notion-sync.ts` | Publishes the requirements, architecture, testing and operations docs as child pages of the DeckUp page in Notion | `NOTION_TOKEN=… NOTION_PAGE_ID=… pnpm sync:notion` |
+| Script             | Purpose                                                                                                           | Command                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `notion-sync.ts`   | Publishes the requirements, architecture, testing and operations docs as child pages of the DeckUp page in Notion | `NOTION_TOKEN=… NOTION_PAGE_ID=… pnpm sync:notion` |
+| `obsidian-sync.ts` | Publishes the documents and ADRs as notes in the Obsidian vault (Ningendo Bee) with YAML frontmatter              | `pnpm sync:obsidian`                               |
 
 ## Notion sync
 
@@ -37,6 +38,24 @@ Automation scripts for the DeckUp monorepo.
 
   ```bash
   pnpm sync:notion --only "Project Status"
+  ```
+
+## Obsidian sync
+
+- Vault: **Ningendo Bee** — `~/Documents/Obsidian Vaults/Ningendo Bee`
+  (override with `OBSIDIAN_VAULT_PATH`).
+- Writes the 13 documents to `DeckUp/Documentación` and the 8 MADR ADRs to
+  `DeckUp/Decisiones Técnicas` with YAML frontmatter (`proyecto`, `fuente`,
+  `synced`, `tags`); copies the evidence screenshots to
+  `DeckUp/Recursos/evidencias` and turns them into wiki-embeds. Relative
+  repository links degrade to plain text; Mermaid, tables and callouts render
+  natively in Obsidian.
+- The curated map of content (`DeckUp/README.md`) and the vault `Home.md` are
+  maintained manually and are never overwritten by the sync.
+- `--dry-run` lists the notes without writing:
+
+  ```bash
+  pnpm sync:obsidian --dry-run
   ```
 
 ## Capture helpers

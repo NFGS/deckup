@@ -107,3 +107,16 @@ pre-deploy command (the `prisma` CLI ships in the production image).
 Skills are installed once, globally (`~/.config/opencode/skills/`); the project keeps
 no local copies (single source of truth, audited 2026-10-04). The Open Design
 catalogue lives at `~/.open-design-skill/repo` (clone of `nexu-io/open-design`).
+
+## 10. Obsidian vault
+
+- Vault: **Ningendo Bee** — `~/Documents/Obsidian Vaults/Ningendo Bee`
+  (override with `OBSIDIAN_VAULT_PATH`).
+- Mirror sync: `pnpm sync:obsidian` — publishes the 13 documents to
+  `DeckUp/Documentación` and the 8 MADR ADRs to `DeckUp/Decisiones Técnicas`
+  with YAML frontmatter, and copies the evidence screenshots to
+  `DeckUp/Recursos/evidencias` (embedded as wiki-links).
+- The curated map of content lives at `DeckUp/README.md` (links to the app, the
+  API, the repository and the Notion workspace); the vault-wide `Home.md`
+  connects all projects. Both are maintained manually.
+- Last sync: **2026-10-04** — 21 notes + 12 evidence images.
