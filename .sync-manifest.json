@@ -322,7 +322,7 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-04T16:39:16.576Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Project Status.md",
@@ -330,10 +330,10 @@
           "sourceHash": "sha256-c11e9ddf371bd355ccd0bcb01d021bb3052183f076a515dde8da050697aff876"
         },
         "notion": {
-          "id": "3ef7d55f-d95e-81aa-95e2-f682cd931be6",
-          "lastEditedTime": "2026-10-04T16:37:00.000Z",
+          "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",
+          "lastEditedTime": "2026-10-04T16:39:00.000Z",
           "blockCount": 51,
-          "sourceHash": "sha256-c11e9ddf371bd355ccd0bcb01d021bb3052183f076a515dde8da050697aff876"
+          "sourceHash": "sha256-1b55be135dff0c27dba1be9169b1b1423328da9df2407c00048b34e977189b9c"
         }
       }
     }
