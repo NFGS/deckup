@@ -12,6 +12,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 export type ObsidianFolder = 'Documentación' | 'Decisiones Técnicas';
+export type SyncTarget = 'notion' | 'obsidian';
 
 export interface DocumentSpec {
   /** Repository-relative path of the source markdown. */
@@ -26,6 +27,18 @@ export interface DocumentSpec {
   obsidianFolder: ObsidianFolder;
   /** Obsidian tags, without the implicit `deckup` project tag. */
   tags: string[];
+  /**
+   * Mirrors this document is published to. Defaults to both. Each environment
+   * has its own strengths, so a document may deliberately live in only one of
+   * them; the manifest tracks targets independently and never reports a
+   * missing target as drift.
+   */
+  targets?: SyncTarget[];
+}
+
+/** The targets a document is published to (both, unless declared otherwise). */
+export function documentTargets(spec: DocumentSpec): SyncTarget[] {
+  return spec.targets ?? ['notion', 'obsidian'];
 }
 
 export const ADR_DIRECTORY = 'docs/02-architecture/adr';

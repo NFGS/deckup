@@ -18,8 +18,8 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
-import { collectAllDocuments, type DocumentSpec } from './lib/documents.ts';
-import { readManifest, sha256, writeManifest } from './lib/sync-manifest.ts';
+import { collectAllDocuments, documentTargets, type DocumentSpec } from './lib/documents.ts';
+import { hashSourceFile, readManifest, writeManifest } from './lib/sync-manifest.ts';
 
 const NOTION_API = 'https://api.notion.com/v1';
 const NOTION_VERSION = '2022-06-28';
@@ -679,11 +679,52 @@ async function listChildPages(token: string, parentPageId: string): Promise<Map<
   return pages;
 }
 
-async function archivePage(token: string, pageId: string): Promise<void> {
-  await notionRequest(`/pages/${pageId}`, token, {
-    method: 'PATCH',
-    body: JSON.stringify({ archived: true }),
-  });
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds));
+}
+
+/** Every direct child block id of a page (paginated). */
+async function listChildBlockIds(token: string, pageId: string): Promise<string[]> {
+  const ids: string[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const query = new URLSearchParams({ page_size: '100' });
+
+    if (cursor) {
+      query.set('start_cursor', cursor);
+    }
+
+    const response = await notionRequest(`/blocks/${pageId}/children?${query.toString()}`, token, {
+      method: 'GET',
+    });
+    const results = Array.isArray(response.results)
+      ? (response.results as Array<Record<string, unknown>>)
+      : [];
+
+    for (const block of results) {
+      ids.push(String(block.id));
+    }
+
+    cursor = typeof response.next_cursor === 'string' ? response.next_cursor : undefined;
+  } while (cursor);
+
+  return ids;
+}
+
+/**
+ * Replaces a page's content in place. Reusing the page id (instead of
+ * archiving and recreating) keeps the Notion trash empty and the page URL
+ * stable; only the blocks are swapped. Notion rate-limits deletes, hence the
+ * small delay.
+ */
+async function clearChildren(token: string, pageId: string): Promise<void> {
+  const ids = await listChildBlockIds(token, pageId);
+
+  for (const id of ids) {
+    await notionRequest(`/blocks/${id}`, token, { method: 'DELETE' });
+    await sleep(150);
+  }
 }
 
 interface PublishedPage {
@@ -708,34 +749,42 @@ async function publishDocument(
   const chunks = chunkBlocks(blocks, BLOCKS_PER_REQUEST);
 
   const previousPageId = existingPages.get(document.notionTitle);
+  let pageId: string;
 
   if (previousPageId) {
-    await archivePage(token, previousPageId);
-    console.log(`Archived previous "${document.notionTitle}" (${previousPageId})`);
+    await clearChildren(token, previousPageId);
+    await notionRequest(`/pages/${previousPageId}`, token, {
+      method: 'PATCH',
+      body: JSON.stringify({ icon: { type: 'emoji', emoji: document.notionIcon } }),
+    });
+    pageId = previousPageId;
+    console.log(`Updating in place "${document.notionTitle}" (${pageId})`);
+  } else {
+    const page = await notionRequest('/pages', token, {
+      method: 'POST',
+      body: JSON.stringify({
+        parent: { page_id: parentPageId },
+        icon: { type: 'emoji', emoji: document.notionIcon },
+        properties: { title: [{ type: 'text', text: { content: document.notionTitle } }] },
+      }),
+    });
+    pageId = String(page.id);
+    console.log(`Created "${document.notionTitle}" (${pageId})`);
   }
 
-  const page = await notionRequest('/pages', token, {
-    method: 'POST',
-    body: JSON.stringify({
-      parent: { page_id: parentPageId },
-      icon: { type: 'emoji', emoji: document.notionIcon },
-      properties: { title: [{ type: 'text', text: { content: document.notionTitle } }] },
-      children: chunks[0] ?? [],
-    }),
-  });
-
-  const pageId = String(page.id);
-
-  for (let index = 1; index < chunks.length; index += 1) {
+  for (const chunk of chunks) {
     await notionRequest(`/blocks/${pageId}/children`, token, {
       method: 'PATCH',
-      body: JSON.stringify({ children: chunks[index] }),
+      body: JSON.stringify({ children: chunk }),
     });
   }
 
+  const refreshed = await notionRequest(`/pages/${pageId}`, token, { method: 'GET' });
+
   return {
     id: pageId,
-    lastEditedTime: typeof page.last_edited_time === 'string' ? page.last_edited_time : '',
+    lastEditedTime:
+      typeof refreshed.last_edited_time === 'string' ? refreshed.last_edited_time : '',
     blockCount: blocks.length,
   };
 }
@@ -746,9 +795,11 @@ async function main(): Promise<void> {
   const onlyIndex = process.argv.indexOf('--only');
   const onlyFilter = onlyIndex >= 0 ? (process.argv[onlyIndex + 1] ?? '') : undefined;
   const allDocuments = await collectAllDocuments(REPOSITORY_ROOT);
-  const documents = onlyFilter
-    ? allDocuments.filter((document) => document.notionTitle.includes(onlyFilter))
-    : allDocuments;
+  const documents = (
+    onlyFilter
+      ? allDocuments.filter((document) => document.notionTitle.includes(onlyFilter))
+      : allDocuments
+  ).filter((document) => documentTargets(document).includes('notion'));
   const token = process.env.NOTION_TOKEN;
   const parentPageId = process.env.NOTION_PAGE_ID;
   const cloudinaryUrl = process.env.CLOUDINARY_URL;
@@ -797,7 +848,7 @@ async function main(): Promise<void> {
   let skipped = 0;
 
   for (const document of documents) {
-    const sourceHash = sha256(await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8'));
+    const sourceHash = await hashSourceFile(REPOSITORY_ROOT, document.path);
     const previous = manifest.documents[document.path];
     const unchanged = !force && previous?.targets.notion?.sourceHash === sourceHash;
 

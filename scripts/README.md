@@ -9,12 +9,19 @@ propagated to three mirrors, and every write is recorded in
 `.sync-manifest.json` (a content hash per document and per target) so the sync
 is **incremental** (only what changed), **idempotent** and **verifiable**.
 
-| Environment    | Role            | Updated by                                                  |
-| -------------- | --------------- | ----------------------------------------------------------- |
-| Repository     | source of truth | you / the editor                                            |
-| GitHub         | transport + CI  | `git push`                                                  |
-| Notion         | outbound mirror | `pnpm sync:notion` (CI on push, or locally)                 |
-| Obsidian vault | outbound mirror | `pnpm sync:obsidian` (local only — the vault lives on disk) |
+The goal is **alignment, not duplication**: the four environments must never
+contradict each other, but each one keeps the role and features that justify it.
+
+| Environment    | Role            | What it is for                                                  |
+| -------------- | --------------- | --------------------------------------------------------------- |
+| Repository     | source of truth | versioned markdown, code, CI, the canonical content             |
+| GitHub         | transport + CI  | history, review, automation; runs the Notion mirror on push     |
+| Notion         | mirror          | rich reading and sharing (tables, callouts, Mermaid, images)    |
+| Obsidian vault | mirror          | local search, graph, wiki-links, offline access, ADR navigation |
+
+A document may deliberately target only one mirror (`targets` in
+`scripts/lib/documents.ts`); the manifest tracks each target independently and a
+missing target is never reported as drift. Today every document targets both.
 
 Triggers that keep the four in step:
 
@@ -30,7 +37,7 @@ Detecting a change in _any_ of the four environments:
 
 | Where it changed | How it is detected                                    | Reconciled by                       |
 | ---------------- | ----------------------------------------------------- | ----------------------------------- |
-| Repository       | `sourceHash` differs from the manifest                | `pnpm sync:all`                     |
+| Repository       | canonical `sourceHash` differs from the manifest      | `pnpm sync:all`                     |
 | GitHub           | same signal after the pull/merge                      | `post-merge` hook / `pnpm sync:all` |
 | Obsidian         | note bytes differ from the recorded hash              | `pnpm sync:obsidian`                |
 | Notion           | top-level block count differs from the recorded count | `pnpm sync:notion --only <title>`   |
@@ -39,6 +46,20 @@ Notion is treated as a **read-only mirror**: hand edits are reported by
 `pnpm sync:check --remote` and reconciled by re-publishing from the repository
 (the repository always wins). A text-only Notion edit that keeps the block count
 is caught the next time the document changes in the repository.
+
+### Canonical hashing
+
+The pre-commit hook runs Prettier over markdown, so the on-disk bytes can change
+(formatting only) _after_ a sync recorded the hash. To avoid spurious drift, the
+manifest stores the hash of the **Prettier-normalized** content
+(`hashSource` in `scripts/lib/sync-manifest.ts`); formatting-only changes never
+break the alignment.
+
+### Notion updates in place
+
+Re-publishing a page clears its blocks and appends the new ones **on the same
+page id** — the page URL stays stable and nothing accumulates in the Notion
+trash (the previous archive-and-recreate strategy did).
 
 ## Commands
 
@@ -60,14 +81,17 @@ Flags: `--dry-run` (preview), `--only <substring>` (a single document),
 
 ```json
 "docs/01-requirements/glossary.md": {
-  "sourceHash": "sha256-…",
   "syncedAt": "2026-10-04T16:26:11.563Z",
   "targets": {
-    "obsidian": { "path": "DeckUp/Documentación/Glossary.md", "hash": "sha256-…" },
-    "notion": { "id": "…", "lastEditedTime": "…", "blockCount": 11 }
+    "obsidian": { "path": "DeckUp/Documentación/Glossary.md", "hash": "sha256-…", "sourceHash": "sha256-…" },
+    "notion": { "id": "…", "lastEditedTime": "…", "blockCount": 11, "sourceHash": "sha256-…" }
   }
 }
 ```
+
+`sourceHash` is stored **per target** (the canonical, Prettier-normalized hash of
+the source at the moment that target was published), so a document synced to one
+mirror is still correctly reported as pending for the other.
 
 `scripts/lib/documents.ts` is the canonical registry (13 documents + the MADR
 ADRs discovered on disk); both mirrors consume it, so they can never disagree on
@@ -88,8 +112,10 @@ _which_ documents they publish.
   (signed uploads, folder `deckup/docs`); otherwise they degrade to a caption.
 - The payload is chunked at 100 blocks per request without splitting a table
   from its rows.
-- Documents with an unchanged `sourceHash` and a recorded `blockCount` are
-  skipped; pass `--force` to re-publish them.
+- Documents with an unchanged canonical `sourceHash` and a recorded `blockCount`
+  are skipped; pass `--force` to re-publish them.
+- Re-publishing updates the page **in place** (same id, blocks swapped), so the
+  Notion trash stays empty and page URLs are stable.
 - Last sync: 2026-10-04 — **21 pages** (13 documents + 8 ADRs).
 
 ## Obsidian sync

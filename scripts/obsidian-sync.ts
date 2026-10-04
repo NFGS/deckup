@@ -22,8 +22,8 @@ import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
-import { collectAllDocuments, type DocumentSpec } from './lib/documents.ts';
-import { readManifest, sha256, writeManifest } from './lib/sync-manifest.ts';
+import { collectAllDocuments, documentTargets, type DocumentSpec } from './lib/documents.ts';
+import { hashSourceFile, readManifest, sha256, writeManifest } from './lib/sync-manifest.ts';
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, '..');
 const DEFAULT_VAULT = join(homedir(), 'Documents', 'Obsidian Vaults', 'Ningendo Bee');
@@ -115,9 +115,9 @@ async function main(): Promise<void> {
   const synced = new Date().toISOString();
   const syncedDay = synced.slice(0, 10);
   const allNotes = await collectNotes(syncedDay);
-  const notes = onlyFilter
-    ? allNotes.filter((note) => note.spec.notionTitle.includes(onlyFilter))
-    : allNotes;
+  const notes = (
+    onlyFilter ? allNotes.filter((note) => note.spec.notionTitle.includes(onlyFilter)) : allNotes
+  ).filter((note) => documentTargets(note.spec).includes('obsidian'));
 
   if (onlyFilter && notes.length === 0) {
     console.error(`No notes match --only "${onlyFilter}".`);
@@ -141,7 +141,7 @@ async function main(): Promise<void> {
   let skipped = 0;
 
   for (const note of notes) {
-    const sourceHash = sha256(await readFile(resolve(REPOSITORY_ROOT, note.spec.path), 'utf8'));
+    const sourceHash = await hashSourceFile(REPOSITORY_ROOT, note.spec.path);
     const noteHash = sha256(note.content);
     const previous = manifest.documents[note.spec.path];
     const target = join(vault, 'DeckUp', note.file);

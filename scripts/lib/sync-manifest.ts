@@ -23,6 +23,7 @@ import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import prettier from 'prettier';
 import type { DocumentSpec } from './documents.ts';
 
 export const MANIFEST_FILE = '.sync-manifest.json';
@@ -65,6 +66,32 @@ export interface DocumentState {
 
 export function sha256(input: string | Uint8Array): string {
   return `sha256-${createHash('sha256').update(input).digest('hex')}`;
+}
+
+/**
+ * Hashes the *canonical* content of a source document.
+ *
+ * The repository's pre-commit hook runs Prettier over markdown, so the on-disk
+ * bytes can change (formatting only) after a sync recorded the hash — which
+ * would otherwise show up as spurious drift. Normalizing through the same
+ * Prettier configuration before hashing keeps the manifest stable.
+ */
+export async function hashSource(content: string, filepath: string): Promise<string> {
+  try {
+    return sha256(await prettier.format(content, { filepath }));
+  } catch {
+    return sha256(content);
+  }
+}
+
+/** Reads a repository document and returns its canonical hash. */
+export async function hashSourceFile(
+  repositoryRoot: string,
+  relativePath: string,
+): Promise<string> {
+  const absolute = resolve(repositoryRoot, relativePath);
+
+  return hashSource(await readFile(absolute, 'utf8'), absolute);
 }
 
 export async function readManifest(repositoryRoot: string): Promise<SyncManifest> {

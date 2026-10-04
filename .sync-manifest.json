@@ -98,18 +98,18 @@
       }
     },
     "docs/02-architecture/adr/ADR-0004-shared-contracts.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-04T17:50:47.585Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0004 — Zod contracts in @deckup-shared.md",
           "hash": "sha256-1b0fdab7d473162f30d7c21a7dcd47a9b3833ff461532845684bfdc7846ebb74",
-          "sourceHash": "sha256-8c1f6a226f3654fc324ffd8a1841cb589cba0a660c9c122fad0c328db70df3de"
+          "sourceHash": "sha256-22aa7b151dc093a7fdc10a11ca0fc515d0539f7bc48827e4ce770dc75599844b"
         },
         "notion": {
           "id": "3ef7d55f-d95e-81f9-956e-f76cdc983ce3",
-          "lastEditedTime": "2026-10-04T16:37:00.000Z",
+          "lastEditedTime": "2026-10-04T17:51:00.000Z",
           "blockCount": 45,
-          "sourceHash": "sha256-8c1f6a226f3654fc324ffd8a1841cb589cba0a660c9c122fad0c328db70df3de"
+          "sourceHash": "sha256-22aa7b151dc093a7fdc10a11ca0fc515d0539f7bc48827e4ce770dc75599844b"
         }
       }
     },
@@ -322,12 +322,12 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-04T16:39:16.576Z",
+      "syncedAt": "2026-10-04T17:50:45.656Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Project Status.md",
-          "hash": "sha256-6b4e0a7e0eb016f15549efe7a9bcad4f5e9c669c289c594f6706d4e857c8c312",
-          "sourceHash": "sha256-c11e9ddf371bd355ccd0bcb01d021bb3052183f076a515dde8da050697aff876"
+          "hash": "sha256-2468a26b2278a6e01637ec265cfd5222fdb7bc96701a3f9e800672000e62e608",
+          "sourceHash": "sha256-1b55be135dff0c27dba1be9169b1b1423328da9df2407c00048b34e977189b9c"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",

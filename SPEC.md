@@ -115,12 +115,15 @@ and to the Obsidian vault, and every write is recorded in `.sync-manifest.json`
 (a content hash per document and target) so the sync is **incremental,
 idempotent and verifiable**.
 
-| Environment    | Role            | Updated by                        |
-| -------------- | --------------- | --------------------------------- |
-| Repository     | source of truth | the editor                        |
-| GitHub         | transport + CI  | `git push`                        |
-| Notion         | mirror          | `pnpm sync:notion` (CI on push)   |
-| Obsidian vault | mirror          | `pnpm sync:obsidian` (local only) |
+The goal is **alignment, not duplication**: the four environments must never
+contradict each other, but each keeps the role that justifies it.
+
+| Environment    | Role            | What it is for                                                  |
+| -------------- | --------------- | --------------------------------------------------------------- |
+| Repository     | source of truth | versioned markdown, code, CI, the canonical content             |
+| GitHub         | transport + CI  | history, review, automation; mirrors Notion on push             |
+| Notion         | mirror          | rich reading and sharing (tables, callouts, Mermaid, images)    |
+| Obsidian vault | mirror          | local search, graph, wiki-links, offline access, ADR navigation |
 
 - `pnpm sync:all` propagates to both mirrors; `pnpm sync:check` reports drift
   (`--remote` also counts Notion blocks); `pnpm sync:watch` re-syncs on every
@@ -130,7 +133,12 @@ idempotent and verifiable**.
   (`sync:check`, blocking only with `DECKUP_SYNC_STRICT=1`) and the
   `docs-sync.yml` workflow (repository → Notion + manifest commit on push).
 - Notion is a **read-only mirror**: hand edits are detected by block count and
-  reconciled from the repository, which always wins.
+  reconciled from the repository, which always wins. Re-publishing updates the
+  page **in place** (same id, blocks swapped), so the Notion trash stays empty.
+- Hashes are **canonical** (Prettier-normalized), so the pre-commit formatter
+  never produces spurious drift.
+- A document may target only one mirror (`targets` in `scripts/lib/documents.ts`);
+  a missing target is never reported as drift. Today every document targets both.
 - Notion root page: **DeckUp** (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 - Obsidian vault: **Ningendo Bee** (`~/Documents/Obsidian Vaults/Ningendo Bee`,
   override with `OBSIDIAN_VAULT_PATH`); the curated map of content lives at

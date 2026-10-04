@@ -25,8 +25,8 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { collectAllDocuments } from './lib/documents.ts';
-import { readManifest, sha256, type DocumentEntry } from './lib/sync-manifest.ts';
+import { collectAllDocuments, documentTargets } from './lib/documents.ts';
+import { hashSourceFile, readManifest, sha256, type DocumentEntry } from './lib/sync-manifest.ts';
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, '..');
 const DEFAULT_VAULT = join(homedir(), 'Documents', 'Obsidian Vaults', 'Ningendo Bee');
@@ -75,6 +75,7 @@ async function checkDocument(
   entry: DocumentEntry | undefined,
   sourceHash: string,
   path: string,
+  targets: string[],
   options: { vault: string | null; remote: boolean; token: string | undefined },
 ): Promise<Report> {
   const issues: Issue[] = [];
@@ -86,7 +87,7 @@ async function checkDocument(
 
   const obsidian = entry.targets.obsidian;
 
-  if (obsidian) {
+  if (targets.includes('obsidian') && obsidian) {
     if (!options.vault) {
       skipped.push('obsidian');
     } else if (obsidian.sourceHash !== sourceHash) {
@@ -102,7 +103,7 @@ async function checkDocument(
 
   const notion = entry.targets.notion;
 
-  if (notion) {
+  if (targets.includes('notion') && notion) {
     if (notion.sourceHash !== sourceHash) {
       issues.push('source-changed');
     } else if (options.remote && options.token) {
@@ -153,8 +154,9 @@ async function main(): Promise<void> {
     reports.push(
       await checkDocument(
         manifest.documents[spec.path],
-        sha256(await readFile(resolve(REPOSITORY_ROOT, spec.path), 'utf8')),
+        await hashSourceFile(REPOSITORY_ROOT, spec.path),
         spec.path,
+        documentTargets(spec),
         { vault, remote, token },
       ),
     );
