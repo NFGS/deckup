@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "47da7a8f-151e-4783-83f0-c2b978e15afa",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-system-context-20261004-024855/candidate.json",
+  "output": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-system-context-20261004-024855/system-context.html",
+  "specification": {
+    "sha256": "fd25ade3d5ee66c9e093bdf4f6d96def531eb5ce09cca10239ac0f5c8d7fe4d5",
+    "bytes": 2228
+  },
+  "artifact": {
+    "sha256": "4913aa11bfe0005ecfa76d59764fa4ad4e0c637d854dbca125f79a9a5bcbc740",
+    "bytes": 748951
+  }
+}

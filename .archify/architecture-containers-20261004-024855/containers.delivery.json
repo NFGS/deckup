@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "2e201a19-cdba-4d87-aaf1-6a644139406f",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-containers-20261004-024855/candidate.json",
+  "output": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-containers-20261004-024855/containers.html",
+  "specification": {
+    "sha256": "0f0fdf701f5d3da5db143f3bbab15a4d298d70474c0e55a8b578c9d9ba0a4c7d",
+    "bytes": 2874
+  },
+  "artifact": {
+    "sha256": "f71b27efd76d049db980baf3a815702b187129c202f598a1bc3667ad3d622fe5",
+    "bytes": 754404
+  }
+}

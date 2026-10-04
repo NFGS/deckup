@@ -6,6 +6,11 @@
 | **Date**    | 2026-09-22                                                          |
 | **Related** | [`deployment.md`](./deployment.md) · [`security.md`](./security.md) |
 
+> [!NOTE]
+> **At a glance** — 5 incident playbooks (API unhealthy, database unreachable, failed
+> migration, auth spike, slow study sessions) plus routine checks and common tasks. Escalation
+> captures the failing request, timestamp, correlation id and affected account.
+
 Operational procedures for the DeckUp API and web client.
 
 ---

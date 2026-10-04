@@ -6,6 +6,10 @@
 | **Date**    | 2026-09-22                                                            |
 | **Scope**   | Domain vocabulary used across requirements, architecture, code and UI |
 
+> [!NOTE]
+> **At a glance** — 31 canonical terms. The **Canonical name** column is the identifier used
+> in code and API contracts; enum values use `UPPER_SNAKE_CASE` and instants are stored in UTC.
+
 Terms are listed alphabetically. The **Canonical name** column is the identifier used in
 code and API contracts.
 

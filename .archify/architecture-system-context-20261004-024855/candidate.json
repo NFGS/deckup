@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DeckUp — System Context (C4 Level 1)",
+    "output": ".archify/architecture-system-context-20261004-024855/system-context.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "student",
+      "type": "external",
+      "label": "Student",
+      "sublabel": "High school student preparing final exams",
+      "pos": [40, 280],
+      "size": [170, 72]
+    },
+    {
+      "id": "deckup",
+      "type": "backend",
+      "label": "DeckUp",
+      "sublabel": "Flashcard authoring · FSRS scheduling · study analytics",
+      "pos": [400, 280],
+      "size": [230, 80]
+    },
+    {
+      "id": "cloudinary",
+      "type": "cloud",
+      "label": "Cloudinary",
+      "sublabel": "Card image storage and delivery",
+      "pos": [800, 140],
+      "size": [190, 72]
+    },
+    {
+      "id": "llm",
+      "type": "cloud",
+      "label": "LLM provider",
+      "sublabel": "Optional AI card generation",
+      "pos": [800, 420],
+      "size": [190, 72]
+    }
+  ],
+  "connections": [
+    {
+      "id": "student-deckup",
+      "from": "student",
+      "to": "deckup",
+      "label": "uses · HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "deckup-cloudinary",
+      "from": "deckup",
+      "to": "cloudinary",
+      "label": "uploads images",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "deckup-llm",
+      "from": "deckup",
+      "to": "llm",
+      "label": "suggestions",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Actor",
+      "items": [
+        "The student is the single human actor",
+        "Owns decks, studies and consumes analytics"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "System",
+      "items": [
+        "DeckUp owns accounts, decks, cards, scheduling and analytics",
+        "All access goes through the API contracts"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "External services",
+      "items": [
+        "Cloudinary stores and delivers card images",
+        "The LLM provider is optional (card generation)"
+      ]
+    }
+  ]
+}

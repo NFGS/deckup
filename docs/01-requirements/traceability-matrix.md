@@ -7,6 +7,11 @@
 | **Source**  | [`user-story-refinement.md`](./user-story-refinement.md)               |
 | **Method**  | SWEBOK V4.0a, KA01 §7.3 — traceability: origin → design → tests → code |
 
+> [!NOTE]
+> **At a glance** — 12 functional requirements, 8 non-functional requirements, 18 use cases
+> and 66 test cases, all linked. Every Must/Should requirement is covered by at least one
+> test case; no orphan requirements and no orphan test cases exist in this baseline.
+
 The matrix links every requirement to its origin (epic and user story), its design
 (use case) and its verification (test case). Test-case IDs are unique and match
 [`../03-testing/test-cases.md`](../03-testing/test-cases.md).

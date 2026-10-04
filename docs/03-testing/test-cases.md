@@ -6,6 +6,12 @@
 | **Date**    | 2026-09-22                                                                                                                  |
 | **Related** | [`test-plan.md`](./test-plan.md) · [`../01-requirements/traceability-matrix.md`](../01-requirements/traceability-matrix.md) |
 
+> [!NOTE]
+> **At a glance** — 66 test cases across 8 areas (`TC-A` accounts, `TC-D` decks, `TC-C` cards,
+> `TC-S` study, `TC-N` analytics, `TC-I` import/export, `TC-P` catalogue/AI, `TC-X`
+> cross-cutting). The **Automated in** column points to the suite that runs each case on
+> every push.
+
 Test-case IDs are unique across the document (`TC-<area><n>`). Steps are
 condensed; the **Automated in** column points to the suite that executes the
 case on every push.

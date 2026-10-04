@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "1de13ed5-637f-4b66-bd4b-f151baaf6d8c",
+  "status": "current",
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/lifecycle-fsrs-20261004-024855/candidate.json",
+  "output": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/lifecycle-fsrs-20261004-024855/fsrs-lifecycle.html",
+  "specification": {
+    "sha256": "3eb10cdc0eefb824551447e8390c52e35843bb2d8cc87cfc330720f40296127a",
+    "bytes": 2296
+  },
+  "artifact": {
+    "sha256": "1954c7dee3c5b983988b0bfae2d21276a6a084ff2b0b6462e2a723e27d040f3d",
+    "bytes": 750955
+  }
+}

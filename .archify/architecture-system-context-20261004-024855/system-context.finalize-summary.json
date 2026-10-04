@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-system-context-20261004-024855/candidate.json",
+    "sha256": "fd25ade3d5ee66c9e093bdf4f6d96def531eb5ce09cca10239ac0f5c8d7fe4d5",
+    "bytes": 2228
+  },
+  "artifact": {
+    "path": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-system-context-20261004-024855/system-context.html",
+    "sha256": "4913aa11bfe0005ecfa76d59764fa4ad4e0c637d854dbca125f79a9a5bcbc740",
+    "bytes": 748951
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-system-context-20261004-024855/system-context.finalize.json",
+    "summaryReceipt": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-system-context-20261004-024855/system-context.finalize-summary.json",
+    "browserCheckReceipt": "/home/fabian/Documents/Proyectos de Programación/Epic_03_Education/.archify/architecture-system-context-20261004-024855/system-context.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-04T07:49:50.066Z",
+    "source": "network",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 3309
+}

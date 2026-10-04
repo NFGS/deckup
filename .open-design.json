@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "designSystem": {
+    "slug": "supabase",
+    "path": "design-systems/supabase"
+  },
+  "skill": {
+    "slug": "motion-frames",
+    "path": "design-templates/motion-frames",
+    "kind": "design-template",
+    "mode": "prototype"
+  },
+  "boundAt": "2026-10-04T08:00:00Z"
+}

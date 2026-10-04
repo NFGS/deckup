@@ -12,6 +12,7 @@
 | **Artefactos** | `PT-ERS-01` (requisitos) · `PT-ECU-01` (casos de uso) · este informe (`PT-IGS-01`)             |
 | **Fuentes**    | `docs/01-requirements/` · `docs/02-architecture/` · `docs/03-testing/` · `docs/04-operations/` |
 
+> [!NOTE]
 > Este informe sigue la estructura institucional de tres partes: (1) características y
 > usuarios, (2) plano maestro del software y (3) de la idea a la aplicación. Cada sección
 > referencia el artefacto SENA o el documento técnico donde vive el detalle.

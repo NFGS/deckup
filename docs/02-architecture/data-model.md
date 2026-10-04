@@ -7,6 +7,11 @@
 | **Status**  | Approved — implemented with Prisma migrations (Phases 2–3)                                                |
 | **Related** | [`overview.md`](./overview.md) · [`adr/ADR-0003-database-and-orm.md`](./adr/ADR-0003-database-and-orm.md) |
 
+> [!NOTE]
+> **At a glance** — 10 models, 7 enums and 5 immutable migrations. UUID primary keys, soft
+> delete for decks and cards, append-only `ReviewLog`, and a denormalized `user_id` on
+> `ReviewState` to serve the daily queue with a single index.
+
 ---
 
 ## 1. Entity-relationship diagram
@@ -388,7 +393,19 @@ The remaining models (`RefreshToken`, `Tag`, `DeckTag`, `CardTag`, `ReviewLog`,
 - Destructive changes require a two-step expand/contract migration and a data backfill.
 - Production applies migrations with `prisma migrate deploy` as a release step (ADR-0007).
 
-## 7. SWEBOK V4.0a references
+## 7. Card review lifecycle (FSRS)
+
+![Card review lifecycle — FSRS](https://res.cloudinary.com/dfuu6j1ht/image/upload/v1791101140/deckup/docs/e3urxy9pgwv6uj8znqc5.png)
+
+_Figure 1 — Card review lifecycle. Interactive version: `.archify/lifecycle-fsrs-20261004-024855/fsrs-lifecycle.html`._
+
+A card moves through four scheduling states. `NEW` cards enter `LEARNING` on their first
+review; `Good` or `Easy` graduates them to `REVIEW` with long intervals. An `Again` rating
+after graduation is a **lapse**: the card enters `RELEARNING` with short steps until `Good`
+or `Easy` returns it to `REVIEW`. `Again` and `Hard` keep the card in its current phase.
+The `scheduler_version` column records the FSRS algorithm version used for every state.
+
+## 8. SWEBOK V4.0a references
 
 - Cap. 3, §4.4 — Design: data design and persistence.
 - Cap. 6, §2.1.1 — Operations: database administration and migrations.

@@ -8,6 +8,11 @@
 | **Method**  | SWEBOK V4.0a, KA05 (Software Testing) §3–§5                                                                                   |
 | **Related** | [`test-cases.md`](./test-cases.md) · [`../01-requirements/traceability-matrix.md`](../01-requirements/traceability-matrix.md) |
 
+> [!NOTE]
+> **At a glance** — 3 test levels (unit, integration, browser E2E) across 5 quality gates.
+> Domain coverage floor: 80 % statements / 85 % branches. Integration runs against a real
+> PostgreSQL 17; browser journeys run against production builds with axe-core scans.
+
 ---
 
 ## 1. Objectives

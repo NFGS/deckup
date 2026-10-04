@@ -6,6 +6,12 @@
 | **Date**    | 2026-09-22                                                                                                                                                                                                                     |
 | **Related** | [`../02-architecture/adr/ADR-0007-deployment.md`](../02-architecture/adr/ADR-0007-deployment.md) · [`runbook.md`](./runbook.md) · [`deployment-walkthrough.md`](./deployment-walkthrough.md) (beginner-friendly, step by step) |
 
+> [!NOTE]
+> **At a glance** — Production runs on Vercel (web), Railway (API container) and Neon
+> (PostgreSQL 17). Releases are gated by CI and applied with `prisma migrate deploy` as a
+> pre-deploy step; rollback is per layer (promote previous deployment / redeploy previous
+> image / forward-only migrations).
+
 ---
 
 ## 1. Environments
@@ -52,6 +58,7 @@ Boot validation fails fast when a feature is enabled without its credentials.
 | -------------- | ------------------------------------------ |
 | `VITE_API_URL` | `https://deckup-api.up.railway.app/api/v1` |
 
+> [!WARNING]
 > `VITE_*` variables are embedded at build time: changing one requires a redeploy.
 
 ## 3. First-time setup

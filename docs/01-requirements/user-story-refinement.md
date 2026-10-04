@@ -10,6 +10,11 @@
 | **Method**  | SWEBOK V4.0a, KA01 §4.2–4.5 (specification) and §7.2–7.3 (prioritization, traceability) |
 | **Related** | [`traceability-matrix.md`](./traceability-matrix.md) · [`glossary.md`](./glossary.md)   |
 
+> [!NOTE]
+> **At a glance** — 4 user stories with progressive detail (22 story points), 12 functional
+> requirements and 8 consolidated non-functional requirements. Every acceptance criterion is
+> written in Given/When/Then form and traced to a use case and test cases.
+
 ---
 
 ## 1. Epic statement

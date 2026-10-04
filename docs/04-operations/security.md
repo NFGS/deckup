@@ -7,6 +7,11 @@
 | **Method**  | SWEBOK V4.0a, KA13 (Software Security) §2–§4 · OWASP Top 10 (2021)                                                                      |
 | **Related** | [`../02-architecture/adr/ADR-0006-authentication.md`](../02-architecture/adr/ADR-0006-authentication.md) · [`runbook.md`](./runbook.md) |
 
+> [!NOTE]
+> **At a glance** — OWASP Top 10 (2021) mapped: 8 risks mitigated, 1 partial (monitoring) and
+> 1 not applicable. Argon2id hashing, rotating refresh tokens with reuse detection,
+> owner-scoped queries and rate limiting are enforced and covered by automated tests.
+
 ---
 
 ## 1. Controls in place
@@ -36,6 +41,7 @@
 | Ownership isolation    | decks, cards, images, study and imports e2e suites                                                              |
 | Request correlation    | `test/app.e2e-spec.ts` (`x-request-id` echoed)                                                                  |
 
+> [!WARNING]
 > The repository does not run a SAST scanner in CI yet; `pnpm audit` and the
 > integration suites above are the enforced checks.
 

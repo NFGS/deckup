@@ -1,0 +1,89 @@
+{
+  "schema_version": 2,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "DeckUp — Card Review Lifecycle (FSRS)",
+    "output": ".archify/lifecycle-fsrs-20261004-024855/fsrs-lifecycle.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "main", "label": "Scheduling states" },
+    { "id": "recovery", "label": "Lapse recovery" }
+  ],
+  "states": [
+    {
+      "id": "new",
+      "type": "start",
+      "label": "New",
+      "sublabel": "never reviewed",
+      "lane": "main",
+      "col": 0,
+      "step": "01",
+      "tag": "due"
+    },
+    {
+      "id": "learning",
+      "type": "active",
+      "label": "Learning",
+      "sublabel": "short steps (minutes)",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "in session"
+    },
+    {
+      "id": "review",
+      "type": "success",
+      "label": "Review",
+      "sublabel": "long intervals (days)",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "graduated"
+    },
+    {
+      "id": "relearning",
+      "type": "waiting",
+      "label": "Relearning",
+      "sublabel": "after a lapse",
+      "lane": "recovery",
+      "col": 2,
+      "tag": "recovering"
+    }
+  ],
+  "transitions": [
+    { "from": "new", "to": "learning", "label": "first review" },
+    { "from": "learning", "to": "review", "label": "Good / Easy" },
+    { "from": "review", "to": "relearning", "label": "Again", "variant": "security" },
+    { "from": "relearning", "to": "review", "label": "Good / Easy" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Ratings",
+      "items": [
+        "Again = 1 · Hard = 2 · Good = 3 · Easy = 4",
+        "Again and Hard keep the card in its current phase",
+        "Good and Easy advance the schedule"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Scheduling",
+      "items": [
+        "FSRS computes stability and difficulty per card",
+        "dueAt is stored in UTC and shown in the student timezone",
+        "scheduler_version records the algorithm version"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Lapses",
+      "items": [
+        "A lapse is an Again rating after graduating",
+        "Relearning uses short steps before returning to Review",
+        "The lapses counter feeds analytics"
+      ]
+    }
+  ]
+}

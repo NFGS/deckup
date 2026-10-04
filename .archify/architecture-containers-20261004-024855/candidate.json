@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DeckUp — Containers (C4 Level 2)",
+    "output": ".archify/architecture-containers-20261004-024855/containers.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "student",
+      "type": "external",
+      "label": "Student",
+      "sublabel": "Browser",
+      "pos": [40, 300],
+      "size": [140, 64]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Web application",
+      "sublabel": "React 19 · Vite 8 · Tailwind 4",
+      "pos": [280, 300],
+      "size": [200, 72]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API application",
+      "sublabel": "NestJS 12 · Fastify · Clean Architecture",
+      "pos": [660, 300],
+      "size": [220, 72]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Database",
+      "sublabel": "PostgreSQL 17",
+      "pos": [1020, 300],
+      "size": [160, 64]
+    },
+    {
+      "id": "cloudinary",
+      "type": "cloud",
+      "label": "Cloudinary",
+      "sublabel": "Card image storage",
+      "pos": [660, 120],
+      "size": [180, 64]
+    },
+    {
+      "id": "llm",
+      "type": "cloud",
+      "label": "LLM provider",
+      "sublabel": "Optional card generation",
+      "pos": [660, 480],
+      "size": [180, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "DeckUp",
+      "wraps": ["web", "api", "db"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "student-web",
+      "from": "student",
+      "to": "web",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "label": "REST /api/v1"
+    },
+    {
+      "id": "api-db",
+      "from": "api",
+      "to": "db",
+      "label": "Prisma + pg"
+    },
+    {
+      "id": "api-cloudinary",
+      "from": "api",
+      "to": "cloudinary",
+      "label": "uploads",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "api-llm",
+      "from": "api",
+      "to": "llm",
+      "label": "suggestions",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Web",
+      "items": [
+        "Feature-first SPA with TanStack Query for server state",
+        "Never talks to the database or Cloudinary directly"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "API",
+      "items": [
+        "Clean Architecture: presentation → application → domain",
+        "Owns the REST contracts and the FSRS scheduling rules"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Data and services",
+      "items": [
+        "PostgreSQL 17 is the source of truth for scheduling state",
+        "Cloudinary and the LLM provider are optional integrations"
+      ]
+    }
+  ]
+}

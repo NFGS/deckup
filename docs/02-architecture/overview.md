@@ -8,6 +8,12 @@
 | **Method**  | C4 model (context, container, component) · SWEBOK V4.0a, KA02                           |
 | **Related** | [`adr/`](./adr) · [`data-model.md`](./data-model.md) · [`openapi.yaml`](./openapi.yaml) |
 
+> [!NOTE]
+> **At a glance** — React 19 + Vite 8 web, NestJS 12 + Fastify API in Clean Architecture,
+> PostgreSQL 17 via Prisma 7. The web never talks to the database or Cloudinary directly;
+> all access goes through the API, which owns the contracts. 8 ADRs record the significant
+> decisions.
+
 ---
 
 ## 1. System context (C4 — Level 1)
@@ -15,19 +21,9 @@
 DeckUp is a web platform where high school students author flashcard decks and review
 them through a spaced-repetition engine.
 
-```mermaid
-C4Context
-    title System context — DeckUp
+![System context — DeckUp](https://res.cloudinary.com/dfuu6j1ht/image/upload/v1791101138/deckup/docs/hws9nal7x6vatkfuyhr0.png)
 
-    Person(student, "Student", "Busy high school student preparing final exams")
-    System(deckup, "DeckUp", "Flashcard authoring, FSRS scheduling and study analytics")
-    System_Ext(cloudinary, "Cloudinary", "Image storage and optimized delivery for card images")
-    System_Ext(llm, "LLM provider", "Optional AI card generation from study notes (Phase 8)")
-
-    Rel(student, deckup, "Creates decks, studies and reviews progress", "HTTPS")
-    Rel(deckup, cloudinary, "Uploads and serves card images", "HTTPS API")
-    Rel(deckup, llm, "Requests card suggestions", "HTTPS API (optional)")
-```
+_Figure 1 — System context (C4 Level 1). Interactive version: `.archify/architecture-system-context-20261004-024855/system-context.html`._
 
 | Element          | Responsibility                                                               |
 | ---------------- | ---------------------------------------------------------------------------- |
@@ -38,27 +34,9 @@ C4Context
 
 ## 2. Containers (C4 — Level 2)
 
-```mermaid
-C4Container
-    title Container view — DeckUp
+![Container view — DeckUp](https://res.cloudinary.com/dfuu6j1ht/image/upload/v1791101139/deckup/docs/atv2su1pyzs9n5clzwyu.png)
 
-    Person(student, "Student", "High school student")
-
-    System_Boundary(deckup, "DeckUp") {
-        Container(web, "Web application", "React 19 · Vite 8 · Tailwind CSS 4", "Serves the SPA: deck management, study mode, analytics")
-        Container(api, "API application", "NestJS 12 · Fastify · Clean Architecture", "REST /api/v1: auth, decks, cards, scheduling, analytics")
-        ContainerDb(db, "Database", "PostgreSQL 17", "Users, decks, cards, review state, review logs, sessions")
-    }
-
-    System_Ext(cloudinary, "Cloudinary", "Card image storage")
-    System_Ext(llm, "LLM provider", "Optional card generation")
-
-    Rel(student, web, "Uses", "HTTPS")
-    Rel(web, api, "Calls REST API", "JSON over HTTPS")
-    Rel(api, db, "Reads/writes via Prisma", "TCP 5432, TLS in production")
-    Rel(api, cloudinary, "Uploads images", "HTTPS API")
-    Rel(api, llm, "Requests suggestions", "HTTPS API")
-```
+_Figure 2 — Container view (C4 Level 2). Interactive version: `.archify/architecture-containers-20261004-024855/containers.html`._
 
 | Container           | Technology                       | Responsibility                                                         |
 | ------------------- | -------------------------------- | ---------------------------------------------------------------------- |
@@ -139,33 +117,9 @@ apps/web/src/
 
 ## 5. Deployment view
 
-```mermaid
-flowchart LR
-    subgraph internet["Internet"]
-        U[Student browser]
-    end
+![Production deployment — DeckUp](https://res.cloudinary.com/dfuu6j1ht/image/upload/v1791101139/deckup/docs/qqgok6nmcqww3mw7wznm.png)
 
-    subgraph vercel["Vercel"]
-        W[Web SPA<br/>static assets + CDN]
-    end
-
-    subgraph railway["Railway"]
-        A[API container<br/>NestJS + Fastify]
-    end
-
-    subgraph neon["Neon"]
-        DB[(PostgreSQL 17<br/>serverless)]
-    end
-
-    CDN[Cloudinary CDN]
-
-    U -->|HTTPS| W
-    U -->|HTTPS /api/v1| A
-    W -.->|fetch API| A
-    A -->|Prisma + pg driver| DB
-    A -->|upload| CDN
-    U -->|image delivery| CDN
-```
+_Figure 3 — Production deployment. Interactive version: `.archify/architecture-deployment-20261004-024855/deployment.html`._
 
 | Environment    | Web             | API                    | Database             |
 | -------------- | --------------- | ---------------------- | -------------------- |

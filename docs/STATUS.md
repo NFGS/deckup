@@ -9,6 +9,11 @@
 | **Snapshot**   | Full repository review after a context handover                                      |
 | **Related**    | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                              |
 
+> [!NOTE]
+> **At a glance** — v0.1.0 is tagged, published and deployed. All five quality gates are
+> green (174 unit · 72 API integration · 8 browser E2E), production is verified end-to-end
+> and the only open item is the Railway redeploy token for the CI deploy job.
+
 This document is the **single source of truth for the current state of the
 project** and for the continuation backlog. Read it together with `SPEC.md`
 (stack and conventions) and `PLAN.md` (historical remediation plan).
@@ -39,6 +44,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Railway autodeploy | Push `3582662` → deployment `d64e141b` (trigger `f2be2d99`)                    | **SUCCESS** — pre-deploy applied 5 migrations                    |
 | Fresh clone        | `git clone` → `pnpm install --frozen-lockfile` → all gates                     | **OK** — 174 unit · 72 API e2e · 8 browser e2e                   |
 
+> [!NOTE]
 > The browser E2E run required the local workaround described in §4.1 because
 > this machine hosts another service on port 3000 and uses `*.env.local`
 > overrides that Turbo's cache does not hash.

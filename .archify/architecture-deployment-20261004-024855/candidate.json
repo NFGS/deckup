@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DeckUp — Production Deployment",
+    "output": ".archify/architecture-deployment-20261004-024855/deployment.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Student browser",
+      "sublabel": "Desktop / mobile",
+      "pos": [40, 300],
+      "size": [160, 64]
+    },
+    {
+      "id": "vercel",
+      "type": "cloud",
+      "label": "Vercel",
+      "sublabel": "Web SPA · CDN",
+      "pos": [320, 160],
+      "size": [160, 64]
+    },
+    {
+      "id": "railway",
+      "type": "cloud",
+      "label": "Railway",
+      "sublabel": "API container · NestJS + Fastify",
+      "pos": [320, 440],
+      "size": [200, 72]
+    },
+    {
+      "id": "neon",
+      "type": "database",
+      "label": "Neon",
+      "sublabel": "PostgreSQL 17 · serverless",
+      "pos": [660, 440],
+      "size": [190, 72]
+    },
+    {
+      "id": "cloudinary",
+      "type": "cloud",
+      "label": "Cloudinary CDN",
+      "sublabel": "Card images",
+      "pos": [660, 160],
+      "size": [170, 64]
+    }
+  ],
+  "connections": [
+    {
+      "id": "browser-vercel",
+      "from": "browser",
+      "to": "vercel",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "browser-railway",
+      "from": "browser",
+      "to": "railway",
+      "label": "HTTPS /api/v1"
+    },
+    {
+      "id": "vercel-railway",
+      "from": "vercel",
+      "to": "railway",
+      "label": "fetch API",
+      "variant": "dashed"
+    },
+    {
+      "id": "railway-neon",
+      "from": "railway",
+      "to": "neon",
+      "label": "Prisma + pg"
+    },
+    {
+      "id": "railway-cloudinary",
+      "from": "railway",
+      "to": "cloudinary",
+      "label": "upload",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Edge",
+      "items": ["Vercel serves the SPA from its CDN", "Cloudinary delivers optimized card images"]
+    },
+    {
+      "dot": "emerald",
+      "title": "Compute",
+      "items": [
+        "Railway runs the API Docker image",
+        "prisma migrate deploy runs as a pre-deploy step"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Data",
+      "items": [
+        "Neon hosts PostgreSQL 17 with pooled connections",
+        "Point-in-time restore is the last-resort recovery"
+      ]
+    }
+  ]
+}
