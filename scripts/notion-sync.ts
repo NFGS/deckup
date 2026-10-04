@@ -768,12 +768,23 @@ async function publishDocument(
 
 async function main(): Promise<void> {
   const dryRun = process.argv.includes('--dry-run');
+  const onlyIndex = process.argv.indexOf('--only');
+  const onlyFilter = onlyIndex >= 0 ? (process.argv[onlyIndex + 1] ?? '') : undefined;
+  const documents = onlyFilter
+    ? DOCUMENTS.filter((document) => document.title.includes(onlyFilter))
+    : DOCUMENTS;
   const token = process.env.NOTION_TOKEN;
   const parentPageId = process.env.NOTION_PAGE_ID;
   const cloudinaryUrl = process.env.CLOUDINARY_URL;
 
+  if (onlyFilter && documents.length === 0) {
+    console.error(`No documents match --only "${onlyFilter}".`);
+    process.exitCode = 1;
+    return;
+  }
+
   if (dryRun) {
-    for (const document of DOCUMENTS) {
+    for (const document of documents) {
       const markdown = await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8');
       const blocks = await markdownToBlocks(markdown, async (url, alt) =>
         imageBlock(`https://placeholder.invalid/${basename(url)}`, alt),
@@ -805,7 +816,7 @@ async function main(): Promise<void> {
 
   const existingPages = await listChildPages(token, parentPageId);
 
-  for (const document of DOCUMENTS) {
+  for (const document of documents) {
     const pageId = await publishDocument(
       token,
       parentPageId,

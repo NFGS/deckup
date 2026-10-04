@@ -31,6 +31,13 @@ Automation scripts for the DeckUp monorepo.
   pnpm sync:notion --dry-run
   ```
 
+- `--only <substring>` re-publishes just the documents whose title contains the
+  substring (useful to refresh a single page without recreating the others):
+
+  ```bash
+  pnpm sync:notion --only "Project Status"
+  ```
+
 ## Capture helpers
 
 Static PNG captures of HTML artifacts (used for the Notion documentation):

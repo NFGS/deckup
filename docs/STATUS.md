@@ -1,13 +1,13 @@
 # Project Status — DeckUp
 
-| Field          | Value                                                                                |
-| -------------- | ------------------------------------------------------------------------------------ |
-| **Date**       | 2026-10-03                                                                           |
-| **Version**    | 0.1.0 (tagged, published and deployed)                                               |
-| **HEAD**       | `e4a22df ci: run the Vercel CLI from the repository root` (2026-10-03)               |
-| **Production** | Web <https://deckup.vercel.app> · API <https://deckup-api-production.up.railway.app> |
-| **Snapshot**   | Full repository review after a context handover                                      |
-| **Related**    | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                              |
+| Field          | Value                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------- |
+| **Date**       | 2026-10-04                                                                              |
+| **Version**    | 0.1.0 (tagged, published and deployed)                                                  |
+| **HEAD**       | `61accae docs(operations): record frozen platform state and run/use guide` (2026-10-04) |
+| **Production** | Web <https://deckup.vercel.app> · API <https://deckup-api-production.up.railway.app>    |
+| **Snapshot**   | Documentation refresh: rich Notion blocks, Archify diagrams and platform freeze         |
+| **Related**    | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                                 |
 
 > [!NOTE]
 > **At a glance** — v0.1.0 is tagged, published and deployed. All five quality gates are
@@ -33,7 +33,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Build              | `pnpm build`                                                                   | Pass                                                             |
 | Browser E2E        | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)                                  |
 | Production image   | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                             |
-| Notion sync        | `pnpm sync:notion`                                                             | 10 documents published (2026-10-03)                              |
+| Notion sync        | `pnpm sync:notion`                                                             | **13 documents** with rich blocks (2026-10-04)                   |
 | CI (GitHub)        | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
 | Neon migrations    | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
 | Vercel project     | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
@@ -51,13 +51,13 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
 ## 2. Scope delivered
 
-| Area                       | Summary                                                                                                                                                        |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API (`apps/api`)           | NestJS 12 + Fastify, Clean Architecture. 6 entities, 3 domain services, 17 ports, **31 use cases**, 10 controllers, 5 migrations.                              |
-| Web (`apps/web`)           | React 19 + Vite 8 + Tailwind 4 + TanStack Query 5 + React Router 8. Feature-first; PWA with offline review queue.                                              |
-| Shared (`packages/shared`) | Zod 4 runtime contracts as the single source of truth.                                                                                                         |
-| Documentation (`docs/`)    | 25 documents: user story refinement, traceability matrix, 8 MADR ADRs, data model, OpenAPI, test plan/cases, runbook, security, SENA report and class diagram. |
-| Delivery artefacts         | `DeckUp - User Story and Refinement - Nelson Fabián Gallego Sánchez.pdf` (2026-09-25); `deployment-walkthrough.md`.                                            |
+| Area                       | Summary                                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| API (`apps/api`)           | NestJS 12 + Fastify, Clean Architecture. 6 entities, 3 domain services, 17 ports, **31 use cases**, 10 controllers, 5 migrations.                                              |
+| Web (`apps/web`)           | React 19 + Vite 8 + Tailwind 4 + TanStack Query 5 + React Router 8. Feature-first; PWA with offline review queue.                                                              |
+| Shared (`packages/shared`) | Zod 4 runtime contracts as the single source of truth.                                                                                                                         |
+| Documentation (`docs/`)    | 26 documents: user story refinement, traceability matrix, 8 MADR ADRs, data model, OpenAPI, test plan/cases, runbook, security, platform notes, SENA report and class diagram. |
+| Delivery artefacts         | `DeckUp - User Story and Refinement - Nelson Fabián Gallego Sánchez.pdf` (2026-09-25); `deployment-walkthrough.md`.                                                            |
 
 Functional coverage: authentication, deck/card CRUD, images, CSV import/export,
 FSRS study engine with idempotent offline replay, analytics, public catalogue
@@ -72,6 +72,7 @@ with cloning, AI card generation, accessibility (WCAG 2.1 AA scans).
 | 2026-09-25 19:20–19:24 | Hardening batch: refresh-token rotation, FSRS persistence, image signing, offline idempotency, docs.       |
 | 2026-09-25 20:05       | Local overrides created (`apps/api/.env.local` PORT=3100, `apps/web/.env.local` VITE_API_URL=:3100).       |
 | 2026-09-26 13:04       | `deployment-walkthrough.md` published — the deployment was the next intended step.                         |
+| 2026-10-04             | Documentation refresh: rich Notion blocks, Archify diagrams, Open Design cover and frozen-platform notes.  |
 
 ## 4. Findings
 
@@ -102,7 +103,8 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
    green. Railway deploys the API from GitHub on every push to `main` and runs
    `prisma migrate deploy` as a pre-deploy command; the Deploy workflow only
    publishes the web app.
-2. **Notion sync** — **done (2026-10-03)**: 10 documents published to the new
+2. **Notion sync** — **done (2026-10-04)**: 13 documents published with rich
+   blocks (native tables, Mermaid, callouts and evidence images) to the
    workspace page (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with
    display name and IANA timezone, wired to `PATCH /users/me`, covered by unit
@@ -136,7 +138,8 @@ keeps the session → card → study session → review → summary → analytic
   `.railway/railway.ts` (IaC) on 2026-12-01. The automatic
   `railway config migrate` proposes a wrong service name
   (`Epic_03_Education`) and drops `dockerfilePath`, so it needs a manual
-  review before applying.
+  review before applying. Tracked in the accepted-debt register:
+  [`04-operations/platform-notes.md`](./04-operations/platform-notes.md) §6.
 
 ## 5. Continuation plan
 
@@ -148,6 +151,7 @@ keeps the session → card → study session → review → summary → analytic
 | 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC) | Done (2026-10-03) — 10 pages published              |
 | 5     | Account management UI and accessibility/tech-debt cleanup          | Account UI done; minor debt pending                 |
 | 6     | Academic evidence: SENA evidence pack / general system report      | Done (report, class diagram, 12 screenshots)        |
+| 7     | Platform freeze: operational notes, run/use guide, accepted debt   | Done (2026-10-04) — `platform-notes.md` published   |
 
 ## 6. How to verify locally
 
