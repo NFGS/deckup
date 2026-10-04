@@ -68,6 +68,7 @@ const DOCUMENTS: DocumentSpec[] = [
   { title: 'DeckUp — Test Plan', path: 'docs/03-testing/test-plan.md', icon: '🧪' },
   { title: 'DeckUp — Test Cases', path: 'docs/03-testing/test-cases.md', icon: '✅' },
   { title: 'DeckUp — Deployment Guide', path: 'docs/04-operations/deployment.md', icon: '🚀' },
+  { title: 'DeckUp — Platform Notes', path: 'docs/04-operations/platform-notes.md', icon: '🧭' },
   { title: 'DeckUp — Runbook', path: 'docs/04-operations/runbook.md', icon: '🛠️' },
   { title: 'DeckUp — Security Notes', path: 'docs/04-operations/security.md', icon: '🔒' },
   {
