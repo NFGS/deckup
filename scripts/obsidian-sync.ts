@@ -149,7 +149,7 @@ async function main(): Promise<void> {
     const matchesDisk = existsSync(target) && sha256(await readFile(target, 'utf8')) === noteHash;
     const unchanged =
       !force &&
-      previous?.sourceHash === sourceHash &&
+      previous?.targets.obsidian?.sourceHash === sourceHash &&
       previous?.targets.obsidian?.hash === noteHash &&
       matchesDisk;
 
@@ -161,11 +161,10 @@ async function main(): Promise<void> {
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, note.content, 'utf8');
     manifest.documents[note.spec.path] = {
-      sourceHash,
       syncedAt: synced,
       targets: {
         ...(previous?.targets ?? {}),
-        obsidian: { path: `DeckUp/${note.file}`, hash: noteHash },
+        obsidian: { path: `DeckUp/${note.file}`, hash: noteHash, sourceHash },
       },
     };
 

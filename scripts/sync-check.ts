@@ -84,38 +84,45 @@ async function checkDocument(
     return { path, status: 'drift', issues: ['unsynced'], skipped };
   }
 
-  if (entry.sourceHash !== sourceHash) {
-    issues.push('source-changed');
-  }
+  const obsidian = entry.targets.obsidian;
 
-  if (entry.targets.obsidian && options.vault) {
-    const notePath = join(options.vault, entry.targets.obsidian.path);
+  if (obsidian) {
+    if (!options.vault) {
+      skipped.push('obsidian');
+    } else if (obsidian.sourceHash !== sourceHash) {
+      issues.push('source-changed');
+    } else {
+      const notePath = join(options.vault, obsidian.path);
 
-    if (!existsSync(notePath)) {
-      issues.push('obsidian-edited');
-    } else if (sha256(await readFile(notePath, 'utf8')) !== entry.targets.obsidian.hash) {
-      issues.push('obsidian-edited');
+      if (!existsSync(notePath) || sha256(await readFile(notePath, 'utf8')) !== obsidian.hash) {
+        issues.push('obsidian-edited');
+      }
     }
-  } else if (entry.targets.obsidian && !options.vault) {
-    skipped.push('obsidian');
   }
 
-  if (entry.targets.notion && options.remote && options.token) {
-    const count = await notionBlockCount(options.token, entry.targets.notion.id);
-    const recorded = entry.targets.notion.blockCount;
+  const notion = entry.targets.notion;
 
-    // Deterministic signal: a block added or removed by hand changes the page's
-    // top-level block count. (Text-only edits are caught by re-syncing.)
-    if (count === null) {
+  if (notion) {
+    if (notion.sourceHash !== sourceHash) {
+      issues.push('source-changed');
+    } else if (options.remote && options.token) {
+      const count = await notionBlockCount(options.token, notion.id);
+
+      // Deterministic signal: a block added or removed by hand changes the
+      // page's top-level block count. (Text-only edits are caught on re-sync.)
+      if (count === null) {
+        skipped.push('notion');
+      } else if (notion.blockCount !== undefined && count !== notion.blockCount) {
+        issues.push('notion-edited');
+      }
+    } else {
       skipped.push('notion');
-    } else if (recorded !== undefined && count !== recorded) {
-      issues.push('notion-edited');
     }
-  } else if (entry.targets.notion && !options.remote) {
-    skipped.push('notion');
   }
 
-  return { path, status: issues.length > 0 ? 'drift' : 'in-sync', issues, skipped };
+  const unique = [...new Set(issues)];
+
+  return { path, status: unique.length > 0 ? 'drift' : 'in-sync', issues: unique, skipped };
 }
 
 const LABELS: Record<Issue, string> = {

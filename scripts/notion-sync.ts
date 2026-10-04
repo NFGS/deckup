@@ -799,10 +799,7 @@ async function main(): Promise<void> {
   for (const document of documents) {
     const sourceHash = sha256(await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8'));
     const previous = manifest.documents[document.path];
-    const unchanged =
-      !force &&
-      previous?.sourceHash === sourceHash &&
-      previous?.targets.notion?.blockCount !== undefined;
+    const unchanged = !force && previous?.targets.notion?.sourceHash === sourceHash;
 
     if (unchanged) {
       skipped += 1;
@@ -813,7 +810,6 @@ async function main(): Promise<void> {
     const page = await publishDocument(token, parentPageId, document, existingPages, cloudinaryUrl);
 
     manifest.documents[document.path] = {
-      sourceHash,
       syncedAt: synced,
       targets: {
         ...(previous?.targets ?? {}),
@@ -821,6 +817,7 @@ async function main(): Promise<void> {
           id: page.id,
           lastEditedTime: page.lastEditedTime,
           blockCount: page.blockCount,
+          sourceHash,
         },
       },
     };

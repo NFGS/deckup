@@ -6,7 +6,7 @@
 | **Version**    | 0.1.0 (tagged, published and deployed)                                                  |
 | **HEAD**       | `61accae docs(operations): record frozen platform state and run/use guide` (2026-10-04) |
 | **Production** | Web <https://deckup.vercel.app> · API <https://deckup-api-production.up.railway.app>    |
-| **Snapshot**   | Documentation refresh: rich Notion blocks, Archify diagrams and platform freeze         |
+| **Snapshot**   | Documentation refresh, Archify diagrams and a manifest-driven four-environment sync     |
 | **Related**    | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                                 |
 
 > [!NOTE]
@@ -33,7 +33,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Build              | `pnpm build`                                                                   | Pass                                                             |
 | Browser E2E        | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)                                  |
 | Production image   | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                             |
-| Notion sync        | `pnpm sync:notion`                                                             | **13 documents** with rich blocks (2026-10-04)                   |
+| Documentation sync | `pnpm sync:all`                                                                | **21 documents** on Notion + Obsidian, incremental (2026-10-04)  |
 | CI (GitHub)        | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
 | Neon migrations    | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
 | Vercel project     | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
@@ -65,14 +65,14 @@ with cloning, AI card generation, accessibility (WCAG 2.1 AA scans).
 
 ## 3. Work timeline (reconstructed)
 
-| Date                   | Milestone                                                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| 2026-09-21/22          | Monorepo bootstrap, requirements refinement, architecture, API, web, study engine, analytics (phases 0–8). |
-| 2026-09-22 08:–12:     | Exhaustive review, remediation PLAN phases 1–5, Notion sync, deploy hardening.                             |
-| 2026-09-25 19:20–19:24 | Hardening batch: refresh-token rotation, FSRS persistence, image signing, offline idempotency, docs.       |
-| 2026-09-25 20:05       | Local overrides created (`apps/api/.env.local` PORT=3100, `apps/web/.env.local` VITE_API_URL=:3100).       |
-| 2026-09-26 13:04       | `deployment-walkthrough.md` published — the deployment was the next intended step.                         |
-| 2026-10-04             | Documentation refresh: rich Notion blocks, Archify diagrams, Open Design cover and frozen-platform notes.  |
+| Date                   | Milestone                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-21/22          | Monorepo bootstrap, requirements refinement, architecture, API, web, study engine, analytics (phases 0–8).                             |
+| 2026-09-22 08:–12:     | Exhaustive review, remediation PLAN phases 1–5, Notion sync, deploy hardening.                                                         |
+| 2026-09-25 19:20–19:24 | Hardening batch: refresh-token rotation, FSRS persistence, image signing, offline idempotency, docs.                                   |
+| 2026-09-25 20:05       | Local overrides created (`apps/api/.env.local` PORT=3100, `apps/web/.env.local` VITE_API_URL=:3100).                                   |
+| 2026-09-26 13:04       | `deployment-walkthrough.md` published — the deployment was the next intended step.                                                     |
+| 2026-10-04             | Documentation refresh (Archify diagrams, Open Design cover) and a manifest-driven sync across repository, GitHub, Notion and Obsidian. |
 
 ## 4. Findings
 
@@ -103,9 +103,12 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
    green. Railway deploys the API from GitHub on every push to `main` and runs
    `prisma migrate deploy` as a pre-deploy command; the Deploy workflow only
    publishes the web app.
-2. **Notion sync** — **done (2026-10-04)**: 13 documents published with rich
-   blocks (native tables, Mermaid, callouts and evidence images) to the
-   workspace page (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
+2. **Documentation sync** — **done (2026-10-04)**: 21 documents (13 documents +
+   8 ADRs) published with rich blocks to Notion and mirrored to the Obsidian
+   vault. A `.sync-manifest.json` (SHA-256 per document and target) makes the
+   sync incremental and drift detectable in any direction; `pnpm sync:all`,
+   `sync:check`, `sync:watch`, the husky hooks and the `Docs sync` workflow keep
+   the repository, GitHub, Notion and Obsidian aligned (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 3. **Account management UI** — **done (2026-10-02)**: `/account` page with
    display name and IANA timezone, wired to `PATCH /users/me`, covered by unit
    tests and an authenticated axe scan.

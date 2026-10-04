@@ -6,14 +6,14 @@
  * manifest is what turns the mirrors from "fire and forget" into a verifiable,
  * idempotent synchronization:
  *
- * - `sourceHash`  — the repository markdown at the last sync. If the current
- *                   hash differs, the repository changed and the mirrors are
- *                   stale (local drift).
+ * - `targets.notion.sourceHash` / `targets.obsidian.sourceHash` — the repository
+ *                   markdown when that target was last published. Tracked per
+ *                   target so a change is propagated to every mirror, even when
+ *                   one is synced before the other.
  * - `obsidian.hash` — the bytes written to the vault. If the file changed since,
  *                   someone edited the vault by hand (remote drift).
- * - `notion.lastEditedTime` — the page's `last_edited_time`. A Notion page
- *                   returns a newer timestamp than the one we recorded when a
- *                   human edited it (remote drift).
+ * - `notion.blockCount` — the page's top-level block count. A different count at
+ *                   check time means a human edited the page (remote drift).
  *
  * The manifest is committed to the repository so CI can verify that a push to
  * `main` left both mirrors up to date.
@@ -33,15 +33,18 @@ export interface NotionTarget {
   lastEditedTime: string;
   /** Number of top-level blocks published; the runtime drift signal. */
   blockCount?: number;
+  /** Source hash at the moment this target was published. */
+  sourceHash: string;
 }
 
 export interface ObsidianTarget {
   path: string;
   hash: string;
+  /** Source hash at the moment this target was published. */
+  sourceHash: string;
 }
 
 export interface DocumentEntry {
-  sourceHash: string;
   syncedAt: string;
   targets: {
     notion?: NotionTarget;
