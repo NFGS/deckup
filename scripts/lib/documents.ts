@@ -164,6 +164,22 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianFolder: 'Documentación',
     tags: ['estado'],
   },
+  {
+    path: 'SPEC.md',
+    notionTitle: 'DeckUp — Specification',
+    notionIcon: '📐',
+    obsidianName: 'Specification',
+    obsidianFolder: 'Documentación',
+    tags: ['gobernanza', 'especificación'],
+  },
+  {
+    path: 'PLAN.md',
+    notionTitle: 'DeckUp — Remediation Plan',
+    notionIcon: '🗺️',
+    obsidianName: 'Remediation Plan',
+    obsidianFolder: 'Documentación',
+    tags: ['gobernanza', 'plan'],
+  },
 ];
 
 /** Derives a filesystem-safe Obsidian note name from an ADR heading. */

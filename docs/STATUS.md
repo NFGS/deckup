@@ -33,7 +33,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Build              | `pnpm build`                                                                   | Pass                                                             |
 | Browser E2E        | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)                                  |
 | Production image   | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                             |
-| Documentation sync | `pnpm sync:all`                                                                | **23 documents** on Notion + Obsidian, incremental (2026-10-05)  |
+| Documentation sync | `pnpm sync:all`                                                                | **25 documents** on Notion + Obsidian, incremental (2026-10-05)  |
 | CI (GitHub)        | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
 | Neon migrations    | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
 | Vercel project     | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
@@ -103,7 +103,7 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
    green. Railway deploys the API from GitHub on every push to `main` and runs
    `prisma migrate deploy` as a pre-deploy command; the Deploy workflow only
    publishes the web app.
-2. **Documentation sync** — **done (2026-10-05)**: 23 documents (15 documents +
+2. **Documentation sync** — **done (2026-10-05)**: 25 documents (17 documents +
    8 ADRs) published with rich blocks to Notion and mirrored to the Obsidian
    vault. A `.sync-manifest.json` (SHA-256 per document and target) makes the
    sync incremental and drift detectable in any direction; `pnpm sync:all`,

@@ -74,7 +74,7 @@ pnpm test:e2e    # Playwright smoke (web)
   (`https://app.notion.com/p/DeckUp-3ee7d55fd95e80798ee8f9dc00042699`).
 - Documentation sync: `NOTION_DECKUP_TOKEN=… NOTION_PAGE_ID=3ee7d55f-d95e-8079-8ee8-f9dc00042699 pnpm sync:notion`
   (dry run: add `--dry-run`; single page: add `--only "<substring>"`). Last sync:
-  **2026-10-05** — 15 documents published as child pages with rich blocks (native
+  **2026-10-05** — 17 documents published as child pages with rich blocks (native
   tables, Mermaid diagrams, GitHub-style callouts, to-dos and evidence images uploaded
   to Cloudinary). Re-runs update each page in place (same id, blocks swapped).
 
@@ -143,4 +143,4 @@ contradict each other, but each keeps the role that justifies it.
 - Obsidian vault: **Ningendo Bee** (`~/Documents/Obsidian Vaults/Ningendo Bee`,
   override with `OBSIDIAN_VAULT_PATH`); the curated map of content lives at
   `DeckUp/README.md` and the vault-wide `Home.md` connects all projects.
-- Last sync: **2026-10-05** — 23 documents (15 documents + 8 ADRs) on both mirrors.
+- Last sync: **2026-10-05** — 25 documents (17 documents + 8 ADRs) on both mirrors.
