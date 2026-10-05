@@ -158,5 +158,8 @@ contradict each other, but each keeps the role that justifies it.
   `pnpm status:refresh` and shared with the vault map of content, so those
   numbers never drift between environments. The markers are invisible HTML
   comments, stripped when publishing, so they never reach Notion or the vault;
-  `pnpm status:check` verifies them.
+  `pnpm status:check` verifies them and a unit test guards the real document.
+  `pnpm status:refresh --with-infra` measures the API integration and browser E2E
+  counts against the Docker database and Playwright, and the refresh is atomic:
+  a failed measurement writes nothing.
 - Last sync: **2026-10-05** — 25 documents (17 documents + 8 ADRs) on both mirrors.

@@ -26,17 +26,26 @@ The markers are stripped when publishing, so they never reach Notion or the
 vault.
 
 ```bash
-pnpm status:refresh             # run the test suite, then refresh the facts + STATUS
-pnpm status:refresh --no-tests  # keep the recorded test counts
-pnpm status:check               # fail when the marked facts are stale (pre-push hook)
+pnpm status:refresh                 # unit tests + derived counts (fast)
+pnpm status:refresh --no-tests      # keep the recorded unit counts
+pnpm status:refresh --with-infra    # also measure API integration + browser E2E
+pnpm status:check                   # fail when the marked facts are stale (pre-push hook)
 ```
 
 `scripts/status-refresh.ts` is the only writer of `project-facts.json`. It
-derives the document counts from the canonical registry and the test counts from
-an actual `pnpm test` run; counts that need infrastructure (API integration,
-browser E2E) are preserved from the previous facts file. The `pre-push` hook
-warns when the marked facts are stale, and blocks only under
-`DECKUP_SYNC_STRICT=1`.
+derives the document counts from the canonical registry and the unit counts from
+an actual `pnpm test` run. `--with-infra` starts the Docker database
+(`docker compose up -d --wait db`) and measures the API integration suite
+(Vitest + PostgreSQL) and the browser E2E suite (Playwright + build); honour
+`E2E_API_PORT` / `E2E_WEB_PORT` when the default ports are taken. The script is
+**atomic**: if a measurement fails it writes nothing, so the facts never record
+a number that was not observed. The `pre-push` hook warns when the marked facts
+are stale, and blocks only under `DECKUP_SYNC_STRICT=1`.
+
+The counting rules live in `scripts/lib/test-counts.ts` (pure, unit-tested), and
+`scripts/lib/status-document.spec.ts` guards the real `docs/STATUS.md`: it must
+keep its markers, stay resolved against the committed facts, and publish without
+markers.
 
 ## Synchronization model
 

@@ -18,18 +18,18 @@
       }
     },
     "SPEC.md": {
-      "syncedAt": "2026-10-05T11:37:03.464Z",
+      "syncedAt": "2026-10-05T11:55:38.851Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Gobernanza/Specification.md",
-          "hash": "sha256-870478e0b795236816ee99640ce2eb5b94bda82c367d548f2a7dcdd0134b6517",
-          "sourceHash": "sha256-bf4a38ea0d961513c3ffbcc3c0b6a3011a76728b8c0ae3512d60b696eca1bb01"
+          "hash": "sha256-9492501c816fb0468aac4aa12d4e11fc1c3be22a9c45cb055bfc6c9cbd51c8bc",
+          "sourceHash": "sha256-9c6214ade6fb1787104453f2e9f997a2cdd66db60f5612572a60fa9366ce3ebd"
         },
         "notion": {
           "id": "3f07d55f-d95e-81ae-a8bc-ed5710f23dfe",
-          "lastEditedTime": "2026-10-05T11:38:00.000Z",
+          "lastEditedTime": "2026-10-05T11:56:00.000Z",
           "blockCount": 62,
-          "sourceHash": "sha256-bf4a38ea0d961513c3ffbcc3c0b6a3011a76728b8c0ae3512d60b696eca1bb01"
+          "sourceHash": "sha256-9c6214ade6fb1787104453f2e9f997a2cdd66db60f5612572a60fa9366ce3ebd"
         }
       }
     },
@@ -386,18 +386,18 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-05T11:35:12.757Z",
+      "syncedAt": "2026-10-05T11:55:38.851Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Gobernanza/Project Status.md",
-          "hash": "sha256-77dafb864afa6e0da72fb0208b502c985ef4110eac4b86feffea5ee2053e44b5",
-          "sourceHash": "sha256-1d99077ec84ea9f5f9f416eca6153d3c5797a26ac4cb0ee02cc0f865ea3c77ef"
+          "hash": "sha256-6b03e89d0f6f2ea29dfebf6afd6fbeb5e3db23fb7edacc7454d5a25f370221e7",
+          "sourceHash": "sha256-f46be775f908d9db0825f4713b180a429a0b2ba0877396224ad0c2931fdbcd37"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",
-          "lastEditedTime": "2026-10-05T11:36:00.000Z",
+          "lastEditedTime": "2026-10-05T11:57:00.000Z",
           "blockCount": 51,
-          "sourceHash": "sha256-1d99077ec84ea9f5f9f416eca6153d3c5797a26ac4cb0ee02cc0f865ea3c77ef"
+          "sourceHash": "sha256-f46be775f908d9db0825f4713b180a429a0b2ba0877396224ad0c2931fdbcd37"
         }
       }
     }
