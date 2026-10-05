@@ -18,18 +18,18 @@
       }
     },
     "SPEC.md": {
-      "syncedAt": "2026-10-05T10:51:46.074Z",
+      "syncedAt": "2026-10-05T11:37:03.464Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Gobernanza/Specification.md",
-          "hash": "sha256-eb1bacea82798b0a7497952f07069c97fcd9120e17c6d9e5eff70d5efa19c6ac",
-          "sourceHash": "sha256-c0d12e48682b52f1aa29f9b57be96e8e8ccc46481192abc2c58dde211f8256aa"
+          "hash": "sha256-870478e0b795236816ee99640ce2eb5b94bda82c367d548f2a7dcdd0134b6517",
+          "sourceHash": "sha256-bf4a38ea0d961513c3ffbcc3c0b6a3011a76728b8c0ae3512d60b696eca1bb01"
         },
         "notion": {
           "id": "3f07d55f-d95e-81ae-a8bc-ed5710f23dfe",
-          "lastEditedTime": "2026-10-05T10:52:00.000Z",
-          "blockCount": 60,
-          "sourceHash": "sha256-c0d12e48682b52f1aa29f9b57be96e8e8ccc46481192abc2c58dde211f8256aa"
+          "lastEditedTime": "2026-10-05T11:38:00.000Z",
+          "blockCount": 62,
+          "sourceHash": "sha256-bf4a38ea0d961513c3ffbcc3c0b6a3011a76728b8c0ae3512d60b696eca1bb01"
         }
       }
     },
@@ -386,18 +386,18 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-05T10:51:46.074Z",
+      "syncedAt": "2026-10-05T11:35:12.757Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Gobernanza/Project Status.md",
-          "hash": "sha256-2810bc6f278f90c6206956aae93c96b0e7e91f40cfbd38264031f42cb07d33f1",
-          "sourceHash": "sha256-9963be21f79698bf975c4619f151e0456d94b2fb0e1c5832b6ec729af16c62ff"
+          "hash": "sha256-77dafb864afa6e0da72fb0208b502c985ef4110eac4b86feffea5ee2053e44b5",
+          "sourceHash": "sha256-1d99077ec84ea9f5f9f416eca6153d3c5797a26ac4cb0ee02cc0f865ea3c77ef"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",
-          "lastEditedTime": "2026-10-05T10:53:00.000Z",
+          "lastEditedTime": "2026-10-05T11:36:00.000Z",
           "blockCount": 51,
-          "sourceHash": "sha256-9963be21f79698bf975c4619f151e0456d94b2fb0e1c5832b6ec729af16c62ff"
+          "sourceHash": "sha256-1d99077ec84ea9f5f9f416eca6153d3c5797a26ac4cb0ee02cc0f865ea3c77ef"
         }
       }
     }

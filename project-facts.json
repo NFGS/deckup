@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "updated": "2026-10-05",
+  "documents": 25,
+  "documentsBreakdown": "17 documents + 8 ADRs",
+  "docsFolder": 23,
+  "unitTests": 198,
+  "unitTestsBreakdown": "shared 8 · API 120 · web 46 · scripts 24",
+  "apiIntegration": 72,
+  "browserE2e": 8
+}

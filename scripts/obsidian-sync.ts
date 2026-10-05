@@ -23,6 +23,7 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { collectAllDocuments, documentTargets, type DocumentSpec } from './lib/documents.ts';
+import { readProjectFacts, stripFactMarkers } from './lib/project-facts.ts';
 import { hashSourceFile, readManifest, sha256, writeManifest } from './lib/sync-manifest.ts';
 import { renderHome, PROJECTS, type IndexEntry } from './lib/vault-home.ts';
 import { renderMoc } from './lib/vault-moc.ts';
@@ -71,7 +72,7 @@ function frontmatter(spec: DocumentSpec, synced: string, markdown: string): stri
 /** Converts repository markdown into vault markdown. */
 export function toVaultMarkdown(markdown: string): string {
   return (
-    markdown
+    stripFactMarkers(markdown)
       // Evidence screenshots become local wiki-embeds.
       .replace(/!\[[^\]]*\]\(\.\/evidencias\/([^)]+)\)/g, '![[$1]]')
       // Relative repository links degrade to plain text.
@@ -245,8 +246,9 @@ async function main(): Promise<void> {
 
   // Regenerate the vault map of content from the curated template plus the
   // canonical registry, so the index never drifts from the published set.
+  const facts = await readProjectFacts(REPOSITORY_ROOT);
   const mocPath = join(vault, 'DeckUp', 'README.md');
-  const moc = renderMoc(allDocuments, syncedDay);
+  const moc = renderMoc(allDocuments, syncedDay, facts);
   const mocUnchanged = existsSync(mocPath) && (await readFile(mocPath, 'utf8')) === moc;
 
   if (!mocUnchanged) {

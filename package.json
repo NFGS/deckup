@@ -21,6 +21,8 @@
     "sync:all": "node --experimental-strip-types scripts/sync-all.ts",
     "sync:check": "node --experimental-strip-types scripts/sync-check.ts",
     "sync:watch": "node --experimental-strip-types scripts/sync-watch.ts",
+    "status:refresh": "node --experimental-strip-types scripts/status-refresh.ts",
+    "status:check": "node --experimental-strip-types scripts/status-refresh.ts --check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

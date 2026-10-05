@@ -2,16 +2,15 @@
 
 | Field          | Value                                                                                                         |
 | -------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Date**       | 2026-10-05                                                                                                    |
+| **Date**       | <!--f:date-->2026-10-05<!--/f-->                                                                              |
 | **Version**    | 0.1.0 (tagged, published and deployed)                                                                        |
-| **HEAD**       | `55087be feat(obsidian): generate the vault home note from a curated template` (2026-10-05)                   |
 | **Production** | Web <https://deckup.vercel.app> · API <https://deckup-api-production.up.railway.app>                          |
 | **Snapshot**   | Four-environment sync with generated Obsidian index notes, a Gobernanza section, script tests and Railway IaC |
 | **Related**    | [`../PLAN.md`](../PLAN.md) · [`../SPEC.md`](../SPEC.md)                                                       |
 
 > [!NOTE]
 > **At a glance** — v0.1.0 is tagged, published and deployed. All five quality gates are
-> green (187 unit · 72 API integration · 8 browser E2E), production is verified end-to-end
+> green (<!--f:unit-tests-->198<!--/f--> unit · <!--f:api-integration-->72<!--/f--> API integration · <!--f:browser-e2e-->8<!--/f--> browser E2E), production is verified end-to-end
 > and the only open item is the Railway redeploy token for the CI deploy job.
 
 This document is the **single source of truth for the current state of the
@@ -20,29 +19,29 @@ project** and for the continuation backlog. Read it together with `SPEC.md`
 
 ---
 
-## 1. Verified state (2026-10-05)
+## 1. Verified state (<!--f:date-->2026-10-05<!--/f-->)
 
 All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
-| Gate               | Command                                                                        | Result                                                           |
-| ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| Lint               | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                                               |
-| Typecheck          | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                                             |
-| Unit tests         | `pnpm exec turbo run test --force` + `vitest run`                              | **187/187** (shared 8 · API 120 · web 46 · scripts 13)           |
-| API integration    | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **72/72** against PostgreSQL 17                                  |
-| Build              | `pnpm build`                                                                   | Pass                                                             |
-| Browser E2E        | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **8/8** (Playwright + axe-core)                                  |
-| Production image   | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                             |
-| Documentation sync | `pnpm sync:all`                                                                | **25 documents** on Notion + Obsidian, incremental (2026-10-05)  |
-| CI (GitHub)        | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                      |
-| Neon migrations    | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                         |
-| Vercel project     | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true` |
-| Production web     | `curl https://deckup.vercel.app`                                               | **200** (Vercel)                                                 |
-| Production API     | `curl .../api/v1/health`                                                       | **200** `{"status":"ok","version":"0.1.0"}`                      |
-| Production smoke   | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                              |
-| Production flow    | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                              |
-| Railway autodeploy | Push `3582662` → deployment `d64e141b` (trigger `f2be2d99`)                    | **SUCCESS** — pre-deploy applied 5 migrations                    |
-| Fresh clone        | `git clone` → `pnpm install --frozen-lockfile` → all gates                     | **OK** — 187 unit · 72 API e2e · 8 browser e2e                   |
+| Gate               | Command                                                                        | Result                                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Lint               | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                                                                                                                       |
+| Typecheck          | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                                                                                                                     |
+| Unit tests         | `pnpm exec turbo run test --force` + `vitest run`                              | **<!--f:unit-tests-ratio-->198/198<!--/f-->** (<!--f:unit-tests-breakdown-->shared 8 · API 120 · web 46 · scripts 24<!--/f-->)           |
+| API integration    | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **<!--f:api-integration-ratio-->72/72<!--/f-->** against PostgreSQL 17                                                                   |
+| Build              | `pnpm build`                                                                   | Pass                                                                                                                                     |
+| Browser E2E        | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **<!--f:browser-e2e-ratio-->8/8<!--/f-->** (Playwright + axe-core)                                                                       |
+| Production image   | `docker build -f apps/api/Dockerfile -t deckup-api:verification .` + run       | **200** on `/api/v1/health` (v0.1.0)                                                                                                     |
+| Documentation sync | `pnpm sync:all`                                                                | **<!--f:documents-->25<!--/f--> documents** on Notion + Obsidian, incremental (<!--f:date-->2026-10-05<!--/f-->)                         |
+| CI (GitHub)        | `gh run view 37113194127`                                                      | **success** — quality, API e2e, browser e2e                                                                                              |
+| Neon migrations    | `prisma migrate deploy` (direct URL)                                           | 5/5 applied (2026-10-03)                                                                                                                 |
+| Vercel project     | API PATCH project settings                                                     | `rootDirectory=apps/web`, `sourceFilesOutsideRootDirectory=true`                                                                         |
+| Production web     | `curl https://deckup.vercel.app`                                               | **200** (Vercel)                                                                                                                         |
+| Production API     | `curl .../api/v1/health`                                                       | **200** `{"status":"ok","version":"0.1.0"}`                                                                                              |
+| Production smoke   | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                                                                                                      |
+| Production flow    | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                                                                                                      |
+| Railway autodeploy | Push `3582662` → deployment `d64e141b` (trigger `f2be2d99`)                    | **SUCCESS** — pre-deploy applied 5 migrations                                                                                            |
+| Fresh clone        | `git clone` → `pnpm install --frozen-lockfile` → all gates                     | **OK** — <!--f:unit-tests-->198<!--/f--> unit · <!--f:api-integration-->72<!--/f--> API e2e · <!--f:browser-e2e-->8<!--/f--> browser e2e |
 
 > [!NOTE]
 > The browser E2E run required the local workaround described in §4.1 because
@@ -51,13 +50,13 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 
 ## 2. Scope delivered
 
-| Area                       | Summary                                                                                                                                                                                                                                         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API (`apps/api`)           | NestJS 12 + Fastify, Clean Architecture. 6 entities, 3 domain services, 17 ports, **31 use cases**, 10 controllers, 5 migrations.                                                                                                               |
-| Web (`apps/web`)           | React 19 + Vite 8 + Tailwind 4 + TanStack Query 5 + React Router 8. Feature-first; PWA with offline review queue.                                                                                                                               |
-| Shared (`packages/shared`) | Zod 4 runtime contracts as the single source of truth.                                                                                                                                                                                          |
-| Documentation (`docs/`)    | 23 documents: user story refinement, traceability matrix, 8 MADR ADRs, data model, test plan/cases, runbook, security, platform notes, backup policy, deployment walkthrough, SENA report. Plus `SPEC.md` and `PLAN.md` at the repository root. |
-| Delivery artefacts         | `DeckUp - User Story and Refinement - Nelson Fabián Gallego Sánchez.pdf` (2026-09-25); `deployment-walkthrough.md`.                                                                                                                             |
+| Area                       | Summary                                                                                                                                                                                                                                                                      |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API (`apps/api`)           | NestJS 12 + Fastify, Clean Architecture. 6 entities, 3 domain services, 17 ports, **31 use cases**, 10 controllers, 5 migrations.                                                                                                                                            |
+| Web (`apps/web`)           | React 19 + Vite 8 + Tailwind 4 + TanStack Query 5 + React Router 8. Feature-first; PWA with offline review queue.                                                                                                                                                            |
+| Shared (`packages/shared`) | Zod 4 runtime contracts as the single source of truth.                                                                                                                                                                                                                       |
+| Documentation (`docs/`)    | <!--f:docs-folder-->23<!--/f--> documents: user story refinement, traceability matrix, 8 MADR ADRs, data model, test plan/cases, runbook, security, platform notes, backup policy, deployment walkthrough, SENA report. Plus `SPEC.md` and `PLAN.md` at the repository root. |
+| Delivery artefacts         | `DeckUp - User Story and Refinement - Nelson Fabián Gallego Sánchez.pdf` (2026-09-25); `deployment-walkthrough.md`.                                                                                                                                                          |
 
 Functional coverage: authentication, deck/card CRUD, images, CSV import/export,
 FSRS study engine with idempotent offline replay, analytics, public catalogue
@@ -103,8 +102,8 @@ gitignored — fixed in `2c07b3b`. All three CI jobs are green.
    green. Railway deploys the API from GitHub on every push to `main` and runs
    `prisma migrate deploy` as a pre-deploy command; the Deploy workflow only
    publishes the web app.
-2. **Documentation sync** — **done (2026-10-05)**: 25 documents (17 documents +
-   8 ADRs) published with rich blocks to Notion and mirrored to the Obsidian
+2. **Documentation sync** — **done (<!--f:date-->2026-10-05<!--/f-->)**: <!--f:documents-->25<!--/f--> documents (<!--f:documents-breakdown-->17 documents + 8 ADRs<!--/f-->)
+   published with rich blocks to Notion and mirrored to the Obsidian
    vault. A `.sync-manifest.json` (SHA-256 per document and target) makes the
    sync incremental and drift detectable in any direction; `pnpm sync:all`,
    `sync:check`, `sync:watch`, the husky hooks and the `Docs sync` workflow keep
@@ -147,16 +146,16 @@ keeps the session → card → study session → review → summary → analytic
 
 ## 5. Continuation plan
 
-| Phase | Goal                                                                         | Status                                              |
-| ----- | ---------------------------------------------------------------------------- | --------------------------------------------------- |
-| 1     | Secure the work: commit pending files, publish `main`, verify CI             | Done (2026-10-03) — CI green                        |
-| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                          | Done (2026-10-02)                                   |
-| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)             | Done (2026-10-03) — Railway autodeploys from GitHub |
-| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC)           | Done (2026-10-03) — first publish; now 25 documents |
-| 5     | Account management UI and accessibility/tech-debt cleanup                    | Account UI done; minor debt pending                 |
-| 6     | Academic evidence: SENA evidence pack / general system report                | Done (report, class diagram, 12 screenshots)        |
-| 7     | Platform freeze: operational notes, run/use guide, accepted debt             | Done (2026-10-04) — `platform-notes.md` published   |
-| 8     | Sync maturity: generated vault index notes, Gobernanza section, script tests | Done (2026-10-05) — 187 tests, 25 documents         |
+| Phase | Goal                                                                         | Status                                                                                             |
+| ----- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 1     | Secure the work: commit pending files, publish `main`, verify CI             | Done (2026-10-03) — CI green                                                                       |
+| 2     | Permanent E2E fix, build-cache inputs, `v0.1.0` tag                          | Done (2026-10-02)                                                                                  |
+| 3     | Production deployment (Neon → Railway → Vercel → GitHub secrets)             | Done (2026-10-03) — Railway autodeploys from GitHub                                                |
+| 4     | Notion re-sync and documentation alignment (this file, PLAN, SPEC)           | Done (2026-10-03) — first publish; now <!--f:documents-->25<!--/f--> documents                     |
+| 5     | Account management UI and accessibility/tech-debt cleanup                    | Account UI done; minor debt pending                                                                |
+| 6     | Academic evidence: SENA evidence pack / general system report                | Done (report, class diagram, 12 screenshots)                                                       |
+| 7     | Platform freeze: operational notes, run/use guide, accepted debt             | Done (2026-10-04) — `platform-notes.md` published                                                  |
+| 8     | Sync maturity: generated vault index notes, Gobernanza section, script tests | Done (2026-10-05) — <!--f:unit-tests-->198<!--/f--> tests, <!--f:documents-->25<!--/f--> documents |
 
 ## 6. How to verify locally
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DocumentSpec } from './documents.ts';
+import { defaultFacts } from './project-facts.ts';
 import { renderMoc } from './vault-moc.ts';
 
 /** Minimal spec builder; only the fields the MOC reads are relevant. */
@@ -40,8 +41,10 @@ const documents: DocumentSpec[] = [
   }),
 ];
 
+const facts = { ...defaultFacts(), unitTests: 187, apiIntegration: 72, browserE2e: 8 };
+
 describe('renderMoc', () => {
-  const moc = renderMoc(documents, '2026-10-05');
+  const moc = renderMoc(documents, '2026-10-05', facts);
 
   it('opens with the index frontmatter and the sync date', () => {
     expect(moc).toMatch(/^---\nproyecto: DeckUp\ntipo: índice\nactualizado: 2026-10-05\n/);
@@ -78,6 +81,10 @@ describe('renderMoc', () => {
   });
 
   it('is deterministic for the same input', () => {
-    expect(renderMoc(documents, '2026-10-05')).toBe(moc);
+    expect(renderMoc(documents, '2026-10-05', facts)).toBe(moc);
+  });
+
+  it('reads the quality numbers from the project facts', () => {
+    expect(moc).toContain('| **Calidad** | 187 unit · 72 integración · 8 E2E');
   });
 });

@@ -9,6 +9,35 @@ repository root (`vitest.config.mts`, scoped to `scripts/**/*.spec.ts`). Run the
 alone with `pnpm test:scripts`, or as part of the full suite with `pnpm test`
 (which runs the three packages through Turbo, then the scripts).
 
+## Status refresh
+
+`docs/STATUS.md` is a curated narrative, but its date, document counts and test
+counts used to drift by hand. They are now **marked regions** resolved from
+`project-facts.json` — the single source for those numbers, also consumed by the
+vault map of content, so the repository, Notion and Obsidian can never disagree.
+The document keeps the resolved value between invisible comments, so the
+repository shows real numbers while the refresh can always find and update them:
+
+```markdown
+| **Date** | <!--f:date-->2026-10-05<!--/f--> |
+```
+
+The markers are stripped when publishing, so they never reach Notion or the
+vault.
+
+```bash
+pnpm status:refresh             # run the test suite, then refresh the facts + STATUS
+pnpm status:refresh --no-tests  # keep the recorded test counts
+pnpm status:check               # fail when the marked facts are stale (pre-push hook)
+```
+
+`scripts/status-refresh.ts` is the only writer of `project-facts.json`. It
+derives the document counts from the canonical registry and the test counts from
+an actual `pnpm test` run; counts that need infrastructure (API integration,
+browser E2E) are preserved from the previous facts file. The `pre-push` hook
+warns when the marked facts are stale, and blocks only under
+`DECKUP_SYNC_STRICT=1`.
+
 ## Synchronization model
 
 The repository documentation (`docs/`) is the single source of truth. It is

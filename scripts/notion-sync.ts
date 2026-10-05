@@ -19,6 +19,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import { collectAllDocuments, documentTargets, type DocumentSpec } from './lib/documents.ts';
+import { stripFactMarkers } from './lib/project-facts.ts';
 import { hashSourceFile, readManifest, writeManifest } from './lib/sync-manifest.ts';
 
 const NOTION_API = 'https://api.notion.com/v1';
@@ -740,7 +741,9 @@ async function publishDocument(
   existingPages: Map<string, string>,
   cloudinaryUrl: string | undefined,
 ): Promise<PublishedPage> {
-  const markdown = await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8');
+  const markdown = stripFactMarkers(
+    await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8'),
+  );
   const resolveImage = createImageResolver(
     cloudinaryUrl,
     resolve(REPOSITORY_ROOT, dirname(document.path)),
@@ -812,7 +815,9 @@ async function main(): Promise<void> {
 
   if (dryRun) {
     for (const document of documents) {
-      const markdown = await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8');
+      const markdown = stripFactMarkers(
+        await readFile(resolve(REPOSITORY_ROOT, document.path), 'utf8'),
+      );
       const blocks = await markdownToBlocks(markdown, async (url, alt) =>
         imageBlock(`https://placeholder.invalid/${basename(url)}`, alt),
       );

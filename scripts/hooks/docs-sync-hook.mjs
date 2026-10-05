@@ -5,8 +5,9 @@
  *   post-commit  — a commit touched docs/: remind the author, or auto-sync when
  *                  DECKUP_AUTO_SYNC=1 (background, non-blocking).
  *   post-merge   — a pull/merge touched docs/: same behaviour.
- *   pre-push     — cheap offline drift check; warns on drift and blocks the
- *                  push only when DECKUP_SYNC_STRICT=1.
+ *   pre-push     — cheap offline checks: mirror drift and stale STATUS
+ *                  placeholders. Warns, and blocks the push only when
+ *                  DECKUP_SYNC_STRICT=1.
  *
  * Hooks never fail the git operation: they only advise unless strict mode is on.
  */
@@ -47,25 +48,35 @@ function runSync() {
   child.unref();
 }
 
-if (mode === 'pre-push') {
-  const check = spawn(process.execPath, ['--experimental-strip-types', 'scripts/sync-check.ts'], {
-    cwd: REPOSITORY_ROOT,
-    stdio: 'inherit',
+/** Runs a script with the repository root as cwd; resolves with its exit code. */
+function run(script, args = []) {
+  return new Promise((resolvePromise) => {
+    const child = spawn(process.execPath, ['--experimental-strip-types', script, ...args], {
+      cwd: REPOSITORY_ROOT,
+      stdio: 'inherit',
+    });
+
+    child.on('close', (code) => resolvePromise(code ?? 0));
   });
+}
 
-  check.on('close', (code) => {
-    if (code === 0) {
-      return;
-    }
+if (mode === 'pre-push') {
+  const syncCode = await run('scripts/sync-check.ts');
+  const statusCode = await run('scripts/status-refresh.ts', ['--check']);
 
+  if (syncCode !== 0) {
     console.error(
       '\n⚠  Documentation mirrors are out of sync. Run `pnpm sync:all` before pushing.',
     );
+  }
 
-    if (process.env.DECKUP_SYNC_STRICT === '1') {
-      process.exitCode = code ?? 1;
-    }
-  });
+  if (statusCode !== 0) {
+    console.error('\n⚠  STATUS.md placeholders are stale. Run `pnpm status:refresh`.');
+  }
+
+  if (process.env.DECKUP_SYNC_STRICT === '1' && (syncCode !== 0 || statusCode !== 0)) {
+    process.exitCode = 1;
+  }
 } else {
   const files =
     mode === 'post-merge'

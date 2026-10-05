@@ -14,6 +14,7 @@
  */
 
 import type { DocumentSpec } from './documents.ts';
+import type { ProjectFacts } from './project-facts.ts';
 
 const PANEL_NOTE = [
   '> [!tip] Panel dinámico',
@@ -82,7 +83,7 @@ const adrPanel = panel(
   ].join('\n'),
 );
 
-export function renderMoc(documents: DocumentSpec[], updated: string): string {
+export function renderMoc(documents: DocumentSpec[], updated: string, facts: ProjectFacts): string {
   const governance = documents.filter((doc) => doc.obsidianFolder === 'Gobernanza');
   const documentation = documents.filter((doc) => doc.obsidianFolder === 'Documentación');
   const adrs = documents.filter((doc) => doc.obsidianFolder === 'Decisiones Técnicas');
@@ -114,7 +115,7 @@ tags:
 | **Tipo** | Aplicación web full-stack (PWA instalable) |
 | **Autor** | Nelson Fabián Gallego Sánchez — SENA ADSO · Universidad del Quindío |
 | **Estado** | **v0.1.0** desplegado · infraestructura congelada (sin cambios planificados) |
-| **Calidad** | 187 unit · 72 integración · 8 E2E · WCAG 2.1 AA · CI verde |
+| **Calidad** | ${facts.unitTests} unit · ${facts.apiIntegration} integración · ${facts.browserE2e} E2E · WCAG 2.1 AA · CI verde |
 
 ## Enlaces oficiales
 
