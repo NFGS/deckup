@@ -3,8 +3,8 @@
  * Publishes the DeckUp documentation to Notion.
  *
  * Usage:
- *   NOTION_TOKEN=... NOTION_PAGE_ID=... node --experimental-strip-types scripts/notion-sync.ts
- *   NOTION_TOKEN=... NOTION_PAGE_ID=... node --experimental-strip-types scripts/notion-sync.ts --dry-run
+ *   NOTION_DECKUP_TOKEN=... NOTION_PAGE_ID=... node --experimental-strip-types scripts/notion-sync.ts
+ *   NOTION_DECKUP_TOKEN=... NOTION_PAGE_ID=... node --experimental-strip-types scripts/notion-sync.ts --dry-run
  *
  * The root page ID is the "DeckUp" page inside the "Ningendo Bee Projects"
  * workspace page (see SPEC.md §7). Each document becomes a child page with the
@@ -800,7 +800,7 @@ async function main(): Promise<void> {
       ? allDocuments.filter((document) => document.notionTitle.includes(onlyFilter))
       : allDocuments
   ).filter((document) => documentTargets(document).includes('notion'));
-  const token = process.env.NOTION_TOKEN;
+  const token = process.env.NOTION_DECKUP_TOKEN ?? process.env.NOTION_TOKEN;
   const parentPageId = process.env.NOTION_PAGE_ID;
   const cloudinaryUrl = process.env.CLOUDINARY_URL;
 
@@ -836,7 +836,9 @@ async function main(): Promise<void> {
   }
 
   if (!token || !parentPageId) {
-    console.error('NOTION_TOKEN and NOTION_PAGE_ID are required (or use --dry-run).');
+    console.error(
+      'NOTION_DECKUP_TOKEN (or NOTION_TOKEN) and NOTION_PAGE_ID are required (or use --dry-run).',
+    );
     process.exitCode = 1;
     return;
   }

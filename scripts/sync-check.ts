@@ -140,7 +140,7 @@ async function main(): Promise<void> {
   const onlyFilter = onlyIndex >= 0 ? (process.argv[onlyIndex + 1] ?? '') : undefined;
   const vaultCandidate = process.env.OBSIDIAN_VAULT_PATH ?? DEFAULT_VAULT;
   const vault = existsSync(vaultCandidate) ? vaultCandidate : null;
-  const token = process.env.NOTION_TOKEN;
+  const token = process.env.NOTION_DECKUP_TOKEN ?? process.env.NOTION_TOKEN;
   const documents = await collectAllDocuments(REPOSITORY_ROOT);
   const manifest = await readManifest(REPOSITORY_ROOT);
 

@@ -102,7 +102,7 @@ _which_ documents they publish.
 - Root page: **DeckUp** — ID `3ee7d55f-d95e-8079-8ee8-f9dc00042699`
   (<https://app.notion.com/p/3ee7d55fd95e80798ee8f9dc00042699>, see SPEC.md §7).
 - Create an internal integration token with _insert content_ permission on that
-  page and expose it as `NOTION_TOKEN`; the page ID goes in `NOTION_PAGE_ID`.
+  page and expose it as `NOTION_DECKUP_TOKEN`; the page ID goes in `NOTION_PAGE_ID`.
 - The script converts markdown to rich Notion blocks: headings, paragraphs,
   numbered and bulleted lists, to-dos, quotes, dividers, GitHub-style callouts
   (`> [!NOTE]`), code fences (Mermaid included), native tables, inline

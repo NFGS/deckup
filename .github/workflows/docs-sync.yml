@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 15
     env:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_DECKUP_TOKEN: ${{ secrets.NOTION_TOKEN }}
       NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
       CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
     steps:
