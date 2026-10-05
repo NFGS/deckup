@@ -2,6 +2,13 @@
 
 Automation scripts for the DeckUp monorepo.
 
+## Tests
+
+The build-time helpers under `scripts/lib/` are unit-tested with Vitest at the
+repository root (`vitest.config.mts`, scoped to `scripts/**/*.spec.ts`). Run them
+alone with `pnpm test:scripts`, or as part of the full suite with `pnpm test`
+(which runs the three packages through Turbo, then the scripts).
+
 ## Synchronization model
 
 The repository documentation (`docs/`) is the single source of truth. It is
@@ -135,8 +142,11 @@ Técnicas` (MADR ADRs) — with YAML frontmatter (`proyecto`, `tipo`, `fuente`,
   diagrams, stack, how-to, resources) is the curated template in that module,
   and the section counts plus the document lists are derived from the canonical
   registry. Curation is preserved in the repository and reviewed in version
-  control; the index can never drift from the published set. The vault `Home.md`
-  stays manual.
+  control; the index can never drift from the published set.
+- The vault home note (`Home.md`) is **regenerated** too, by
+  `scripts/lib/vault-home.ts`: the project table is curated and the audit and
+  guide lists are discovered from the vault, so they never go stale. DeckUp owns
+  this file; the Kubo mirror script leaves it untouched.
 - A note is re-written only when the source changed or the file on disk was
   edited by hand (both are compared by hash). When a document moves to another
   folder, the note left behind is deleted so the vault keeps no orphaned

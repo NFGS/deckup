@@ -386,18 +386,18 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-05T09:54:53.502Z",
+      "syncedAt": "2026-10-05T10:34:04.801Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Gobernanza/Project Status.md",
-          "hash": "sha256-5f5abbe40ec11982986793ddc0fcfb362dc83fbff56814828570dcb4a7d62b72",
-          "sourceHash": "sha256-c532be3ac675dd7579edd0fb65bcabe783e4d627ad53024853b85e23304c4bb7"
+          "hash": "sha256-d0b3db9caf90a2ec60128dec966282e29f3b8b47fc77f4cb1655ca46c6219be7",
+          "sourceHash": "sha256-9c3ec5534c959208798f16216676cb4fa34a60400dcbf8de13f8d1546cd51c66"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",
-          "lastEditedTime": "2026-10-05T09:36:00.000Z",
+          "lastEditedTime": "2026-10-05T10:34:00.000Z",
           "blockCount": 51,
-          "sourceHash": "sha256-c532be3ac675dd7579edd0fb65bcabe783e4d627ad53024853b85e23304c4bb7"
+          "sourceHash": "sha256-9c3ec5534c959208798f16216676cb4fa34a60400dcbf8de13f8d1546cd51c66"
         }
       }
     }

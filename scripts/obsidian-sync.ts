@@ -24,6 +24,7 @@ import { homedir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { collectAllDocuments, documentTargets, type DocumentSpec } from './lib/documents.ts';
 import { hashSourceFile, readManifest, sha256, writeManifest } from './lib/sync-manifest.ts';
+import { renderHome, PROJECTS, type IndexEntry } from './lib/vault-home.ts';
 import { renderMoc } from './lib/vault-moc.ts';
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, '..');
@@ -101,6 +102,35 @@ async function collectNotes(synced: string, documents: DocumentSpec[]): Promise<
   return notes;
 }
 
+/**
+ * Collects the index entries of a vault folder (or the vault root) for the home
+ * note: every note becomes a wiki-link whose display text is its H1.
+ */
+async function collectIndexEntries(
+  vault: string,
+  folder: string | null,
+  matches: (file: string) => boolean,
+): Promise<IndexEntry[]> {
+  const dir = folder ? join(vault, folder) : vault;
+
+  if (!existsSync(dir)) {
+    return [];
+  }
+
+  const files = (await readdir(dir)).filter((file) => file.endsWith('.md') && matches(file)).sort();
+  const entries: IndexEntry[] = [];
+
+  for (const file of files) {
+    const content = await readFile(join(dir, file), 'utf8');
+    const name = file.replace(/\.md$/, '');
+    const title = /^#\s+(.+)$/m.exec(content)?.[1]?.trim() ?? name;
+
+    entries.push({ link: folder ? `${folder}/${name}` : name, title });
+  }
+
+  return entries;
+}
+
 async function copyEvidence(vault: string, dryRun: boolean): Promise<number> {
   const source = resolve(REPOSITORY_ROOT, EVIDENCE_SOURCE);
 
@@ -154,6 +184,7 @@ async function main(): Promise<void> {
     }
 
     console.log('would write: DeckUp/README.md (regenerated map of content)');
+    console.log('would write: Home.md (regenerated vault index)');
 
     const evidence = await copyEvidence(vault, true);
     console.log(`would copy: ${evidence} evidence images to DeckUp/Recursos/evidencias`);
@@ -222,6 +253,19 @@ async function main(): Promise<void> {
     await mkdir(dirname(mocPath), { recursive: true });
     await writeFile(mocPath, moc, 'utf8');
     console.log('written: DeckUp/README.md (regenerated map of content)');
+  }
+
+  // Regenerate the vault home note: the project table is curated, the audit and
+  // guide lists are discovered from the vault, so they never go stale.
+  const audits = await collectIndexEntries(vault, 'Auditorías', () => true);
+  const guides = await collectIndexEntries(vault, null, (file) => file.startsWith('Guía — '));
+  const homePath = join(vault, 'Home.md');
+  const home = renderHome(PROJECTS, audits, guides, syncedDay);
+  const homeUnchanged = existsSync(homePath) && (await readFile(homePath, 'utf8')) === home;
+
+  if (!homeUnchanged) {
+    await writeFile(homePath, home, 'utf8');
+    console.log('written: Home.md (regenerated vault index)');
   }
 
   const evidence = await copyEvidence(vault, false);

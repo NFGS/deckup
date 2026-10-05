@@ -114,7 +114,7 @@ tags:
 | **Tipo** | Aplicación web full-stack (PWA instalable) |
 | **Autor** | Nelson Fabián Gallego Sánchez — SENA ADSO · Universidad del Quindío |
 | **Estado** | **v0.1.0** desplegado · infraestructura congelada (sin cambios planificados) |
-| **Calidad** | 174 unit · 72 integración · 8 E2E · WCAG 2.1 AA · CI verde |
+| **Calidad** | 187 unit · 72 integración · 8 E2E · WCAG 2.1 AA · CI verde |
 
 ## Enlaces oficiales
 
