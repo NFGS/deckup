@@ -4,8 +4,8 @@
   "documents": 25,
   "documentsBreakdown": "17 documents + 8 ADRs",
   "docsFolder": 23,
-  "unitTests": 212,
-  "unitTestsBreakdown": "shared 8 · API 120 · web 46 · scripts 38",
+  "unitTests": 223,
+  "unitTestsBreakdown": "shared 8 · API 120 · web 46 · scripts 49",
   "apiIntegration": 72,
   "browserE2e": 8
 }

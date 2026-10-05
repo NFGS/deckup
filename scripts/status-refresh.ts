@@ -14,20 +14,30 @@
  *   pnpm status:refresh --check         # fail when the marked facts are stale
  *   pnpm status:refresh --dry-run       # show what would change
  *
- * The document counts come from the canonical registry. The unit counts come
- * from an actual `pnpm test` run. `--with-infra` starts the Docker database and
- * measures the API integration suite (Vitest + PostgreSQL) and the browser E2E
- * suite (Playwright), which need Docker and the Playwright browsers; honour
- * `E2E_API_PORT` / `E2E_WEB_PORT` when the default ports are taken.
+ * `--with-infra` runs a preflight (Docker daemon + Playwright browsers) so it
+ * fails in seconds instead of minutes, then starts the database and measures
+ * both suites. The browser E2E ports are resolved against the machine: an
+ * explicit `E2E_API_PORT` / `E2E_WEB_PORT` wins, otherwise the port declared in
+ * `apps/web/.env.local` is honoured, and a free port is picked when the default
+ * is taken. `VITE_API_URL` is exported so the web build always points at the
+ * API the suite starts.
  *
  * The script is atomic: if a measurement fails it writes nothing, so the facts
  * never record a number that was not actually observed.
  */
 
 import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { collectAllDocuments, DOCUMENTS } from './lib/documents.ts';
+import {
+  apiPortFromUrl,
+  findFreePort,
+  isPortFree,
+  playwrightInstallLocations,
+  viteApiUrlFromEnvFile,
+} from './lib/infra.ts';
 import {
   applyFacts,
   readProjectFacts,
@@ -38,15 +48,83 @@ import { parsePlaywrightTotal, parseVitestCounts, parseVitestTotal } from './lib
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, '..');
 const STATUS_PATH = 'docs/STATUS.md';
+const WEB_ENV_LOCAL = 'apps/web/.env.local';
 
 /** Runs a command in the repository root, capturing stdout. */
-function runCommand(command: string): string {
+function runCommand(command: string, env: NodeJS.ProcessEnv = process.env): string {
   return execSync(command, {
     cwd: REPOSITORY_ROOT,
     encoding: 'utf8',
     stdio: 'pipe',
     maxBuffer: 32 * 1024 * 1024,
+    env,
   });
+}
+
+async function readFileIfExists(path: string): Promise<string | null> {
+  const absolute = resolve(REPOSITORY_ROOT, path);
+
+  return existsSync(absolute) ? readFile(absolute, 'utf8') : null;
+}
+
+/** Fails in seconds when the infrastructure `--with-infra` needs is missing. */
+function preflightInfra(): void {
+  try {
+    runCommand('docker info --format "{{.ServerVersion}}"');
+  } catch {
+    throw new Error(
+      'Docker is not available. Start the Docker daemon (or Docker Desktop) and retry --with-infra.',
+    );
+  }
+
+  const output = runCommand('pnpm exec playwright install --dry-run chromium');
+  const missing = playwrightInstallLocations(output).filter((location) => !existsSync(location));
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Playwright browsers are missing (${missing[0]}). Run \`pnpm exec playwright install chromium\`.`,
+    );
+  }
+}
+
+interface InfraPlan {
+  apiPort: number;
+  webPort: number;
+  env: NodeJS.ProcessEnv;
+}
+
+/**
+ * Resolves the API and web ports for the browser E2E run, and the environment
+ * that keeps the web build and the API the suite starts on the same port.
+ */
+async function planInfra(): Promise<InfraPlan> {
+  const configuredApi = process.env.E2E_API_PORT ? Number(process.env.E2E_API_PORT) : null;
+
+  if (configuredApi !== null && !(await isPortFree(configuredApi))) {
+    throw new Error(
+      `E2E_API_PORT=${configuredApi} is already in use. Stop that service or pass another port.`,
+    );
+  }
+
+  const envLocal = await readFileIfExists(WEB_ENV_LOCAL);
+  const declared = envLocal ? apiPortFromUrl(viteApiUrlFromEnvFile(envLocal)) : null;
+  const preferred = configuredApi ?? declared;
+  const apiPort =
+    preferred !== null && (await isPortFree(preferred)) ? preferred : await findFreePort(3000);
+
+  const configuredWeb = process.env.E2E_WEB_PORT ? Number(process.env.E2E_WEB_PORT) : null;
+  const webPort = configuredWeb ?? ((await isPortFree(5173)) ? 5173 : await findFreePort(5174));
+
+  return {
+    apiPort,
+    webPort,
+    env: {
+      ...process.env,
+      E2E_API_PORT: String(apiPort),
+      E2E_WEB_PORT: String(webPort),
+      VITE_API_URL: `http://localhost:${apiPort}/api/v1`,
+    },
+  };
 }
 
 function measureUnitTests(): { total: number; breakdown: string } {
@@ -65,8 +143,11 @@ function measureApiIntegration(): number {
   return total;
 }
 
-function measureBrowserE2e(): number {
-  const total = parsePlaywrightTotal(runCommand('pnpm test:e2e'));
+async function measureBrowserE2e(): Promise<number> {
+  const plan = await planInfra();
+  console.log(`▸ Browser E2E on API :${plan.apiPort} · web :${plan.webPort}`);
+
+  const total = parsePlaywrightTotal(runCommand('pnpm test:e2e', plan.env));
 
   if (total === null) {
     throw new Error('Could not read the browser E2E count from the Playwright output.');
@@ -76,6 +157,10 @@ function measureBrowserE2e(): number {
 }
 
 async function collectFacts(options: { unit: boolean; infra: boolean }): Promise<ProjectFacts> {
+  if (options.infra) {
+    preflightInfra();
+  }
+
   const previous = await readProjectFacts(REPOSITORY_ROOT);
   const documents = await collectAllDocuments(REPOSITORY_ROOT);
   const adrs = documents.filter((doc) => doc.path.startsWith('docs/02-architecture/adr'));
@@ -93,7 +178,7 @@ async function collectFacts(options: { unit: boolean; infra: boolean }): Promise
     unitTests: tests?.total ?? previous.unitTests,
     unitTestsBreakdown: tests?.breakdown ?? previous.unitTestsBreakdown,
     apiIntegration: options.infra ? measureApiIntegration() : previous.apiIntegration,
-    browserE2e: options.infra ? measureBrowserE2e() : previous.browserE2e,
+    browserE2e: options.infra ? await measureBrowserE2e() : previous.browserE2e,
   };
 }
 

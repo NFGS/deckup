@@ -34,13 +34,26 @@ pnpm status:check                   # fail when the marked facts are stale (pre-
 
 `scripts/status-refresh.ts` is the only writer of `project-facts.json`. It
 derives the document counts from the canonical registry and the unit counts from
-an actual `pnpm test` run. `--with-infra` starts the Docker database
-(`docker compose up -d --wait db`) and measures the API integration suite
-(Vitest + PostgreSQL) and the browser E2E suite (Playwright + build); honour
-`E2E_API_PORT` / `E2E_WEB_PORT` when the default ports are taken. The script is
-**atomic**: if a measurement fails it writes nothing, so the facts never record
-a number that was not observed. The `pre-push` hook warns when the marked facts
-are stale, and blocks only under `DECKUP_SYNC_STRICT=1`.
+an actual `pnpm test` run. `--with-infra` runs a **preflight** (Docker daemon +
+Playwright browsers, via `playwright install --dry-run`) so it fails in seconds
+instead of minutes, then starts the database (`docker compose up -d --wait db`)
+and measures the API integration suite (Vitest + PostgreSQL) and the browser E2E
+suite (Playwright + build). The script is **atomic**: if a measurement fails it
+writes nothing, so the facts never record a number that was not observed.
+
+The browser E2E ports are resolved against the machine, so no manual
+`E2E_API_PORT` is needed:
+
+1. an explicit `E2E_API_PORT` / `E2E_WEB_PORT` wins (and a busy one fails fast);
+2. otherwise the port declared in `apps/web/.env.local` is honoured;
+3. otherwise the default is used, or the first free port when it is taken.
+
+`VITE_API_URL` is exported for the run, so the web build always points at the
+API the suite starts. The run prints the chosen ports
+(`▸ Browser E2E on API :3100 · web :5173`).
+
+The `pre-push` hook warns when the marked facts are stale, and blocks only under
+`DECKUP_SYNC_STRICT=1`.
 
 The counting rules live in `scripts/lib/test-counts.ts` (pure, unit-tested), and
 `scripts/lib/status-document.spec.ts` guards the real `docs/STATUS.md`: it must

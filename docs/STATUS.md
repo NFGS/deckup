@@ -10,7 +10,7 @@
 
 > [!NOTE]
 > **At a glance** — v0.1.0 is tagged, published and deployed. All five quality gates are
-> green (<!--f:unit-tests-->212<!--/f--> unit · <!--f:api-integration-->72<!--/f--> API integration · <!--f:browser-e2e-->8<!--/f--> browser E2E), production is verified end-to-end
+> green (<!--f:unit-tests-->223<!--/f--> unit · <!--f:api-integration-->72<!--/f--> API integration · <!--f:browser-e2e-->8<!--/f--> browser E2E), production is verified end-to-end
 > and the only open item is the Railway redeploy token for the CI deploy job.
 
 This document is the **single source of truth for the current state of the
@@ -27,7 +27,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Lint               | `pnpm exec turbo run lint --force` + `eslint scripts e2e playwright.config.ts` | Pass (10/10 tasks)                                                                                                                       |
 | Typecheck          | `pnpm exec turbo run typecheck --force` + `tsc --noEmit -p tsconfig.json`      | Pass                                                                                                                                     |
-| Unit tests         | `pnpm exec turbo run test --force` + `vitest run`                              | **<!--f:unit-tests-ratio-->212/212<!--/f-->** (<!--f:unit-tests-breakdown-->shared 8 · API 120 · web 46 · scripts 38<!--/f-->)           |
+| Unit tests         | `pnpm exec turbo run test --force` + `vitest run`                              | **<!--f:unit-tests-ratio-->223/223<!--/f-->** (<!--f:unit-tests-breakdown-->shared 8 · API 120 · web 46 · scripts 49<!--/f-->)           |
 | API integration    | `docker compose up -d db && pnpm --filter @deckup/api test:e2e`                | **<!--f:api-integration-ratio-->72/72<!--/f-->** against PostgreSQL 17                                                                   |
 | Build              | `pnpm build`                                                                   | Pass                                                                                                                                     |
 | Browser E2E        | `E2E_API_PORT=3100 pnpm exec playwright test`                                  | **<!--f:browser-e2e-ratio-->8/8<!--/f-->** (Playwright + axe-core)                                                                       |
@@ -41,7 +41,7 @@ All five quality gates were executed from scratch (`--force`, no Turbo cache):
 | Production smoke   | `E2E_BASE_URL=https://deckup.vercel.app playwright test e2e/smoke.spec.ts`     | **3/3** (read-only)                                                                                                                      |
 | Production flow    | API end-to-end: register → deck → card → study → review → analytics            | **OK** (2026-10-03)                                                                                                                      |
 | Railway autodeploy | Push `3582662` → deployment `d64e141b` (trigger `f2be2d99`)                    | **SUCCESS** — pre-deploy applied 5 migrations                                                                                            |
-| Fresh clone        | `git clone` → `pnpm install --frozen-lockfile` → all gates                     | **OK** — <!--f:unit-tests-->212<!--/f--> unit · <!--f:api-integration-->72<!--/f--> API e2e · <!--f:browser-e2e-->8<!--/f--> browser e2e |
+| Fresh clone        | `git clone` → `pnpm install --frozen-lockfile` → all gates                     | **OK** — <!--f:unit-tests-->223<!--/f--> unit · <!--f:api-integration-->72<!--/f--> API e2e · <!--f:browser-e2e-->8<!--/f--> browser e2e |
 
 > [!NOTE]
 > The browser E2E run required the local workaround described in §4.1 because
@@ -155,7 +155,7 @@ keeps the session → card → study session → review → summary → analytic
 | 5     | Account management UI and accessibility/tech-debt cleanup                    | Account UI done; minor debt pending                                                                |
 | 6     | Academic evidence: SENA evidence pack / general system report                | Done (report, class diagram, 12 screenshots)                                                       |
 | 7     | Platform freeze: operational notes, run/use guide, accepted debt             | Done (2026-10-04) — `platform-notes.md` published                                                  |
-| 8     | Sync maturity: generated vault index notes, Gobernanza section, script tests | Done (2026-10-05) — <!--f:unit-tests-->212<!--/f--> tests, <!--f:documents-->25<!--/f--> documents |
+| 8     | Sync maturity: generated vault index notes, Gobernanza section, script tests | Done (2026-10-05) — <!--f:unit-tests-->223<!--/f--> tests, <!--f:documents-->25<!--/f--> documents |
 
 ## 6. How to verify locally
 

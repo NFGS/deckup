@@ -159,7 +159,10 @@ contradict each other, but each keeps the role that justifies it.
   numbers never drift between environments. The markers are invisible HTML
   comments, stripped when publishing, so they never reach Notion or the vault;
   `pnpm status:check` verifies them and a unit test guards the real document.
-  `pnpm status:refresh --with-infra` measures the API integration and browser E2E
-  counts against the Docker database and Playwright, and the refresh is atomic:
-  a failed measurement writes nothing.
+  `pnpm status:refresh --with-infra` preflights Docker and the Playwright
+  browsers, then measures the API integration and browser E2E counts; the
+  browser E2E ports are resolved against the machine (explicit env, then
+  `apps/web/.env.local`, then a free port) and `VITE_API_URL` is exported so the
+  web build matches, and the refresh is atomic: a failed measurement writes
+  nothing.
 - Last sync: **2026-10-05** — 25 documents (17 documents + 8 ADRs) on both mirrors.
