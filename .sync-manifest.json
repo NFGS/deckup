@@ -18,18 +18,18 @@
       }
     },
     "SPEC.md": {
-      "syncedAt": "2026-10-05T09:54:53.502Z",
+      "syncedAt": "2026-10-05T10:51:46.074Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Gobernanza/Specification.md",
-          "hash": "sha256-e6e024dbbda52cf7872b44899ab7b8308f527afe178787e8cf54de65255af1fd",
-          "sourceHash": "sha256-31f7ff72a4467353f35834a8b2fdc222decde270804dc7aa6a9d2eda6fe1d5d4"
+          "hash": "sha256-eb1bacea82798b0a7497952f07069c97fcd9120e17c6d9e5eff70d5efa19c6ac",
+          "sourceHash": "sha256-c0d12e48682b52f1aa29f9b57be96e8e8ccc46481192abc2c58dde211f8256aa"
         },
         "notion": {
           "id": "3f07d55f-d95e-81ae-a8bc-ed5710f23dfe",
-          "lastEditedTime": "2026-10-05T09:37:00.000Z",
-          "blockCount": 56,
-          "sourceHash": "sha256-31f7ff72a4467353f35834a8b2fdc222decde270804dc7aa6a9d2eda6fe1d5d4"
+          "lastEditedTime": "2026-10-05T10:52:00.000Z",
+          "blockCount": 60,
+          "sourceHash": "sha256-c0d12e48682b52f1aa29f9b57be96e8e8ccc46481192abc2c58dde211f8256aa"
         }
       }
     },
@@ -386,18 +386,18 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-05T10:34:04.801Z",
+      "syncedAt": "2026-10-05T10:51:46.074Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Gobernanza/Project Status.md",
-          "hash": "sha256-d0b3db9caf90a2ec60128dec966282e29f3b8b47fc77f4cb1655ca46c6219be7",
-          "sourceHash": "sha256-9c3ec5534c959208798f16216676cb4fa34a60400dcbf8de13f8d1546cd51c66"
+          "hash": "sha256-2810bc6f278f90c6206956aae93c96b0e7e91f40cfbd38264031f42cb07d33f1",
+          "sourceHash": "sha256-9963be21f79698bf975c4619f151e0456d94b2fb0e1c5832b6ec729af16c62ff"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",
-          "lastEditedTime": "2026-10-05T10:34:00.000Z",
+          "lastEditedTime": "2026-10-05T10:53:00.000Z",
           "blockCount": 51,
-          "sourceHash": "sha256-9c3ec5534c959208798f16216676cb4fa34a60400dcbf8de13f8d1546cd51c66"
+          "sourceHash": "sha256-9963be21f79698bf975c4619f151e0456d94b2fb0e1c5832b6ec729af16c62ff"
         }
       }
     }

@@ -23,7 +23,7 @@ study time.
 │   └── config/     # Shared TypeScript presets
 ├── docs/           # Requirements, architecture, testing, operations
 ├── e2e/            # Playwright journeys and accessibility scans
-├── scripts/        # Automation (Notion sync, seeds)
+├── scripts/        # Automation (Notion + Obsidian sync, unit-tested helpers)
 ├── docker-compose.yml
 ├── PLAN.md         # Remediation plan and current backlog
 └── SPEC.md         # Project specification and conventions

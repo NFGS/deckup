@@ -141,6 +141,16 @@ contradict each other, but each keeps the role that justifies it.
   a missing target is never reported as drift. Today every document targets both.
 - Notion root page: **DeckUp** (`3ee7d55f-d95e-8079-8ee8-f9dc00042699`).
 - Obsidian vault: **Ningendo Bee** (`~/Documents/Obsidian Vaults/Ningendo Bee`,
-  override with `OBSIDIAN_VAULT_PATH`); the curated map of content lives at
-  `DeckUp/README.md` and the vault-wide `Home.md` connects all projects.
+  override with `OBSIDIAN_VAULT_PATH`). Notes land in `DeckUp/Gobernanza`
+  (SPEC, PLAN, STATUS), `DeckUp/Documentación` (technical docs) and
+  `DeckUp/Decisiones Técnicas` (MADR ADRs); the frontmatter `tipo` is derived
+  from the folder so Dataview panels can filter on it.
+- The per-project map of content (`DeckUp/README.md`) and the vault-wide
+  `Home.md` are **regenerated** on every sync from curated templates
+  (`scripts/lib/vault-moc.ts`, `scripts/lib/vault-home.ts`) plus the document
+  registry, so the indexes never drift from the published set. A document that
+  moves folder has the stale note deleted.
+- The build-time helpers under `scripts/lib/` are unit-tested with Vitest at the
+  repository root; `pnpm test` runs the three packages (through Turbo) and the
+  scripts, 187 tests in total.
 - Last sync: **2026-10-05** — 25 documents (17 documents + 8 ADRs) on both mirrors.
