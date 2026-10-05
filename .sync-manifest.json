@@ -2,11 +2,11 @@
   "version": 1,
   "documents": {
     "PLAN.md": {
-      "syncedAt": "2026-10-05T09:34:48.622Z",
+      "syncedAt": "2026-10-05T09:54:53.502Z",
       "targets": {
         "obsidian": {
-          "path": "DeckUp/Documentación/Remediation Plan.md",
-          "hash": "sha256-9742f1bc6e23756afdb3bb4c8931cd81dfcbe96e2c4710b7b37ffe2fdd3d2377",
+          "path": "DeckUp/Gobernanza/Remediation Plan.md",
+          "hash": "sha256-4c7c4484efd803a8ec30b80b85374465b95ed51a225718763855f26c17d505b5",
           "sourceHash": "sha256-a09b3b8888cc0fe553dbfa8252c0abe00a0132b77bfd99e72b1ee6da9c83b1cd"
         },
         "notion": {
@@ -18,11 +18,11 @@
       }
     },
     "SPEC.md": {
-      "syncedAt": "2026-10-05T09:36:00.886Z",
+      "syncedAt": "2026-10-05T09:54:53.502Z",
       "targets": {
         "obsidian": {
-          "path": "DeckUp/Documentación/Specification.md",
-          "hash": "sha256-2a387a5d8759621740d9deffbcfddc3dae2eecb03d9ee5bdb56041db5af07d93",
+          "path": "DeckUp/Gobernanza/Specification.md",
+          "hash": "sha256-e6e024dbbda52cf7872b44899ab7b8308f527afe178787e8cf54de65255af1fd",
           "sourceHash": "sha256-31f7ff72a4467353f35834a8b2fdc222decde270804dc7aa6a9d2eda6fe1d5d4"
         },
         "notion": {
@@ -386,11 +386,11 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-05T09:36:00.886Z",
+      "syncedAt": "2026-10-05T09:54:53.502Z",
       "targets": {
         "obsidian": {
-          "path": "DeckUp/Documentación/Project Status.md",
-          "hash": "sha256-3e25dc2950a83e2ea0d9d4833d440a879e09dba4825d7521822069c2f9ff4037",
+          "path": "DeckUp/Gobernanza/Project Status.md",
+          "hash": "sha256-5f5abbe40ec11982986793ddc0fcfb362dc83fbff56814828570dcb4a7d62b72",
           "sourceHash": "sha256-c532be3ac675dd7579edd0fb65bcabe783e4d627ad53024853b85e23304c4bb7"
         },
         "notion": {

@@ -122,14 +122,18 @@ _which_ documents they publish.
 
 - Vault: **Ningendo Bee** — `~/Documents/Obsidian Vaults/Ningendo Bee`
   (override with `OBSIDIAN_VAULT_PATH`).
-- Writes the 17 documents to `DeckUp/Documentación` and the 8 MADR ADRs to
-  `DeckUp/Decisiones Técnicas` with YAML frontmatter (`proyecto`, `fuente`,
-  `synced`, `tags`); copies the evidence screenshots to
-  `DeckUp/Recursos/evidencias` and turns them into wiki-embeds. Relative
-  repository links degrade to plain text; Mermaid, tables and callouts render
-  natively in Obsidian.
+- Writes the documents to three folders — `DeckUp/Documentación` (technical
+  docs), `DeckUp/Gobernanza` (SPEC, PLAN, STATUS) and `DeckUp/Decisiones
+Técnicas` (MADR ADRs) — with YAML frontmatter (`proyecto`, `tipo`, `fuente`,
+  `synced`, `tags`). `tipo` is derived from the folder (`documentación` |
+  `gobernanza` | `adr`) so Dataview panels can filter on it. Copies the evidence
+  screenshots to `DeckUp/Recursos/evidencias` and turns them into wiki-embeds.
+  Relative repository links degrade to plain text; Mermaid, tables and callouts
+  render natively in Obsidian.
 - A note is re-written only when the source changed or the file on disk was
-  edited by hand (both are compared by hash).
+  edited by hand (both are compared by hash). When a document moves to another
+  folder, the note left behind is deleted so the vault keeps no orphaned
+  duplicates.
 - The curated map of content (`DeckUp/README.md`) and the vault `Home.md` are
   maintained manually and are never overwritten by the sync.
 

@@ -18,7 +18,7 @@
  * `pnpm sync:check` can detect hand edits made inside the vault.
  */
 
-import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -37,6 +37,14 @@ export function adrStatus(markdown: string): string | undefined {
   return /^\*\*Status\*\*:\s*(.+)$/m.exec(markdown)?.[1]?.trim();
 }
 
+/** Dataview `tipo` derived from the destination folder, so panels can filter on it. */
+export function noteType(spec: DocumentSpec): string {
+  if (spec.obsidianFolder === 'Decisiones Técnicas') return 'adr';
+  if (spec.obsidianFolder === 'Gobernanza') return 'gobernanza';
+
+  return 'documentación';
+}
+
 function frontmatter(spec: DocumentSpec, synced: string, markdown: string): string {
   const tags = ['deckup', ...spec.tags];
   const isAdr = spec.obsidianFolder === 'Decisiones Técnicas';
@@ -44,7 +52,7 @@ function frontmatter(spec: DocumentSpec, synced: string, markdown: string): stri
   const lines = [
     '---',
     'proyecto: DeckUp',
-    `tipo: ${isAdr ? 'adr' : 'documentación'}`,
+    `tipo: ${noteType(spec)}`,
     `fuente: ${spec.path}`,
     `synced: ${synced}`,
   ];
@@ -174,11 +182,24 @@ async function main(): Promise<void> {
 
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, note.content, 'utf8');
+
+    // When a document moves to another folder, remove the note left behind so
+    // the vault does not accumulate orphaned duplicates.
+    const previousPath = previous?.targets.obsidian?.path;
+    const currentPath = `DeckUp/${note.file}`;
+    if (previousPath && previousPath !== currentPath) {
+      const stale = join(vault, previousPath);
+      if (existsSync(stale)) {
+        await unlink(stale);
+        console.log(`moved: ${previousPath} → ${currentPath}`);
+      }
+    }
+
     manifest.documents[note.spec.path] = {
       syncedAt: synced,
       targets: {
         ...(previous?.targets ?? {}),
-        obsidian: { path: `DeckUp/${note.file}`, hash: noteHash, sourceHash },
+        obsidian: { path: currentPath, hash: noteHash, sourceHash },
       },
     };
 

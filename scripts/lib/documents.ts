@@ -11,7 +11,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
-export type ObsidianFolder = 'Documentación' | 'Decisiones Técnicas';
+export type ObsidianFolder = 'Documentación' | 'Decisiones Técnicas' | 'Gobernanza';
 export type SyncTarget = 'notion' | 'obsidian';
 
 export interface DocumentSpec {
@@ -161,15 +161,15 @@ export const DOCUMENTS: DocumentSpec[] = [
     notionTitle: 'DeckUp — Project Status',
     notionIcon: '📊',
     obsidianName: 'Project Status',
-    obsidianFolder: 'Documentación',
-    tags: ['estado'],
+    obsidianFolder: 'Gobernanza',
+    tags: ['gobernanza', 'estado'],
   },
   {
     path: 'SPEC.md',
     notionTitle: 'DeckUp — Specification',
     notionIcon: '📐',
     obsidianName: 'Specification',
-    obsidianFolder: 'Documentación',
+    obsidianFolder: 'Gobernanza',
     tags: ['gobernanza', 'especificación'],
   },
   {
@@ -177,7 +177,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     notionTitle: 'DeckUp — Remediation Plan',
     notionIcon: '🗺️',
     obsidianName: 'Remediation Plan',
-    obsidianFolder: 'Documentación',
+    obsidianFolder: 'Gobernanza',
     tags: ['gobernanza', 'plan'],
   },
 ];
