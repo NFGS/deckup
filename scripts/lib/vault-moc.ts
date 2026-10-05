@@ -26,6 +26,11 @@ function panel(query: string): string {
   return ['```dataview', query, '```'].join('\n');
 }
 
+/** `3 notas` / `1 nota` — keeps the section headings grammatical. */
+function count(n: number, singular: string, plural: string): string {
+  return `${n} ${n === 1 ? singular : plural}`;
+}
+
 const recentPanel = panel(
   [
     'TABLE file.folder AS "Carpeta", file.mtime AS "Actualizado"',
@@ -147,7 +152,7 @@ _Vercel (web) · Railway (contenedor API) · Neon (PostgreSQL 17) · Cloudinary 
 
 _\`NEW → LEARNING → REVIEW\`; un \`Again\` después de graduarse es un lapso: \`RELEARNING\` hasta volver a \`REVIEW\`._
 
-## Gobernanza (${governance.length} notas)
+## Gobernanza (${count(governance.length, 'nota', 'notas')})
 
 ${PANEL_NOTE}
 
@@ -157,7 +162,7 @@ ${folderPanel('gobernanza')}
 
 ${curatedList(governance)}
 
-## Documentación (${documentation.length} notas)
+## Documentación (${count(documentation.length, 'nota', 'notas')})
 
 ${PANEL_NOTE}
 
@@ -167,7 +172,7 @@ ${folderPanel('documentación')}
 
 ${curatedList(documentation)}
 
-## Decisiones técnicas (${adrs.length} ADRs)
+## Decisiones técnicas (${count(adrs.length, 'ADR', 'ADRs')})
 
 > [!tip] Panel dinámico — ADRs por estado
 > Se alimenta del campo \`estado\` que el sync extrae del \`**Status**\` de cada MADR.
