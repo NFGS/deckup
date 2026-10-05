@@ -29,19 +29,33 @@ const REPOSITORY_ROOT = resolve(import.meta.dirname, '..');
 const DEFAULT_VAULT = join(homedir(), 'Documents', 'Obsidian Vaults', 'Ningendo Bee');
 const EVIDENCE_SOURCE = 'docs/05-academic/evidencias';
 
-function frontmatter(spec: DocumentSpec, synced: string): string {
-  const tags = ['deckup', ...spec.tags];
+/**
+ * Extracts the MADR `**Status**: <value>` line from an ADR body so Dataview can
+ * group decisions by state. Returns undefined for non-ADR documents.
+ */
+export function adrStatus(markdown: string): string | undefined {
+  return /^\*\*Status\*\*:\s*(.+)$/m.exec(markdown)?.[1]?.trim();
+}
 
-  return [
+function frontmatter(spec: DocumentSpec, synced: string, markdown: string): string {
+  const tags = ['deckup', ...spec.tags];
+  const isAdr = spec.obsidianFolder === 'Decisiones Técnicas';
+  const status = isAdr ? adrStatus(markdown) : undefined;
+  const lines = [
     '---',
     'proyecto: DeckUp',
+    `tipo: ${isAdr ? 'adr' : 'documentación'}`,
     `fuente: ${spec.path}`,
     `synced: ${synced}`,
-    'tags:',
-    ...tags.map((tag) => `  - ${tag}`),
-    '---',
-    '',
-  ].join('\n');
+  ];
+
+  if (status) {
+    lines.push(`estado: ${status}`);
+  }
+
+  lines.push('tags:', ...tags.map((tag) => `  - ${tag}`), '---', '');
+
+  return lines.join('\n');
 }
 
 /** Converts repository markdown into vault markdown. */
@@ -72,7 +86,7 @@ async function collectNotes(synced: string): Promise<VaultNote[]> {
     notes.push({
       spec,
       file: join(spec.obsidianFolder, `${spec.obsidianName}.md`),
-      content: frontmatter(spec, synced) + toVaultMarkdown(markdown),
+      content: frontmatter(spec, synced, markdown) + toVaultMarkdown(markdown),
     });
   }
 

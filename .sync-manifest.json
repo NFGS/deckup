@@ -2,11 +2,11 @@
   "version": 1,
   "documents": {
     "docs/01-requirements/glossary.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Glossary.md",
-          "hash": "sha256-b1fbcdbe4c5408e3363af713d91cbaf011bc8fc0efa16c241e20ee798ea34af5",
+          "hash": "sha256-e0080ebb19d231798a35798aadea6f10e14b5345c5c869cb837e78b9a0359fb0",
           "sourceHash": "sha256-7b490f89321041c998fb125958c5ddbf62d3e2249402ba03ac484e0a5073c72c"
         },
         "notion": {
@@ -18,11 +18,11 @@
       }
     },
     "docs/01-requirements/traceability-matrix.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Traceability Matrix.md",
-          "hash": "sha256-00eb62230ca449c4fb80017d89a13bc1f6bfc153f2f7a8cbf74ab14a3b7f4f00",
+          "hash": "sha256-6fa72d8ff5d76ca757f47d62d53aeccdb0e1a7b11780322077f040b9fee3dd3a",
           "sourceHash": "sha256-28fc8b26c0b65e7fb06e171e771b88c9086c22b4960b8b87619c7934defec0d4"
         },
         "notion": {
@@ -34,11 +34,11 @@
       }
     },
     "docs/01-requirements/user-story-refinement.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/User Story Refinement.md",
-          "hash": "sha256-c1ce2d7eb878f8d5f8e11997843557c03c43ba1e5543cdc6a9c1d5679a67a2ea",
+          "hash": "sha256-099b6f2f989fa9e47298f7c2e84a41d5814ad08b3d79a2a44fe91102b049e54e",
           "sourceHash": "sha256-056001b70aaf7bcc8fccfb223f890ed55502838efca10536f02a17f98e3060a3"
         },
         "notion": {
@@ -50,11 +50,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0001-monorepo-strategy.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0001 — Monorepo with pnpm workspaces and Turborepo.md",
-          "hash": "sha256-462d2c2dd20e5553702a0594d436a5da35e5a4465be2b688d44366fd652b74ba",
+          "hash": "sha256-7a3e3ba6300e303dbed3607453e4b8748c131471987458d82221359f51c91fb7",
           "sourceHash": "sha256-5f291c295655aa75f8810b89a0a4e58a4e7abdffe2a663ae2246391905ee4c02"
         },
         "notion": {
@@ -66,11 +66,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0002-backend-framework.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0002 — NestJS 12 on Fastify with Clean Architecture.md",
-          "hash": "sha256-aa01a2908260bb75a04533d2d0c1d1683eb08242fa93fc1ced46548a5930a9aa",
+          "hash": "sha256-90fdd73906ec21820df9bc4a064513d994ad5208cbcdcb4415164cb24be05f9a",
           "sourceHash": "sha256-071d3805d068de55796f0342a41a8aa5156b89826f243f3a1ce5d9d15bf26388"
         },
         "notion": {
@@ -82,11 +82,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0003-database-and-orm.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0003 — PostgreSQL 17 with Prisma 7 and the pg driver adapter.md",
-          "hash": "sha256-2f693f478ad0d06507c062493be2aa8b0d4113fed360227d54d3573ce28f02da",
+          "hash": "sha256-6c5e83775f577dd8b76f227ebe9846b5423d21894b9022169ac066b289ce23a6",
           "sourceHash": "sha256-26bb2e8b56814c11c72e7b3aeff77be479fc4847f5f54187480cc06013c56c1d"
         },
         "notion": {
@@ -98,11 +98,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0004-shared-contracts.md": {
-      "syncedAt": "2026-10-04T17:50:47.585Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0004 — Zod contracts in @deckup-shared.md",
-          "hash": "sha256-1b0fdab7d473162f30d7c21a7dcd47a9b3833ff461532845684bfdc7846ebb74",
+          "hash": "sha256-7fa8b5349c32fbc8e768cc67c4f590b3207ae1ca997f5a891f06ef61ed4cf83b",
           "sourceHash": "sha256-22aa7b151dc093a7fdc10a11ca0fc515d0539f7bc48827e4ce770dc75599844b"
         },
         "notion": {
@@ -114,11 +114,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0005-spaced-repetition.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0005 — FSRS via ts-fsrs behind a domain port.md",
-          "hash": "sha256-00d4b05796b8a58e0e68ad7f6a2a7d40de359d1bcb91c672d7fcbe6a0b6790e2",
+          "hash": "sha256-ab0327c2d3879ba4ff454aeb00ea1cdf20eba863a330af793b4ac65dd793d6df",
           "sourceHash": "sha256-9fa3541b560e7693d3bf27a4c0adda48e9d3303edd0c335733a7de542ac0aece"
         },
         "notion": {
@@ -130,11 +130,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0006-authentication.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0006 — JWT access tokens with refresh rotation and Argon2id.md",
-          "hash": "sha256-a9844b6bc1c3f01e7f83b060dbd032fa552bc97b00e0213980b2584085638b0b",
+          "hash": "sha256-63d0e75f2c389fc501a8b0134a0d769442e3d7b1c9c34893ac83789096b8a314",
           "sourceHash": "sha256-e1bc64986dd00e9b2bc1089d75c6c7763155c3caf70f3e55151258c31d1ca650"
         },
         "notion": {
@@ -146,11 +146,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0007-deployment.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0007 — Deployment on Vercel, Railway and Neon.md",
-          "hash": "sha256-aa5f8fd0c26b9185585872e75a9087b1cf08c3ff01a48b564da8c2fd2882f7d7",
+          "hash": "sha256-9b1943943210dfa295d3a9f6f842b011e7228c8593c23288a84194d93034ff37",
           "sourceHash": "sha256-02793d5a3a768103a53b35835b268ee51fea9dde6a51668938085f91c3b2a60d"
         },
         "notion": {
@@ -162,11 +162,11 @@
       }
     },
     "docs/02-architecture/adr/ADR-0008-testing-strategy.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Decisiones Técnicas/ADR-0008 — Testing strategy — Vitest, Supertest and Playwright.md",
-          "hash": "sha256-9e4592a5e50efd42983ea33dc7f7ab113e364d65d9a6d60425b40096f102982e",
+          "hash": "sha256-a41d4da969cbc2c9d2cf31b1e59be375f36a1b2c2591c82894b4ff09e2939ad0",
           "sourceHash": "sha256-e8b3f7a86f89f359643c8a0340da15eccff8e2a1ccdf038079eda2a9ffb3e751"
         },
         "notion": {
@@ -178,11 +178,11 @@
       }
     },
     "docs/02-architecture/data-model.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Data Model.md",
-          "hash": "sha256-d1c37e65b6f16d0c70962ef93942dc250586063ff8840c6752a9d1312f725004",
+          "hash": "sha256-ef8f3918752d4ea2a105ee20e70cdadcc6691c81843ee5fbba1f33cbcf662935",
           "sourceHash": "sha256-cf3d92bb12a4a7f314a97d639e32541c2f16822fa5d6232560af6356fa5d7b4d"
         },
         "notion": {
@@ -194,11 +194,11 @@
       }
     },
     "docs/02-architecture/overview.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Architecture Overview.md",
-          "hash": "sha256-884f1d965932569758c8e52ebf30bd7fd2fe4647dbeb7de88fb3e8a1fcfef12d",
+          "hash": "sha256-5d49a1d6040d4b85b147dc9114ff1b933a4a898bea0e5003c1e9da167b2974c7",
           "sourceHash": "sha256-ff9611b3fec1dc8e3e6433a06fa4f537f3266caad829bc87525fefabb69e017b"
         },
         "notion": {
@@ -210,11 +210,11 @@
       }
     },
     "docs/03-testing/test-cases.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Test Cases.md",
-          "hash": "sha256-7659618eca37f3e9ef78f23d20fa00a518cd5e84b32444cf045802047cd4998d",
+          "hash": "sha256-c1b4859b5e6159184f33bfaa1779aeae12c2442f995eb80e5651a39846bb3e60",
           "sourceHash": "sha256-b23fb4d479d4c5d4fb8cf881142e6203d304a5176bfd48a5089eac493cc095ce"
         },
         "notion": {
@@ -226,11 +226,11 @@
       }
     },
     "docs/03-testing/test-plan.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Test Plan.md",
-          "hash": "sha256-2f90a2eb56a9348055bd0b61453b2054fe1219bee41bed1b67cc3bd859685125",
+          "hash": "sha256-afa5326062d1010e34f1b326261e76b9ab2a8814af098990d1653139c2645cc6",
           "sourceHash": "sha256-61332de3efb7ae46521ef4709df140e86b9dba7aace9405e84be9bfa2f43dce9"
         },
         "notion": {
@@ -242,11 +242,11 @@
       }
     },
     "docs/04-operations/deployment.md": {
-      "syncedAt": "2026-10-04T18:12:20.849Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Deployment Guide.md",
-          "hash": "sha256-9b5a07c93632100d9565378ddb7e524926520ce27e7eebf9ed87bdd48053952a",
+          "hash": "sha256-cab7ba67214610c71c19c876a119d779cde3e141f42c11d4f5dca03c323bd42d",
           "sourceHash": "sha256-767e2c8274bebf39c1676e6fe74288aa54dd971cae8ae7150d1b3bcd0e40df59"
         },
         "notion": {
@@ -258,11 +258,11 @@
       }
     },
     "docs/04-operations/platform-notes.md": {
-      "syncedAt": "2026-10-04T18:12:20.849Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Platform Notes.md",
-          "hash": "sha256-7325168afde336388c1c9b2f2dd4793ffe111e597dc02b008c114c2f2718929b",
+          "hash": "sha256-846b6ec746bc32767359374a4843717795bdac5359f8d36be8ee4350b4402ff0",
           "sourceHash": "sha256-4f8f796796bddc76b82c8a3913fe47f874f9dede8f14bc653562fa2b0a76cca5"
         },
         "notion": {
@@ -274,11 +274,11 @@
       }
     },
     "docs/04-operations/runbook.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Runbook.md",
-          "hash": "sha256-1af975af662dc5971fbd2aa18709c52e0bfa8208e3893105d32128ee2dbad2c3",
+          "hash": "sha256-666a22519d0d7eb2d6ca3560ca295bc3234d1f0426cd17efd9f45ef432607b96",
           "sourceHash": "sha256-b95633522b7ac7eee2bac95d45698cdb16216e315b40019a1a03d2fd1819ca93"
         },
         "notion": {
@@ -290,11 +290,11 @@
       }
     },
     "docs/04-operations/security.md": {
-      "syncedAt": "2026-10-04T16:38:08.085Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Security Notes.md",
-          "hash": "sha256-ca719cc92305144a9091e8a75f87b1e45596518bbe3c8cf9d070800cea213b10",
+          "hash": "sha256-59f6ba49b1acbe28847ece8e2c0997c321fbc4f1595581b0f46d1b708b733d68",
           "sourceHash": "sha256-c47101389a9acf12081c83345ff2c2ed54f2c46bad1fb6354357b5d26e7ad9f6"
         },
         "notion": {
@@ -306,11 +306,11 @@
       }
     },
     "docs/05-academic/informe-general-sistema.md": {
-      "syncedAt": "2026-10-04T16:36:48.023Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Informe General del Sistema.md",
-          "hash": "sha256-71cd310f1c1c797309466d9333156356a7aeec5a7a2e3ed990de686da6ccb060",
+          "hash": "sha256-72329194e4116cc64057298f3a6ecd2dc9f39699411c402e4eeb5408b26e0403",
           "sourceHash": "sha256-be3239fbbb9a7b50c1a36c17aa55034fe51581a05a23e7a41a6237cd330af0b1"
         },
         "notion": {
@@ -322,11 +322,11 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-04T18:12:20.849Z",
+      "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Project Status.md",
-          "hash": "sha256-f46090ee3066194af8f720e735efc038e3011936a4a7d17c0da3d99fb11af5b1",
+          "hash": "sha256-89765ff5a097c1dbbda2d498a5f37df56e243bc38c6fcd3fc163ea8d3644e47b",
           "sourceHash": "sha256-3ea5ad8aefc79840ec79bda4fd80c138fefd3d04e0b90d12501e7407ce10fa59"
         },
         "notion": {
