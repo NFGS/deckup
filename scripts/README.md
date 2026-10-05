@@ -93,7 +93,7 @@ Flags: `--dry-run` (preview), `--only <substring>` (a single document),
 the source at the moment that target was published), so a document synced to one
 mirror is still correctly reported as pending for the other.
 
-`scripts/lib/documents.ts` is the canonical registry (13 documents + the MADR
+`scripts/lib/documents.ts` is the canonical registry (15 documents + the MADR
 ADRs discovered on disk); both mirrors consume it, so they can never disagree on
 _which_ documents they publish.
 
@@ -116,13 +116,13 @@ _which_ documents they publish.
   are skipped; pass `--force` to re-publish them.
 - Re-publishing updates the page **in place** (same id, blocks swapped), so the
   Notion trash stays empty and page URLs are stable.
-- Last sync: 2026-10-04 — **21 pages** (13 documents + 8 ADRs).
+- Last sync: 2026-10-05 — **23 pages** (15 documents + 8 ADRs).
 
 ## Obsidian sync
 
 - Vault: **Ningendo Bee** — `~/Documents/Obsidian Vaults/Ningendo Bee`
   (override with `OBSIDIAN_VAULT_PATH`).
-- Writes the 13 documents to `DeckUp/Documentación` and the 8 MADR ADRs to
+- Writes the 15 documents to `DeckUp/Documentación` and the 8 MADR ADRs to
   `DeckUp/Decisiones Técnicas` with YAML frontmatter (`proyecto`, `fuente`,
   `synced`, `tags`); copies the evidence screenshots to
   `DeckUp/Recursos/evidencias` and turns them into wiki-embeds. Relative

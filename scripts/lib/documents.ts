@@ -133,6 +133,22 @@ export const DOCUMENTS: DocumentSpec[] = [
     tags: ['seguridad'],
   },
   {
+    path: 'docs/04-operations/backup-policy.md',
+    notionTitle: 'DeckUp — Backup Policy',
+    notionIcon: '💾',
+    obsidianName: 'Backup Policy',
+    obsidianFolder: 'Documentación',
+    tags: ['operación', 'respaldos'],
+  },
+  {
+    path: 'docs/04-operations/deployment-walkthrough.md',
+    notionTitle: 'DeckUp — Deployment Walkthrough',
+    notionIcon: '🧭',
+    obsidianName: 'Deployment Walkthrough',
+    obsidianFolder: 'Documentación',
+    tags: ['operación', 'despliegue'],
+  },
+  {
     path: 'docs/05-academic/informe-general-sistema.md',
     notionTitle: 'DeckUp — Informe General del Sistema',
     notionIcon: '🎓',

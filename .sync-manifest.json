@@ -241,6 +241,38 @@
         }
       }
     },
+    "docs/04-operations/backup-policy.md": {
+      "syncedAt": "2026-10-05T08:57:17.981Z",
+      "targets": {
+        "obsidian": {
+          "path": "DeckUp/Documentación/Backup Policy.md",
+          "hash": "sha256-93ed9346e731e9e00cde4380a0c3933b80068094072ed06f1bc0dfb965bb53b7",
+          "sourceHash": "sha256-30007abb23e98ccad45013a9ff38fd8836898abc7fb1795760a637687d4e7dc8"
+        },
+        "notion": {
+          "id": "3f07d55f-d95e-81b9-a85a-d2b98cb1b2f8",
+          "lastEditedTime": "2026-10-05T08:57:00.000Z",
+          "blockCount": 35,
+          "sourceHash": "sha256-30007abb23e98ccad45013a9ff38fd8836898abc7fb1795760a637687d4e7dc8"
+        }
+      }
+    },
+    "docs/04-operations/deployment-walkthrough.md": {
+      "syncedAt": "2026-10-05T08:57:17.981Z",
+      "targets": {
+        "obsidian": {
+          "path": "DeckUp/Documentación/Deployment Walkthrough.md",
+          "hash": "sha256-e05a78467073b1d6a92de2adf49c60118d3a44bf8ca4ea2aa4b5c8737e6c81c1",
+          "sourceHash": "sha256-511ec553ec127193ee3fe887d6da822bbf23a8d7b2ad09673b52b4cd4cc98dcb"
+        },
+        "notion": {
+          "id": "3f07d55f-d95e-8101-a94e-fd158e3a3727",
+          "lastEditedTime": "2026-10-05T08:57:00.000Z",
+          "blockCount": 115,
+          "sourceHash": "sha256-511ec553ec127193ee3fe887d6da822bbf23a8d7b2ad09673b52b4cd4cc98dcb"
+        }
+      }
+    },
     "docs/04-operations/deployment.md": {
       "syncedAt": "2026-10-05T01:43:12.514Z",
       "targets": {
@@ -322,18 +354,18 @@
       }
     },
     "docs/STATUS.md": {
-      "syncedAt": "2026-10-05T01:43:12.514Z",
+      "syncedAt": "2026-10-05T08:59:40.652Z",
       "targets": {
         "obsidian": {
           "path": "DeckUp/Documentación/Project Status.md",
-          "hash": "sha256-89765ff5a097c1dbbda2d498a5f37df56e243bc38c6fcd3fc163ea8d3644e47b",
-          "sourceHash": "sha256-3ea5ad8aefc79840ec79bda4fd80c138fefd3d04e0b90d12501e7407ce10fa59"
+          "hash": "sha256-782d81c8fa95643ba7ecb1260e8618358e036a6b1234637b24ec2bcd5bc08bd6",
+          "sourceHash": "sha256-3e0d9c6696abb16fe1e7966952f177179e776c840e43fd1843c9dde4697f97be"
         },
         "notion": {
           "id": "3ef7d55f-d95e-8194-9aa5-c7eae5e33b95",
-          "lastEditedTime": "2026-10-04T18:14:00.000Z",
+          "lastEditedTime": "2026-10-05T09:00:00.000Z",
           "blockCount": 51,
-          "sourceHash": "sha256-3ea5ad8aefc79840ec79bda4fd80c138fefd3d04e0b90d12501e7407ce10fa59"
+          "sourceHash": "sha256-3e0d9c6696abb16fe1e7966952f177179e776c840e43fd1843c9dde4697f97be"
         }
       }
     }
