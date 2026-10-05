@@ -28,6 +28,11 @@ export interface DocumentSpec {
   /** Obsidian tags, without the implicit `deckup` project tag. */
   tags: string[];
   /**
+   * Curated one-line summary shown in the vault map of content. Kept here so
+   * the MOC can be regenerated without losing the hand-written descriptions.
+   */
+  description?: string;
+  /**
    * Mirrors this document is published to. Defaults to both. Each environment
    * has its own strengths, so a document may deliberately live in only one of
    * them; the manifest tracks targets independently and never reports a
@@ -51,6 +56,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'User Story Refinement',
     obsidianFolder: 'Documentación',
     tags: ['requisitos', 'historias-de-usuario'],
+    description: '4 historias con refinamiento progresivo (Connextra + BDD)',
   },
   {
     path: 'docs/01-requirements/traceability-matrix.md',
@@ -59,6 +65,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Traceability Matrix',
     obsidianFolder: 'Documentación',
     tags: ['requisitos', 'trazabilidad'],
+    description: '12 RF · 8 RNF · 18 CU · 66 TC, sin huérfanos',
   },
   {
     path: 'docs/01-requirements/glossary.md',
@@ -67,6 +74,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Glossary',
     obsidianFolder: 'Documentación',
     tags: ['requisitos'],
+    description: '31 términos canónicos de código y API',
   },
   {
     path: 'docs/02-architecture/overview.md',
@@ -75,6 +83,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Architecture Overview',
     obsidianFolder: 'Documentación',
     tags: ['arquitectura'],
+    description: 'C4, Clean Architecture, ADRs y preocupaciones transversales',
   },
   {
     path: 'docs/02-architecture/data-model.md',
@@ -83,6 +92,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Data Model',
     obsidianFolder: 'Documentación',
     tags: ['arquitectura', 'datos'],
+    description: '10 modelos, 7 enums, 5 migraciones inmutables',
   },
   {
     path: 'docs/03-testing/test-plan.md',
@@ -91,6 +101,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Test Plan',
     obsidianFolder: 'Documentación',
     tags: ['calidad', 'pruebas'],
+    description: '3 niveles de prueba y 5 controles de calidad',
   },
   {
     path: 'docs/03-testing/test-cases.md',
@@ -99,6 +110,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Test Cases',
     obsidianFolder: 'Documentación',
     tags: ['calidad', 'pruebas'],
+    description: '66 casos en 8 áreas',
   },
   {
     path: 'docs/04-operations/deployment.md',
@@ -107,38 +119,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Deployment Guide',
     obsidianFolder: 'Documentación',
     tags: ['operación', 'despliegue'],
-  },
-  {
-    path: 'docs/04-operations/platform-notes.md',
-    notionTitle: 'DeckUp — Platform Notes',
-    notionIcon: '🧭',
-    obsidianName: 'Platform Notes',
-    obsidianFolder: 'Documentación',
-    tags: ['operación', 'despliegue'],
-  },
-  {
-    path: 'docs/04-operations/runbook.md',
-    notionTitle: 'DeckUp — Runbook',
-    notionIcon: '🛠️',
-    obsidianName: 'Runbook',
-    obsidianFolder: 'Documentación',
-    tags: ['operación'],
-  },
-  {
-    path: 'docs/04-operations/security.md',
-    notionTitle: 'DeckUp — Security Notes',
-    notionIcon: '🔒',
-    obsidianName: 'Security Notes',
-    obsidianFolder: 'Documentación',
-    tags: ['seguridad'],
-  },
-  {
-    path: 'docs/04-operations/backup-policy.md',
-    notionTitle: 'DeckUp — Backup Policy',
-    notionIcon: '💾',
-    obsidianName: 'Backup Policy',
-    obsidianFolder: 'Documentación',
-    tags: ['operación', 'respaldos'],
+    description: 'despliegue paso a paso y rollback por capa',
   },
   {
     path: 'docs/04-operations/deployment-walkthrough.md',
@@ -147,6 +128,43 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Deployment Walkthrough',
     obsidianFolder: 'Documentación',
     tags: ['operación', 'despliegue'],
+    description: 'guía desde cero hasta producción, para principiantes',
+  },
+  {
+    path: 'docs/04-operations/platform-notes.md',
+    notionTitle: 'DeckUp — Platform Notes',
+    notionIcon: '🧭',
+    obsidianName: 'Platform Notes',
+    obsidianFolder: 'Documentación',
+    tags: ['operación', 'despliegue'],
+    description: 'estado congelado, requisitos y recomendaciones',
+  },
+  {
+    path: 'docs/04-operations/runbook.md',
+    notionTitle: 'DeckUp — Runbook',
+    notionIcon: '🛠️',
+    obsidianName: 'Runbook',
+    obsidianFolder: 'Documentación',
+    tags: ['operación'],
+    description: '5 playbooks de incidentes',
+  },
+  {
+    path: 'docs/04-operations/security.md',
+    notionTitle: 'DeckUp — Security Notes',
+    notionIcon: '🔒',
+    obsidianName: 'Security Notes',
+    obsidianFolder: 'Documentación',
+    tags: ['seguridad'],
+    description: 'OWASP Top 10 mapeado y riesgos aceptados',
+  },
+  {
+    path: 'docs/04-operations/backup-policy.md',
+    notionTitle: 'DeckUp — Backup Policy',
+    notionIcon: '💾',
+    obsidianName: 'Backup Policy',
+    obsidianFolder: 'Documentación',
+    tags: ['operación', 'respaldos'],
+    description: 'clasificación de datos, objetivos y simulacro mensual',
   },
   {
     path: 'docs/05-academic/informe-general-sistema.md',
@@ -155,14 +173,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Informe General del Sistema',
     obsidianFolder: 'Documentación',
     tags: ['académico', 'sena'],
-  },
-  {
-    path: 'docs/STATUS.md',
-    notionTitle: 'DeckUp — Project Status',
-    notionIcon: '📊',
-    obsidianName: 'Project Status',
-    obsidianFolder: 'Gobernanza',
-    tags: ['gobernanza', 'estado'],
+    description: 'documento académico SENA (3 partes)',
   },
   {
     path: 'SPEC.md',
@@ -171,6 +182,7 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Specification',
     obsidianFolder: 'Gobernanza',
     tags: ['gobernanza', 'especificación'],
+    description: 'stack bloqueado, prohibiciones y convenciones (leer al inicio de sesión)',
   },
   {
     path: 'PLAN.md',
@@ -179,6 +191,16 @@ export const DOCUMENTS: DocumentSpec[] = [
     obsidianName: 'Remediation Plan',
     obsidianFolder: 'Gobernanza',
     tags: ['gobernanza', 'plan'],
+    description: 'plan de remediación post-revisión (fases 1–5, completado)',
+  },
+  {
+    path: 'docs/STATUS.md',
+    notionTitle: 'DeckUp — Project Status',
+    notionIcon: '📊',
+    obsidianName: 'Project Status',
+    obsidianFolder: 'Gobernanza',
+    tags: ['gobernanza', 'estado'],
+    description: 'estado vivo del proyecto y backlog',
   },
 ];
 

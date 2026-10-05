@@ -24,6 +24,7 @@ import { homedir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { collectAllDocuments, documentTargets, type DocumentSpec } from './lib/documents.ts';
 import { hashSourceFile, readManifest, sha256, writeManifest } from './lib/sync-manifest.ts';
+import { renderMoc } from './lib/vault-moc.ts';
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, '..');
 const DEFAULT_VAULT = join(homedir(), 'Documents', 'Obsidian Vaults', 'Ningendo Bee');
@@ -84,8 +85,7 @@ interface VaultNote {
   content: string;
 }
 
-async function collectNotes(synced: string): Promise<VaultNote[]> {
-  const documents = await collectAllDocuments(REPOSITORY_ROOT);
+async function collectNotes(synced: string, documents: DocumentSpec[]): Promise<VaultNote[]> {
   const notes: VaultNote[] = [];
 
   for (const spec of documents) {
@@ -136,7 +136,8 @@ async function main(): Promise<void> {
 
   const synced = new Date().toISOString();
   const syncedDay = synced.slice(0, 10);
-  const allNotes = await collectNotes(syncedDay);
+  const allDocuments = await collectAllDocuments(REPOSITORY_ROOT);
+  const allNotes = await collectNotes(syncedDay, allDocuments);
   const notes = (
     onlyFilter ? allNotes.filter((note) => note.spec.notionTitle.includes(onlyFilter)) : allNotes
   ).filter((note) => documentTargets(note.spec).includes('obsidian'));
@@ -151,6 +152,8 @@ async function main(): Promise<void> {
     for (const note of notes) {
       console.log(`would write: DeckUp/${note.file}`);
     }
+
+    console.log('would write: DeckUp/README.md (regenerated map of content)');
 
     const evidence = await copyEvidence(vault, true);
     console.log(`would copy: ${evidence} evidence images to DeckUp/Recursos/evidencias`);
@@ -208,6 +211,18 @@ async function main(): Promise<void> {
   }
 
   await writeManifest(REPOSITORY_ROOT, manifest);
+
+  // Regenerate the vault map of content from the curated template plus the
+  // canonical registry, so the index never drifts from the published set.
+  const mocPath = join(vault, 'DeckUp', 'README.md');
+  const moc = renderMoc(allDocuments, syncedDay);
+  const mocUnchanged = existsSync(mocPath) && (await readFile(mocPath, 'utf8')) === moc;
+
+  if (!mocUnchanged) {
+    await mkdir(dirname(mocPath), { recursive: true });
+    await writeFile(mocPath, moc, 'utf8');
+    console.log('written: DeckUp/README.md (regenerated map of content)');
+  }
 
   const evidence = await copyEvidence(vault, false);
   console.log(

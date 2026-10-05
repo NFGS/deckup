@@ -130,12 +130,17 @@ Técnicas` (MADR ADRs) — with YAML frontmatter (`proyecto`, `tipo`, `fuente`,
   screenshots to `DeckUp/Recursos/evidencias` and turns them into wiki-embeds.
   Relative repository links degrade to plain text; Mermaid, tables and callouts
   render natively in Obsidian.
+- The vault map of content (`DeckUp/README.md`) is **regenerated** on every run
+  by `scripts/lib/vault-moc.ts`: the hand-written prose (identity, links,
+  diagrams, stack, how-to, resources) is the curated template in that module,
+  and the section counts plus the document lists are derived from the canonical
+  registry. Curation is preserved in the repository and reviewed in version
+  control; the index can never drift from the published set. The vault `Home.md`
+  stays manual.
 - A note is re-written only when the source changed or the file on disk was
   edited by hand (both are compared by hash). When a document moves to another
   folder, the note left behind is deleted so the vault keeps no orphaned
   duplicates.
-- The curated map of content (`DeckUp/README.md`) and the vault `Home.md` are
-  maintained manually and are never overwritten by the sync.
 
 ## Capture helpers
 
