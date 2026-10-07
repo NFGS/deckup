@@ -260,7 +260,11 @@ async function main(): Promise<void> {
   // Regenerate the vault home note: the project table is curated, the audit and
   // guide lists are discovered from the vault, so they never go stale.
   const audits = await collectIndexEntries(vault, 'Auditorías', () => true);
-  const guides = await collectIndexEntries(vault, null, (file) => file.startsWith('Guía — '));
+  const guides = await collectIndexEntries(
+    vault,
+    null,
+    (file) => file.startsWith('Guía — ') || file === 'Pendientes del ecosistema.md',
+  );
   const homePath = join(vault, 'Home.md');
   const home = renderHome(PROJECTS, audits, guides, syncedDay);
   const homeUnchanged = existsSync(homePath) && (await readFile(homePath, 'utf8')) === home;
