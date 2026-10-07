@@ -3,9 +3,9 @@
  *
  * `Home.md` spans more than one project (DeckUp, Kubo, AgroConnect), so it does
  * not belong to any single mirror. The curated project table lives here, in the
- * repository that owns the vault tooling; the audit and guide lists are
- * discovered from the vault so they can never go stale, and the global Dataview
- * panels stay dynamic. `obsidian-sync` regenerates the note on every run.
+ * repository that owns **Beekeeper** (the vault tooling); the audit and guide
+ * lists are discovered from the vault so they can never go stale, and the global
+ * Dataview panels stay dynamic. `obsidian-sync` regenerates the note on every run.
  */
 
 export interface ProjectEntry {
@@ -143,6 +143,6 @@ ${activityPanel}
 2. Las notas llevan *frontmatter* con \`proyecto\`, \`fuente\` y \`tags\` para facilitar búsquedas.
 3. Los espejos de documentación se refrescan desde cada repositorio con \`pnpm sync:obsidian\` (vault) y \`pnpm sync:notion\` (Notion).
 4. El espejo de **Kubo** se refresca con \`./kubo-infra/scripts/obsidian-sync.sh\` (vault).
-5. Esta nota la genera el tooling del vault (\`pnpm sync:obsidian\`); las secciones curadas viven en \`scripts/lib/vault-home.ts\`.
+5. Esta nota la genera **Beekeeper** — el tooling del vault (\`pnpm sync:obsidian\`); las secciones curadas viven en \`scripts/lib/vault-home.ts\`.
 `;
 }
